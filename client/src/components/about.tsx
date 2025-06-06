@@ -16,7 +16,7 @@ export default function About() {
           <div className="space-y-6">
             <p className="text-lg text-gray-300 leading-relaxed">
               I'm a rising junior studying Computer Science with a passionate focus on cybersecurity. 
-              My journey began with curiosity about how systems work and evolved into a dedication 
+              My journey began with cuI AM HEREriosity about how systems work and evolved into a dedication 
               to protecting digital infrastructure.
             </p>
             <p className="text-lg text-gray-300 leading-relaxed">
