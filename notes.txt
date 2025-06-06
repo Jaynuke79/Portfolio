@@ -1,0 +1,7 @@
+Change information in client/*. Specifically, client/src/components
+
+To update pages: run 'npx vite build --config vite.config.github.ts' from repo root
+
+Wait until the action on the github repo site is deployed
+
+Refresh to recache the new site
