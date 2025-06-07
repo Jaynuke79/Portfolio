@@ -19,7 +19,7 @@ export default function Contact() {
     setTimeout(() => {
       toast({
         title: "Message Sent!",
-        description: "Thank you for your HERREERmessage. I'll get back to you soon.",
+        description: "Thank you for your message. I'll get back to you soon.",
       });
       setIsSubmitting(false);
       (e.target as HTMLFormElement).reset();
@@ -29,17 +29,17 @@ export default function Contact() {
   const contactInfo = [
     {
       icon: Mail,
-      text: "alex.chen@email.com",
+      text: "jjalonzo-estra@mavs.coloradomesa.edu",
       color: "text-cyan-400"
     },
     {
       icon: Phone,
-      text: "+1 (555) 123-4567",
+      text: "+1 (808) 491-5116",
       color: "text-green-400"
     },
     {
       icon: MapPin,
-      text: "San Francisco, CA",
+      text: "Grand Junction, CO",
       color: "text-purple-400"
     }
   ];
@@ -61,7 +61,8 @@ export default function Contact() {
             <h3 className="text-2xl font-semibold mb-6 text-white">Let's Connect</h3>
             <p className="text-gray-300 mb-8 leading-relaxed">
               I'm always interested in discussing cybersecurity, new opportunities, 
-              and collaborating on innovative projects. Feel free to reach out!
+              collaborating on innovative projects, or just nerding out on any topics.
+              Feel free to reach out!
             </p>
             
             <div className="space-y-4">

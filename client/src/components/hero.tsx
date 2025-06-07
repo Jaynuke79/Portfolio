@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Hero() {
   const [typedText, setTypedText] = useState("");
-  const fullText = "Alex Chen";
+  const fullText = "Jayden Alonzo-Estrada";
 
   useEffect(() => {
     let i = 0;
@@ -38,7 +38,7 @@ export default function Hero() {
             Hi, I'm <span className="gradient-text">{typedText}</span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 mb-8">
-            Computer Science Student & <span className="text-green-400">Cybersecurity Enthusiast</span>
+            Computer Science Student & <span className="text-green-400">Cybersecurity & Ai Enthusiast</span>
           </p>
           
           <div className="mb-8 animate-float">

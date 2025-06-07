@@ -6,17 +6,17 @@ import { ExternalLink, Github } from "lucide-react";
 export default function Projects() {
   const projects = [
     {
-      title: "Network Security Scanner",
-      description: "Developed a comprehensive network vulnerability scanner using Python and Nmap. Features automated port scanning, service detection, and vulnerability assessment.",
+      title: "AutoMenu",
+      description: "A C++ class that takes in functions and automatically displays them in a cli menu.",
       image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
       alt: "Network security monitoring dashboard",
-      technologies: ["Python", "Nmap", "Networking"],
+      technologies: ["C++"],
       techColors: ["bg-blue-600/20 text-blue-400", "bg-green-600/20 text-green-400", "bg-purple-600/20 text-purple-400"],
       titleColor: "text-cyan-400"
     },
     {
-      title: "Secure Chat Application",
-      description: "Built an end-to-end encrypted messaging application with React and Node.js. Implements AES encryption and secure key exchange protocols.",
+      title: "The Effect of Increased Dimensionality on Detecting Malicious Packets using Machine Learning on IoMT WiFi network traffic",
+      description: "Author of the paper: The Effect of Increased Dimensionality on Detecting Malicious Packets using Machine Learning on IoMT WiFi network traffic.",
       image: "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
       alt: "Cybersecurity encryption interface",
       technologies: ["React", "Node.js", "Encryption"],
