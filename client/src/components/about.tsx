@@ -2,10 +2,10 @@ import { Badge } from "@/components/ui/badge";
 
 export default function About() {
   const skills = [
-    { name: "Cybersecurity", color: "bg-cyan-500/20 text-cyan-400" },
-    { name: "Penetration Testing", color: "bg-green-500/20 text-green-400" },
-    { name: "Network Security", color: "bg-purple-500/20 text-purple-400" },
-    { name: "Python", color: "bg-yellow-500/20 text-yellow-400" },
+    { name: "Cybersecurity", color: "bg-cyan-500 text-cyan-400/90" },
+    { name: "AI", color: "bg-green-500 text-green-400/90" },
+    { name: "Network Security", color: "bg-purple-500 text-purple-400/90" },
+    { name: "Python", color: "bg-yellow-500 text-yellow-400/90" },
   ];
 
   return (
@@ -15,13 +15,17 @@ export default function About() {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <p className="text-lg text-gray-300 leading-relaxed">
-              I'm a rising junior studying Computer Science with a passionate focus on cybersecurity. 
-              My journey began with cuI AM HEREriosity about how systems work and evolved into a dedication 
-              to protecting digital infrastructure.
+              I'm an advanced computer science student specializing in cybersecurity at Colorado Mesa University. 
+              I have a sharp focus on practical application and forward-thinking strategies. 
+              Driven by a passion for what I do, I "cut through fluff" of a situation and tackle complex 
+              challenges head-on. With a solid foundation in C++ and Python, I'm committed to staying ahead of 
+              curve by constantly challenging myself to expand my domain of expertise. Whether it's analyzing
+              network packets or engineering robust Ai systems, my main focus is to operate with precision, 
+              purpose, and an eye on the future.
             </p>
             <p className="text-lg text-gray-300 leading-relaxed">
               Through hands-on projects and continuous learning, I've developed expertise in 
-              penetration testing, network security, and secure software development. I believe 
+              network security, machine learning systems, and secure software development. I believe 
               in the power of ethical hacking to build stronger, safer systems.
             </p>
             <div className="flex flex-wrap gap-3">
