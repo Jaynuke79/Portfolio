@@ -15,17 +15,17 @@ export default function Projects() {
       titleColor: "text-cyan-400"
     },
     {
-      title: "The Effect of Increased Dimensionality on Detecting Malicious Packets using Machine Learning on IoMT WiFi network traffic",
+      title: "Machine Learning Research Lead",
       description: "Author of the paper: The Effect of Increased Dimensionality on Detecting Malicious Packets using Machine Learning on IoMT WiFi network traffic.",
       image: "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
       alt: "Cybersecurity encryption interface",
-      technologies: ["React", "Node.js", "Encryption"],
+      technologies: ["Juypyter Notebook","Sklearn","Pandas","Numpy"],
       techColors: ["bg-blue-600/20 text-blue-400", "bg-green-600/20 text-green-400", "bg-red-600/20 text-red-400"],
       titleColor: "text-green-400"
     },
     {
-      title: "Malware Analysis Tool",
-      description: "Created a static and dynamic malware analysis platform with sandbox environment. Features automated threat detection and behavior analysis.",
+      title: "Pokemon Detector Webapp",
+      description: "Trained and hosted ",
       image: "https://images.unsplash.com/photo-1563206767-5b18f218e8de?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
       alt: "Cybersecurity threat analysis dashboard",
       technologies: ["Python", "Docker", "Security"],
