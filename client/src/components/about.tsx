@@ -15,10 +15,13 @@ export default function About() {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <p className="text-lg text-gray-300 leading-relaxed">
-              I'm an advanced computer science student specializing in cybersecurity at Colorado Mesa University. I have a sharp focus on practical application and forward-thinking strategies. Driven by a passion for what I do, I "cut through fluff" of a situation and tackle complex challenges head-on. With a solid foundation in C++ and Python, I'm committed to staying ahead of curve by constantly challenging myself to expand my domain of expertise. Whether it's analyzing network packets or engineering robust Ai systems, my main focus is to operate with precision, purpose, and an eye on the future.
+              I'm an advanced computer science student specializing in cybersecurity and applied Ai at Colorado Mesa University. Driven by a passion for what I do, I "cut through fluff" of a situation and tackle complex challenges head-on with practical application in mind.
             </p>
             <p className="text-lg text-gray-300 leading-relaxed">
-              Through hands-on projects and continuous learning, I've developed expertise in network security, machine learning systems, and secure software development. I believe in the power of ethical hacking to build stronger, safer systems.
+              With a solid foundation in C++ and Python, I'm committed to staying ahead of curve by constantly challenging myself to expand my domain of expertise. 
+            </p>
+            <p className="text-lg text-gray-300 leading-relaxed">
+              Whether it's analyzing network packets or engineering robust Ai systems, my main focus is to operate with precision, purpose, and an eye on the future.
             </p>
             <div className="flex flex-wrap gap-3">
               {skills.map((skill) => (

@@ -1,8 +1,8 @@
 export default function Footer() {
   const footerLinks = [
-    { label: "Privacy", href: "#" },
-    { label: "Terms", href: "#" },
-    { label: "Sitemap", href: "#" },
+    { label: "Hi there :)", href: "#" },
+    // { label: "Terms", href: "#" },
+    // { label: "Sitemap", href: "#" },
   ];
 
   return (

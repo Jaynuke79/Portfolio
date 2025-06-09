@@ -10,9 +10,9 @@ export default function Skills() {
       color: "text-cyan-400",
       skills: [
         { name: "Python", level: 90, color: "bg-cyan-500" },
-        { name: "Java", level: 85, color: "bg-green-500" },
+        // { name: "Java", level: 85, color: "bg-green-500" },
         { name: "C++", level: 75, color: "bg-purple-500" },
-        { name: "JavaScript", level: 80, color: "bg-yellow-500" },
+        // { name: "JavaScript", level: 80, color: "bg-yellow-500" },
       ]
     },
     {
@@ -41,9 +41,14 @@ export default function Skills() {
 
   const certifications = [
     { name: "Security+", status: "In Progress", icon: "fas fa-certificate", color: "text-cyan-400" },
-    { name: "CTF Winner", status: "Regional 2023", icon: "fas fa-trophy", color: "text-green-400" },
-    { name: "Ethical Hacker", status: "Certified", icon: "fas fa-award", color: "text-purple-400" },
-    { name: "Dean's List", status: "2022-2023", icon: "fas fa-graduation-cap", color: "text-yellow-400" },
+    { name: "CTF Competitor", status: (
+        <>
+          Top 15 in RazorHack 2024 <br />
+          Top 10 in Cybersecurity Challenge SHPE 2024
+        </>
+      ), icon: "fas fa-trophy", color: "text-green-400" },
+    // { name: "Ethical Hacker", status: "Certified", icon: "fas fa-award", color: "text-purple-400" },
+    // { name: "Dean's List", status: "2022-2023", icon: "fas fa-graduation-cap", color: "text-yellow-400" },
   ];
 
   return (

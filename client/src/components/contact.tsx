@@ -45,10 +45,10 @@ export default function Contact() {
   ];
 
   const socialLinks = [
-    { icon: "fab fa-linkedin", href: "#", color: "text-cyan-400 hover:text-cyan-300" },
-    { icon: "fab fa-github", href: "#", color: "text-white hover:text-gray-300" },
-    { icon: "fab fa-twitter", href: "#", color: "text-cyan-400 hover:text-blue-300" },
-    { icon: "fab fa-youtube", href: "#", color: "text-red-400 hover:text-red-300" },
+    { icon: "fab fa-linkedin", href: "https://www.linkedin.com/in/jayae/", color: "text-cyan-400 hover:text-cyan-300" },
+    { icon: "fab fa-github", href: "https://github.com/Jaynuke79", color: "text-white hover:text-gray-300" },
+    // { icon: "fab fa-twitter", href: "https://twitter.com/your-handle", color: "text-cyan-400 hover:text-blue-300" },
+    // { icon: "fab fa-youtube", href: "https://youtube.com/your-channel", color: "text-red-400 hover:text-red-300" },
   ];
 
   return (
@@ -92,6 +92,9 @@ export default function Contact() {
 
           <Card className="glass-morphism border-gray-800 rounded-xl">
             <CardContent className="p-8">
+              <div className="mb-6 p-4 bg-yellow-900/40 border-l-4 border-yellow-500 rounded text-yellow-200 text-sm font-medium">
+                <strong>Note:</strong> This contact form does <u>not</u> actually send any data. It is for demonstration and skill showcase purposes only.
+              </div>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <Label htmlFor="name" className="block text-sm font-medium mb-2 text-gray-300">

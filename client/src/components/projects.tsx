@@ -5,15 +5,17 @@ import { ExternalLink, Github } from "lucide-react";
 
 export default function Projects() {
   const projects = [
-    {
-      title: "AutoMenu",
-      description: "A C++ class that takes in functions and automatically displays them in a cli menu.",
-      image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
-      alt: "Network security monitoring dashboard",
-      technologies: ["C++"],
-      techColors: ["bg-blue-600/20 text-blue-400", "bg-green-600/20 text-green-400", "bg-purple-600/20 text-purple-400"],
-      titleColor: "text-cyan-400"
-    },
+    // {
+    //   title: "AutoMenu",
+    //   description: "A C++ class that takes in functions and automatically displays them in a cli menu.",
+    //   image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
+    //   alt: "Network security monitoring dashboard",
+    //   technologies: ["C++"],
+    //   techColors: ["bg-blue-600/20 text-blue-400", "bg-green-600/20 text-green-400", "bg-purple-600/20 text-purple-400"],
+    //   titleColor: "text-cyan-400",
+      // codeUrl: "https://github.com/yourusername/automenu",
+      // demoUrl: "https://automenu-demo.com"
+    // },
     {
       title: "Machine Learning Research Lead",
       description: "Author of the paper: The Effect of Increased Dimensionality on Detecting Malicious Packets using Machine Learning on IoMT WiFi network traffic.",
@@ -21,50 +23,56 @@ export default function Projects() {
       alt: "Cybersecurity encryption interface",
       technologies: ["Juypyter Notebook","Sklearn","Pandas","Numpy"],
       techColors: ["bg-blue-600/20 text-blue-400", "bg-green-600/20 text-green-400", "bg-red-600/20 text-red-400"],
-      titleColor: "text-green-400"
+      titleColor: "text-green-400",
+      // codeUrl: "https://github.com/yourusername/ml-research-paper",
+      // demoUrl: "https://ml-research-demo.com"
     },
     {
       title: "Pokemon Detector Webapp",
-      description: "Trained and hosted ",
+      description: "Trained a machine learning algorithm to detect Gen1 Pokemon and made a webapp.",
       image: "https://images.unsplash.com/photo-1563206767-5b18f218e8de?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
       alt: "Cybersecurity threat analysis dashboard",
-      technologies: ["Python", "Docker", "Security"],
+      technologies: ["py-torch", "HTML / JS"],
       techColors: ["bg-yellow-600/20 text-yellow-400", "bg-purple-600/20 text-purple-400", "bg-red-600/20 text-red-400"],
-      titleColor: "text-purple-400"
+      titleColor: "text-purple-400",
+      // codeUrl: "https://github.com/yourusername/pokemon-detector",
+      // demoUrl: "https://pokemon-detector-demo.com"
     },
     {
-      title: "Incident Response Platform",
-      description: "Developed an automated incident response system for cybersecurity teams. Includes threat intelligence integration and response playbooks.",
+      title: "Weather APP",
+      description: "A classic beginning coder project.",
       image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
       alt: "Data center cybersecurity infrastructure",
-      technologies: ["Django", "REST API", "MITRE ATT&CK"],
+      technologies: ["Python","API","HTML / JS"],
       techColors: ["bg-blue-600/20 text-blue-400", "bg-green-600/20 text-green-400", "bg-orange-600/20 text-orange-400"],
-      titleColor: "text-yellow-400"
+      titleColor: "text-yellow-400",
+      // codeUrl: "https://github.com/yourusername/weather-app",
+      // demoUrl: "https://weather-app-demo.com"
     },
-    {
-      title: "Blockchain Security Audit",
-      description: "Conducted security audits of smart contracts using Solidity and various testing frameworks. Identified and documented critical vulnerabilities.",
-      image: "https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
-      alt: "Software development and cybersecurity coding",
-      technologies: ["Solidity", "Truffle", "Web3"],
-      techColors: ["bg-purple-600/20 text-purple-400", "bg-yellow-600/20 text-yellow-400", "bg-blue-600/20 text-blue-400"],
-      titleColor: "text-pink-400"
-    },
-    {
-      title: "SIEM Integration Tool",
-      description: "Built a custom SIEM integration platform for log aggregation and threat detection. Features real-time monitoring and automated alerting.",
-      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
-      alt: "Cybersecurity team collaboration workspace",
-      technologies: ["ELK Stack", "Python", "Splunk"],
-      techColors: ["bg-red-600/20 text-red-400", "bg-blue-600/20 text-blue-400", "bg-green-600/20 text-green-400"],
-      titleColor: "text-green-400"
-    }
+    // {
+    //   title: "Blockchain Security Audit",
+    //   description: "Conducted security audits of smart contracts using Solidity and various testing frameworks. Identified and documented critical vulnerabilities.",
+    //   image: "https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
+    //   alt: "Software development and cybersecurity coding",
+    //   technologies: ["Solidity", "Truffle", "Web3"],
+    //   techColors: ["bg-purple-600/20 text-purple-400", "bg-yellow-600/20 text-yellow-400", "bg-blue-600/20 text-blue-400"],
+    //   titleColor: "text-pink-400"
+    // },
+    // {
+    //   title: "SIEM Integration Tool",
+    //   description: "Built a custom SIEM integration platform for log aggregation and threat detection. Features real-time monitoring and automated alerting.",
+    //   image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200",
+    //   alt: "Cybersecurity team collaboration workspace",
+    //   technologies: ["ELK Stack", "Python", "Splunk"],
+    //   techColors: ["bg-red-600/20 text-red-400", "bg-blue-600/20 text-blue-400", "bg-green-600/20 text-green-400"],
+    //   titleColor: "text-green-400"
+    // }
   ];
 
   return (
     <section id="projects" className="py-20 bg-black">
       <div className="max-w-6xl mx-auto px-4">
-        <h2 className="text-4xl font-bold text-center mb-16 gradient-text">Featured Projects</h2>
+        <h2 className="text-4xl font-bold text-center mb-16 gradient-text">Featured Projects and Events</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {projects.map((project, index) => (
             <Card 
@@ -95,20 +103,30 @@ export default function Projects() {
                   ))}
                 </div>
                 <div className="flex space-x-4">
-                  <Button
-                    variant="link"
-                    className="text-cyan-400 hover:text-cyan-300 p-0 h-auto font-medium"
-                  >
-                    <Github className="mr-1 h-4 w-4" />
-                    Code
-                  </Button>
-                  <Button
-                    variant="link"
-                    className="text-green-400 hover:text-green-300 p-0 h-auto font-medium"
-                  >
-                    <ExternalLink className="mr-1 h-4 w-4" />
-                    Demo
-                  </Button>
+                  {project.codeUrl && (
+                    <Button
+                      asChild
+                      variant="link"
+                      className="text-cyan-400 hover:text-cyan-300 p-0 h-auto font-medium"
+                    >
+                      <a href={project.codeUrl} target="_blank" rel="noopener noreferrer">
+                        <Github className="mr-1 h-4 w-4" />
+                        Code
+                      </a>
+                    </Button>
+                  )}
+                  {project.demoUrl && (
+                    <Button
+                      asChild
+                      variant="link"
+                      className="text-green-400 hover:text-green-300 p-0 h-auto font-medium"
+                    >
+                      <a href={project.demoUrl} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="mr-1 h-4 w-4" />
+                        Demo
+                      </a>
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
