@@ -6,7 +6,7 @@ export default function Resume() {
   const handleDownload = () => {
     // Create a download link for the resume PDF
     const link = document.createElement('a');
-    link.href = '/resume.pdf';
+    link.href = '/Jayden_Alonzo-Estrada_Resume.pdf';
     link.download = 'Jayden_Alonzo-Estrada_Resume.pdf';
     document.body.appendChild(link);
     link.click();
@@ -48,7 +48,7 @@ export default function Resume() {
         <p className="text-xl text-gray-300 mb-12">
           Download my complete resume to learn more about my experience and qualifications.
         </p>
-        
+
         <Card className="glass-morphism border-gray-800 rounded-2xl p-8 mb-8">
           <CardContent className="p-0">
             <div className="flex flex-col md:flex-row items-center justify-between">
@@ -59,23 +59,15 @@ export default function Resume() {
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
-                  onClick={handleDownload}
-                  className="bg-cyan-500 hover:bg-cyan-400 text-black px-6 py-3 rounded-lg font-semibold transition-all duration-300"
-                >
+                size="lg"
+                className="bg-gradient-to-r from-cyan-500 to-green-500 text-black hover:scale-105 transition-all duration-300"
+                asChild
+              >
+                <a href="https://drive.google.com/drive/folders/1Jgee_UwcyYSaiMYEvPsW3_bbYSC6pExa?usp=sharing" target="_blank" rel="noopener noreferrer">
                   <Download className="mr-2 h-4 w-4" />
-                  Download PDF
-                </Button>
-                {/* This quick view function isn't working right now, but its a cool idea */}
-                {/* <Button
-                  variant="outline"
-                  asChild
-                  className="border-green-500 text-green-400 hover:bg-green-500 hover:text-black px-6 py-3 rounded-lg font-semibold transition-all duration-300"
-                >
-                  <a href="/Jayden_Alonzo-Estrada_Resume.pdf" target="_blank" rel="noopener noreferrer">
-                    <Eye className="mr-2 h-4 w-4" />
-                    Quick View
-                  </a>
-                </Button> */}
+                  Download Resume
+                </a>
+              </Button>
               </div>
             </div>
           </CardContent>

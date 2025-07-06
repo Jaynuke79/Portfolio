@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Phone, MapPin } from "lucide-react";
+import emailjs from '@emailjs/browser';
 
 export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -15,15 +16,30 @@ export default function Contact() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    setTimeout(() => {
+    try {
+      // Initialize EmailJS (you'll need to replace these with your actual values)
+      const result = await emailjs.sendForm(
+        'service_ybl7r1f', // Replace with your EmailJS service ID
+        'template_zbihedb', // Replace with your EmailJS template ID
+        e.target as HTMLFormElement,
+        's4koIaxc-EHwml43g' // Replace with your EmailJS public key
+      );
+
       toast({
         title: "Message Sent!",
         description: "Thank you for your message. I'll get back to you soon.",
       });
-      setIsSubmitting(false);
       (e.target as HTMLFormElement).reset();
-    }, 1000);
+    } catch (error) {
+      console.error('EmailJS error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again or contact me directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
@@ -92,9 +108,6 @@ export default function Contact() {
 
           <Card className="glass-morphism border-gray-800 rounded-xl">
             <CardContent className="p-8">
-              <div className="mb-6 p-4 bg-yellow-900/40 border-l-4 border-yellow-500 rounded text-yellow-200 text-sm font-medium">
-                <strong>Note:</strong> This contact form does <u>not</u> actually send any data. It is for demonstration and skill showcase purposes only.
-              </div>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <Label htmlFor="name" className="block text-sm font-medium mb-2 text-gray-300">
@@ -102,6 +115,7 @@ export default function Contact() {
                   </Label>
                   <Input 
                     id="name"
+                    name="from_name"
                     type="text" 
                     className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-none transition-colors text-white" 
                     placeholder="Your Name" 
@@ -114,6 +128,7 @@ export default function Contact() {
                   </Label>
                   <Input 
                     id="email"
+                    name="from_email"
                     type="email" 
                     className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-none transition-colors text-white" 
                     placeholder="your@email.com" 
@@ -126,6 +141,7 @@ export default function Contact() {
                   </Label>
                   <Input 
                     id="subject"
+                    name="subject"
                     type="text" 
                     className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-none transition-colors text-white" 
                     placeholder="Subject" 
@@ -138,6 +154,7 @@ export default function Contact() {
                   </Label>
                   <Textarea 
                     id="message"
+                    name="message"
                     rows={4} 
                     className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-none transition-colors resize-none text-white" 
                     placeholder="Your message..." 

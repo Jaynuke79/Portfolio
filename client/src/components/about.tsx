@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 export default function About() {
   const skills = [
     { name: "Cybersecurity", color: "bg-cyan-500/20 text-cyan-400" },
-    { name: "Ai/Machine Learning", color: "bg-green-500/20 text-green-400" },
+    { name: "AI/Machine Learning", color: "bg-green-500/20 text-green-400" },
     // { name: "Network Security", color: "bg-purple-500/20 text-purple-400" },
     { name: "Python", color: "bg-yellow-500/20 text-yellow-400" },
   ];
@@ -15,7 +15,7 @@ export default function About() {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <p className="text-lg text-gray-300 leading-relaxed">
-              I'm an advanced computer science student specializing in cybersecurity and applied Ai at Colorado Mesa University. Driven by a passion for what I do, I "cut through fluff" of a situation and tackle complex challenges head-on with practical application in mind.
+              I'm an advanced computer science student specializing in cybersecurity and applied AI at Colorado Mesa University. Driven by a passion for what I do, I "cut through fluff" of a situation and tackle complex challenges head-on with practical application in mind.
             </p>
             <p className="text-lg text-gray-300 leading-relaxed">
               With a solid foundation in C++ and Python, I'm committed to staying ahead of curve by constantly challenging myself to expand my domain of expertise. 
