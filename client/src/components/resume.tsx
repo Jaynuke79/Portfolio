@@ -7,7 +7,7 @@ export default function Resume() {
     // Create a download link for the resume PDF
     const link = document.createElement('a');
     link.href = '/resume.pdf';
-    link.download = 'Alex_Chen_Resume.pdf';
+    link.download = 'Jayden_Alonzo-Estrada_Resume.pdf';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -15,24 +15,30 @@ export default function Resume() {
 
   const education = {
     degree: "Bachelor of Science - Computer Science",
-    university: "University of Technology",
-    period: "Expected 2025 • GPA: 3.8/4.0",
-    concentration: "Cybersecurity Concentration"
+    university: "Colorado Mesa University",
+    period: "Expected 2027 • GPA: 3.56/4.0",
+    concentration: "Cybersecurity Focus"
   };
 
   const experiences = [
     {
-      title: "Security Intern",
-      company: "CyberTech Solutions",
-      period: "Summer 2023",
-      description: "Vulnerability assessments and penetration testing"
+      title: "Engineering Intern",
+      company: "Fiore Industries",
+      period: "Summer 2024",
+      description: "Microcontroller programming, radio to optical systems, and general business management"
     },
     {
-      title: "IT Support Assistant",
-      company: "University IT Department",
-      period: "2022 - Present",
-      description: "Network troubleshooting and security monitoring"
-    }
+      title: "Software Engineering Intern",
+      company: "JGMS Government Services",
+      period: "Summer 2025",
+      description: "R/D on a custom RAG pipeline and project management"
+    },
+    {
+      title: "Student Research Lead",
+      company: "Colorado Mesa University",
+      period: "2023 - Present",
+      description: "Lead a group of student reserachers on topics like cybersecurity and machine learning"
+    },
   ];
 
   return (
@@ -47,9 +53,9 @@ export default function Resume() {
           <CardContent className="p-0">
             <div className="flex flex-col md:flex-row items-center justify-between">
               <div className="text-left mb-6 md:mb-0">
-                <h3 className="text-2xl font-semibold mb-2 text-white">Alex Chen - Resume</h3>
+                <h3 className="text-2xl font-semibold mb-2 text-white">Jayden Alonzo-Estrada - Resume</h3>
                 <p className="text-gray-300">Computer Science Student • Cybersecurity Focus</p>
-                <p className="text-sm text-gray-400 mt-2">Last updated: December 2023</p>
+                <p className="text-sm text-gray-400 mt-2">Last updated: Feb 2025</p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
@@ -59,13 +65,17 @@ export default function Resume() {
                   <Download className="mr-2 h-4 w-4" />
                   Download PDF
                 </Button>
-                <Button 
+                {/* This quick view function isn't working right now, but its a cool idea */}
+                {/* <Button
                   variant="outline"
+                  asChild
                   className="border-green-500 text-green-400 hover:bg-green-500 hover:text-black px-6 py-3 rounded-lg font-semibold transition-all duration-300"
                 >
-                  <Eye className="mr-2 h-4 w-4" />
-                  Quick View
-                </Button>
+                  <a href="/Jayden_Alonzo-Estrada_Resume.pdf" target="_blank" rel="noopener noreferrer">
+                    <Eye className="mr-2 h-4 w-4" />
+                    Quick View
+                  </a>
+                </Button> */}
               </div>
             </div>
           </CardContent>

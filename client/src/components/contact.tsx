@@ -19,7 +19,7 @@ export default function Contact() {
     setTimeout(() => {
       toast({
         title: "Message Sent!",
-        description: "Thank you for your HERREERmessage. I'll get back to you soon.",
+        description: "Thank you for your message. I'll get back to you soon.",
       });
       setIsSubmitting(false);
       (e.target as HTMLFormElement).reset();
@@ -29,26 +29,26 @@ export default function Contact() {
   const contactInfo = [
     {
       icon: Mail,
-      text: "alex.chen@email.com",
+      text: "jjalonzo-estra@mavs.coloradomesa.edu",
       color: "text-cyan-400"
     },
     {
       icon: Phone,
-      text: "+1 (555) 123-4567",
+      text: "+1 (808) 491-5116",
       color: "text-green-400"
     },
     {
       icon: MapPin,
-      text: "San Francisco, CA",
+      text: "Grand Junction, CO",
       color: "text-purple-400"
     }
   ];
 
   const socialLinks = [
-    { icon: "fab fa-linkedin", href: "#", color: "text-cyan-400 hover:text-cyan-300" },
-    { icon: "fab fa-github", href: "#", color: "text-white hover:text-gray-300" },
-    { icon: "fab fa-twitter", href: "#", color: "text-cyan-400 hover:text-blue-300" },
-    { icon: "fab fa-youtube", href: "#", color: "text-red-400 hover:text-red-300" },
+    { icon: "fab fa-linkedin", href: "https://www.linkedin.com/in/jayae/", color: "text-cyan-400 hover:text-cyan-300" },
+    { icon: "fab fa-github", href: "https://github.com/Jaynuke79", color: "text-white hover:text-gray-300" },
+    // { icon: "fab fa-twitter", href: "https://twitter.com/your-handle", color: "text-cyan-400 hover:text-blue-300" },
+    // { icon: "fab fa-youtube", href: "https://youtube.com/your-channel", color: "text-red-400 hover:text-red-300" },
   ];
 
   return (
@@ -61,7 +61,8 @@ export default function Contact() {
             <h3 className="text-2xl font-semibold mb-6 text-white">Let's Connect</h3>
             <p className="text-gray-300 mb-8 leading-relaxed">
               I'm always interested in discussing cybersecurity, new opportunities, 
-              and collaborating on innovative projects. Feel free to reach out!
+              collaborating on innovative projects, or just nerding out on any topics.
+              Feel free to reach out!
             </p>
             
             <div className="space-y-4">
@@ -91,6 +92,9 @@ export default function Contact() {
 
           <Card className="glass-morphism border-gray-800 rounded-xl">
             <CardContent className="p-8">
+              <div className="mb-6 p-4 bg-yellow-900/40 border-l-4 border-yellow-500 rounded text-yellow-200 text-sm font-medium">
+                <strong>Note:</strong> This contact form does <u>not</u> actually send any data. It is for demonstration and skill showcase purposes only.
+              </div>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <Label htmlFor="name" className="block text-sm font-medium mb-2 text-gray-300">
