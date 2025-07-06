@@ -22,6 +22,7 @@ export default function About() {
             </p>
             <p className="text-lg text-gray-300 leading-relaxed">
               Whether it's analyzing network packets or engineering robust Ai systems, my main focus is to operate with precision, purpose, and an eye on the future.
+
             </p>
             <div className="flex flex-wrap gap-3">
               {skills.map((skill) => (
