@@ -3,8 +3,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Github } from "lucide-react";
 
+interface Project {
+  title: string;
+  description: string;
+  image: string;
+  alt: string;
+  technologies: string[];
+  techColors: string[];
+  titleColor: string;
+  codeUrl?: string;
+  demoUrl?: string;
+}
+
 export default function Projects() {
-  const projects = [
+  const projects: Project[] = [
     {
        title: "AutoMenu",
        description: "After having to make a CLI menu multiple times for multiple classes, I decided to make a general function to do it automatically.",
