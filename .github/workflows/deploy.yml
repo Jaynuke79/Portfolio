@@ -34,6 +34,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Write CNAME for custom domain
+        run: echo "j2a3e.com" > ./docs/CNAME
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
