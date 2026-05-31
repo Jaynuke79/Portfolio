@@ -48,11 +48,11 @@ export default function Contact() {
       text: "jjalonzo-estra@mavs.coloradomesa.edu",
       color: "text-cyan-400"
     },
-    {
-      icon: Phone,
-      text: "+1 (808) 491-5116",
-      color: "text-green-400"
-    },
+    // {
+    //   icon: Phone,
+    //   text: "+1 (808) 491-5116",
+    //   color: "text-green-400"
+    // },
     {
       icon: MapPin,
       text: "Grand Junction, CO",
