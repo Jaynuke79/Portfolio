@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Github, Star } from "lucide-react";
 import { FEATURED_PROJECTS } from "@/lib/featured-projects";
+import { githubOgImageUrl } from "@/lib/github";
 import { useGithubRepos } from "@/hooks/use-github-repos";
 
 const TECH_COLORS: Record<string, string> = {
@@ -36,6 +37,8 @@ export default function Projects() {
     const repo = featured.repo ? repos.get(featured.repo) : undefined;
     return {
       ...featured,
+      image: featured.image ?? (featured.repo ? githubOgImageUrl(featured.repo) : ""),
+      alt: featured.alt ?? `${featured.title} repository card`,
       description: featured.description ?? repo?.description ?? "",
       codeUrl: featured.codeUrl ?? repo?.html_url,
       demoUrl: featured.demoUrl ?? (repo?.homepage || undefined),
