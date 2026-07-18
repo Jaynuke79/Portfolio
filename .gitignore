@@ -2,3 +2,4 @@ node_modules
 CLAUDE.md
 client/.env
 client/.env.local
+ignore/
