@@ -12,6 +12,7 @@ interface Project {
   titleColor: string;
   codeUrl?: string;
   demoUrl?: string;
+  linksNote?: string;
 }
 
 const TECH_COLORS: Record<string, string> = {
@@ -38,7 +39,6 @@ export default function Projects() {
        technologies: ["C++"],
        titleColor: "text-cyan-400",
        codeUrl: "https://github.com/Jaynuke79/AutoMenu",
-      // demoUrl: "https://automenu-demo.com"
     },
     {
       title: "The 100 Prisoners Problem",
@@ -48,7 +48,6 @@ export default function Projects() {
       technologies: ["C++"],
       titleColor: "text-green-400",
       codeUrl: "https://github.com/Jaynuke79/100PrisonerProblem",
-      // demoUrl: "https://ml-research-demo.com"
     },
     {
       title: "Machine Learning Research Lead",
@@ -57,8 +56,7 @@ export default function Projects() {
       alt: "Machine learning cybersecurity research visualization",
       technologies: ["Jupyter Notebook","Sk-learn","Pandas","Numpy"],
       titleColor: "text-green-400",
-      // codeUrl: "https://github.com/yourusername/ml-research-paper",
-      // demoUrl: "https://ml-research-demo.com"
+      linksNote: "Paper not publicly published — available on request.",
     },
     {
       title: "Pokemon Detector Webapp",
@@ -68,7 +66,7 @@ export default function Projects() {
       technologies: ["py-torch", "HTML / JS"],
       titleColor: "text-purple-400",
       codeUrl: "https://github.com/Jaynuke79/PokemonDetector",
-      // demoUrl: "https://pokemon-detector-demo.com"
+      demoUrl: "https://pokemon-detector-demo.vercel.app",
     },
     {
       title: "Weather APP",
@@ -78,7 +76,6 @@ export default function Projects() {
       technologies: ["Python","API","HTML / JS"],
       titleColor: "text-yellow-400",
       codeUrl: "https://github.com/Jaynuke79/WeatherApiApp",
-      // demoUrl: "https://weather-app-demo.com"
     },
   ];
 
@@ -139,6 +136,9 @@ export default function Projects() {
                         Demo
                       </a>
                     </Button>
+                  )}
+                  {!project.codeUrl && !project.demoUrl && project.linksNote && (
+                    <p className="text-gray-500 text-xs italic">{project.linksNote}</p>
                   )}
                 </div>
               </CardContent>
