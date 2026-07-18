@@ -8,6 +8,7 @@ export interface FeaturedProject {
   titleColor: string;
   codeUrl?: string;
   demoUrl?: string;
+  demoLabel?: string;
   linksNote?: string;
 }
 
@@ -32,6 +33,8 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     alt: "Machine learning cybersecurity research visualization",
     technologies: ["Jupyter Notebook", "Sk-learn", "Pandas", "Numpy"],
     titleColor: "text-green-400",
+    demoUrl: "https://easychair.org/smart-slide/slide/2N9Q",
+    demoLabel: "Talk Slides",
     linksNote: "Published by Springer (MobiSec 2025) — full text available on request.",
   },
   {

@@ -112,7 +112,7 @@ export default function Projects() {
                     >
                       <a href={project.demoUrl} target="_blank" rel="noopener noreferrer">
                         <ExternalLink className="mr-1 h-4 w-4" />
-                        Demo
+                        {project.demoLabel ?? "Demo"}
                       </a>
                     </Button>
                   )}
