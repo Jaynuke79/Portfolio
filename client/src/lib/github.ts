@@ -11,6 +11,10 @@ export interface GithubRepo {
   topics: string[];
 }
 
+export function githubOgImageUrl(repo: string): string {
+  return `https://opengraph.githubassets.com/portfolio/${GITHUB_USERNAME}/${repo}`;
+}
+
 const CACHE_KEY = "github-repos-v1";
 const CACHE_TTL_MS = 30 * 60 * 1000;
 
