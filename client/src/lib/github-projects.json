@@ -1,0 +1,165 @@
+[
+  {
+    "name": "Portfolio",
+    "description": "Website Digital Portfolio",
+    "html_url": "https://github.com/Jaynuke79/Portfolio",
+    "homepage": "https://j2a3e.com/",
+    "language": "TypeScript",
+    "stargazers_count": 0,
+    "pushed_at": "2026-07-18T02:32:17Z",
+    "topics": []
+  },
+  {
+    "name": "mythology-final-project",
+    "description": null,
+    "html_url": "https://github.com/Jaynuke79/mythology-final-project",
+    "homepage": "https://jaynuke79.github.io/mythology-final-project/",
+    "language": "HTML",
+    "stargazers_count": 0,
+    "pushed_at": "2026-05-08T04:18:40Z",
+    "topics": []
+  },
+  {
+    "name": "Jaynuke79",
+    "description": "Config files for my GitHub profile.",
+    "html_url": "https://github.com/Jaynuke79/Jaynuke79",
+    "homepage": "https://github.com/Jaynuke79",
+    "language": null,
+    "stargazers_count": 0,
+    "pushed_at": "2026-04-30T23:27:03Z",
+    "topics": [
+      "config",
+      "github-config"
+    ]
+  },
+  {
+    "name": "PokemonDetector",
+    "description": "I built and trained a model to identify gen 1 pokemon. Demo website hosted on vercel.",
+    "html_url": "https://github.com/Jaynuke79/PokemonDetector",
+    "homepage": "https://pokemon-detector-demo.vercel.app",
+    "language": "Python",
+    "stargazers_count": 0,
+    "pushed_at": "2026-03-03T19:33:19Z",
+    "topics": []
+  },
+  {
+    "name": "snowball-ticket-calculator",
+    "description": null,
+    "html_url": "https://github.com/Jaynuke79/snowball-ticket-calculator",
+    "homepage": null,
+    "language": "Jupyter Notebook",
+    "stargazers_count": 0,
+    "pushed_at": "2026-02-27T23:56:41Z",
+    "topics": []
+  },
+  {
+    "name": "Intentionally-Vulnerable-Bad-rAG",
+    "description": "This project demonstrates why you should give AI models the least amount of personal information necessary.",
+    "html_url": "https://github.com/Jaynuke79/Intentionally-Vulnerable-Bad-rAG",
+    "homepage": "",
+    "language": "Python",
+    "stargazers_count": 0,
+    "pushed_at": "2025-10-17T03:52:44Z",
+    "topics": []
+  },
+  {
+    "name": "Social-Media-Downloader",
+    "description": "Social Media Downloader is your CLI bestie for grabbing videos, reels, and posts from YouTube, TikTok, Instagram, Facebook and more. With batch downloads, custom settings, and logs, it’s ready to slay on Windows & Linux, and via PyPI.",
+    "html_url": "https://github.com/Jaynuke79/Social-Media-Downloader",
+    "homepage": "",
+    "language": "Python",
+    "stargazers_count": 0,
+    "pushed_at": "2025-09-08T03:17:32Z",
+    "topics": []
+  },
+  {
+    "name": "100PrisonerProblem",
+    "description": "Coding up the 100 Prisoner Problem",
+    "html_url": "https://github.com/Jaynuke79/100PrisonerProblem",
+    "homepage": "",
+    "language": "C++",
+    "stargazers_count": 0,
+    "pushed_at": "2025-07-06T01:29:47Z",
+    "topics": []
+  },
+  {
+    "name": "github-readme-stats",
+    "description": ":zap: Dynamically generated stats for your github readmes",
+    "html_url": "https://github.com/Jaynuke79/github-readme-stats",
+    "homepage": "https://github-readme-stats.vercel.app",
+    "language": null,
+    "stargazers_count": 0,
+    "pushed_at": "2025-07-03T15:16:51Z",
+    "topics": []
+  },
+  {
+    "name": "WeatherApiApp",
+    "description": "Beginner weather app that uses an api to get data",
+    "html_url": "https://github.com/Jaynuke79/WeatherApiApp",
+    "homepage": null,
+    "language": "Python",
+    "stargazers_count": 0,
+    "pushed_at": "2025-06-25T21:59:49Z",
+    "topics": []
+  },
+  {
+    "name": "Digital_Portfolio",
+    "description": null,
+    "html_url": "https://github.com/Jaynuke79/Digital_Portfolio",
+    "homepage": null,
+    "language": null,
+    "stargazers_count": 0,
+    "pushed_at": "2025-06-08T02:33:21Z",
+    "topics": []
+  },
+  {
+    "name": "test_pages",
+    "description": null,
+    "html_url": "https://github.com/Jaynuke79/test_pages",
+    "homepage": null,
+    "language": "HTML",
+    "stargazers_count": 0,
+    "pushed_at": "2025-06-06T04:22:24Z",
+    "topics": []
+  },
+  {
+    "name": "OOP-Student-Showcase",
+    "description": null,
+    "html_url": "https://github.com/Jaynuke79/OOP-Student-Showcase",
+    "homepage": null,
+    "language": "HTML",
+    "stargazers_count": 0,
+    "pushed_at": "2025-05-07T22:25:30Z",
+    "topics": []
+  },
+  {
+    "name": "CS-Club",
+    "description": null,
+    "html_url": "https://github.com/Jaynuke79/CS-Club",
+    "homepage": null,
+    "language": "Jupyter Notebook",
+    "stargazers_count": 0,
+    "pushed_at": "2025-02-13T18:09:15Z",
+    "topics": []
+  },
+  {
+    "name": "AutoMenu",
+    "description": "Takes in functions and creates an automatic menu in the terminal. Useful for quick class assignments.",
+    "html_url": "https://github.com/Jaynuke79/AutoMenu",
+    "homepage": "",
+    "language": "C++",
+    "stargazers_count": 0,
+    "pushed_at": "2025-01-21T18:06:02Z",
+    "topics": []
+  },
+  {
+    "name": "PlayingWithData",
+    "description": "random data to visualize, manipulate, and otherwise play with",
+    "html_url": "https://github.com/Jaynuke79/PlayingWithData",
+    "homepage": null,
+    "language": "Jupyter Notebook",
+    "stargazers_count": 0,
+    "pushed_at": "2025-01-16T02:36:49Z",
+    "topics": []
+  }
+]
