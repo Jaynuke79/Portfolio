@@ -10,6 +10,7 @@ export default defineConfig({
     },
   },
   root: path.resolve(__dirname, "client"),
+  publicDir: path.resolve(__dirname, "public"),
   server: {
     port: 5173,
     open: false,
