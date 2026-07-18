@@ -4,8 +4,9 @@ export default function About() {
   const skills = [
     { name: "Cybersecurity", color: "bg-cyan-500/20 text-cyan-400" },
     { name: "AI/Machine Learning", color: "bg-green-500/20 text-green-400" },
-    // { name: "Network Security", color: "bg-purple-500/20 text-purple-400" },
+    { name: "AI Agent Orchestration", color: "bg-purple-500/20 text-purple-400" },
     { name: "Python", color: "bg-yellow-500/20 text-yellow-400" },
+    { name: "TypeScript & React", color: "bg-blue-500/20 text-blue-400" },
   ];
 
   return (
@@ -18,7 +19,7 @@ export default function About() {
               I'm an advanced computer science student specializing in cybersecurity and applied AI at Colorado Mesa University. Driven by a passion for what I do, I "cut through fluff" of a situation and tackle complex challenges head-on with practical application in mind.
             </p>
             <p className="text-lg text-gray-300 leading-relaxed">
-              With a solid foundation in C++ and Python, I'm committed to staying ahead of curve by constantly challenging myself to expand my domain of expertise. 
+              With a solid foundation in Python, C, and TypeScript/React, I'm committed to staying ahead of curve by constantly challenging myself to expand my domain of expertise.
             </p>
             <p className="text-lg text-gray-300 leading-relaxed">
               Whether it's analyzing network packets or engineering robust Ai systems, my main focus is to operate with precision, purpose, and an eye on the future.

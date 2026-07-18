@@ -3,41 +3,49 @@ import { Button } from "@/components/ui/button";
 import { Download, Eye } from "lucide-react";
 
 export default function Resume() {
-  const handleDownload = () => {
-    // Create a download link for the resume PDF
-    const link = document.createElement('a');
-    link.href = '/Jayden_Alonzo-Estrada_Resume.pdf';
-    link.download = 'Jayden_Alonzo-Estrada_Resume.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const education = {
     degree: "Bachelor of Science - Computer Science",
     university: "Colorado Mesa University",
-    period: "Expected 2027 • GPA: 3.56/4.0",
-    concentration: "Cybersecurity Focus"
+    period: "Expected May 2027 • GPA: 3.56/4.0",
+    concentration: "Minor: Cybersecurity • Focus: AI Application"
   };
 
   const experiences = [
     {
-      title: "Engineering Intern",
-      company: "Fiore Industries",
-      period: "Summer 2024",
-      description: "Microcontroller programming, radio to optical systems, and general business management"
+      title: "AI Services Intern",
+      company: "EggNest.ai",
+      period: "Oct 2025 - Present",
+      description: "Deep CRM connector integrations for Glean and AI agent pipelines across the full development lifecycle"
     },
     {
       title: "Software Engineering Intern",
       company: "JGMS Government Services",
       period: "Summer 2025",
-      description: "R/D on a custom RAG pipeline and project management"
+      description: "Internal RAG web framework with LangChain, Supabase, FastAPI, and React, cutting document lookup by ~3 hours/week"
     },
     {
-      title: "Student Research Lead",
+      title: "Backend Developer",
+      company: "Rotary Club",
+      period: "Nov 2024 - Present",
+      description: "PII compliance, payment processing optimization, and fund-dispersal automation"
+    },
+    {
+      title: "Field Technician",
+      company: "Greenflare Technologies",
+      period: "Oct 2024 - Present",
+      description: "Repair and maintain high-throughput compute systems; diagnose network bottlenecks via packet captures"
+    },
+    {
+      title: "Software Engineering Intern",
+      company: "Fiore Industries",
+      period: "Summer 2024",
+      description: "RF-to-optical testing protocol and pipeline in low-level C for mission-critical equipment validation"
+    },
+    {
+      title: "Student Research Head",
       company: "Colorado Mesa University",
-      period: "2023 - Present",
-      description: "Lead a group of student reserachers on topics like cybersecurity and machine learning"
+      period: "Dec 2023 - Present",
+      description: "Lead a 6-person team building ML pipelines for IoMT detection and small cybersecurity LMs"
     },
   ];
 
@@ -54,8 +62,8 @@ export default function Resume() {
             <div className="flex flex-col md:flex-row items-center justify-between">
               <div className="text-left mb-6 md:mb-0">
                 <h3 className="text-2xl font-semibold mb-2 text-white">Jayden Alonzo-Estrada - Resume</h3>
-                <p className="text-gray-300">Computer Science Student • Cybersecurity Focus</p>
-                <p className="text-sm text-gray-400 mt-2">Last updated: Feb 2025</p>
+                <p className="text-gray-300">AI Services, Cybersecurity, and Software Engineer</p>
+                <p className="text-sm text-gray-400 mt-2">Last updated: Jul 2026</p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
@@ -63,7 +71,7 @@ export default function Resume() {
                 className="bg-gradient-to-r from-cyan-500 to-green-500 text-black hover:scale-105 transition-all duration-300"
                 asChild
               >
-                <a href="https://drive.google.com/drive/folders/1Jgee_UwcyYSaiMYEvPsW3_bbYSC6pExa?usp=sharing" target="_blank" rel="noopener noreferrer">
+                <a href="/Jayden_Alonzo-Estrada_Resume.pdf" download="Jayden_Alonzo-Estrada_Resume.pdf">
                   <Download className="mr-2 h-4 w-4" />
                   Download Resume
                 </a>

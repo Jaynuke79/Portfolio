@@ -38,7 +38,7 @@ export default function Hero() {
             Hi, I'm <span className="gradient-text">{typedText}</span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 mb-8">
-            Computer Science Student & <span className="text-green-400">Cybersecurity & Ai Enthusiast</span>
+            <span className="text-green-400">AI Services, Cybersecurity, and Software Engineer</span>
           </p>
           
           <div className="mb-8 animate-float">

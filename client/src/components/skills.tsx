@@ -10,9 +10,8 @@ export default function Skills() {
       color: "text-cyan-400",
       skills: [
         { name: "Python", level: 90, color: "bg-cyan-500" },
-        // { name: "Java", level: 85, color: "bg-green-500" },
-        { name: "C++", level: 75, color: "bg-purple-500" },
-        // { name: "JavaScript", level: 80, color: "bg-yellow-500" },
+        { name: "TypeScript & React", level: 85, color: "bg-blue-500" },
+        { name: "C / C++", level: 75, color: "bg-purple-500" },
       ]
     },
     {
@@ -20,26 +19,32 @@ export default function Skills() {
       icon: "fas fa-shield-alt",
       color: "text-green-400",
       skills: [
-        { name: "Penetration Testing", level: 85, color: "bg-cyan-500" },
         { name: "Network Security", level: 90, color: "bg-green-500" },
-        { name: "Incident Response", level: 80, color: "bg-purple-500" },
-        { name: "Malware Analysis", level: 75, color: "bg-red-500" },
+        { name: "Zero Trust Principles", level: 85, color: "bg-cyan-500" },
+        { name: "SecOps", level: 80, color: "bg-purple-500" },
+        { name: "AuthN & AuthZ Systems", level: 80, color: "bg-red-500" },
       ]
     },
     {
-      title: "Tools & Technologies",
-      icon: "fas fa-tools",
+      title: "AI & Backend",
+      icon: "fas fa-robot",
       color: "text-purple-400",
       skills: [
-        { name: "Kali Linux", level: 95, color: "bg-cyan-500" },
-        { name: "Wireshark", level: 85, color: "bg-green-500" },
-        { name: "Metasploit", level: 80, color: "bg-purple-500" },
-        { name: "Docker", level: 75, color: "bg-blue-500" },
+        { name: "AI Agent Orchestration", level: 90, color: "bg-purple-500" },
+        { name: "AI/ML Modeling", level: 85, color: "bg-cyan-500" },
+        { name: "Backend Services & REST APIs", level: 85, color: "bg-green-500" },
+        { name: "Testing & Evaluation Automation", level: 80, color: "bg-blue-500" },
       ]
     }
   ];
 
   const certifications = [
+    { name: "Published Researcher", status: (
+        <>
+          Springer — MobiSec 2025 <br />
+          Sapporo, Japan
+        </>
+      ), icon: "fas fa-book", color: "text-purple-400" },
     { name: "Security+", status: "In Progress", icon: "fas fa-certificate", color: "text-cyan-400" },
     { name: "CTF Competitor", status: (
         <>
@@ -47,8 +52,12 @@ export default function Skills() {
           Top 10 in Cybersecurity Challenge SHPE 2024
         </>
       ), icon: "fas fa-trophy", color: "text-green-400" },
-    // { name: "Ethical Hacker", status: "Certified", icon: "fas fa-award", color: "text-purple-400" },
-    // { name: "Dean's List", status: "2022-2023", icon: "fas fa-graduation-cap", color: "text-yellow-400" },
+    { name: "Student Leadership", status: (
+        <>
+          ASG House Speaker <br />
+          President, CS & Cybersecurity Clubs
+        </>
+      ), icon: "fas fa-users", color: "text-yellow-400" },
   ];
 
   return (
