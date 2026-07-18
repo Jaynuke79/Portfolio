@@ -5,6 +5,8 @@ on:
     branches:
       - main
   workflow_dispatch:
+  schedule:
+    - cron: "0 9 * * *"
 
 permissions:
   contents: read
@@ -36,6 +38,11 @@ jobs:
           BOOKING_PASSWORDS: ${{ secrets.BOOKING_PASSWORDS }}
           ENV_OUTPUT: client/.env
         run: node scripts/hash-passwords.mjs
+
+      - name: Refresh GitHub project data
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/fetch-github-projects.mjs || echo "GitHub fetch failed — building with committed snapshot"
 
       - name: Build
         run: npm run build

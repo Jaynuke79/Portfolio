@@ -8,7 +8,8 @@
     "build": "vite build --config vite.config.github.ts",
     "preview": "vite preview",
     "check": "tsc",
-    "hash-passwords": "node scripts/hash-passwords.mjs"
+    "hash-passwords": "node scripts/hash-passwords.mjs",
+    "fetch-projects": "node scripts/fetch-github-projects.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
