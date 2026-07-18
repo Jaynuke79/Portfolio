@@ -4,13 +4,12 @@ A modern, responsive digital portfolio built with React and TypeScript, showcasi
 
 ## 🚀 Live Demo
 
-Visit the live portfolio: [Your GitHub Pages URL will be here]
+Visit the live portfolio: [j2a3e.com](https://j2a3e.com)
 
 ## 🛠️ Technologies Used
 
 - React 18 with TypeScript
 - Tailwind CSS for styling
-- Framer Motion for animations
 - Lucide React for icons
 - Vite for build tooling
 
@@ -20,7 +19,7 @@ Visit the live portfolio: [Your GitHub Pages URL will be here]
 - **Dark Theme**: Cybersecurity-inspired color scheme
 - **Smooth Animations**: Professional transitions and effects
 - **Interactive Navigation**: Smooth scrolling between sections
-- **Project Showcase**: Detailed project presentations
+- **Live Project Showcase**: Cards are driven by a curated repo list enriched from the GitHub API — stars, language, last-pushed date, links, and auto-updating OpenGraph images — with a baked snapshot as offline fallback
 - **Skills Display**: Technical competencies and certifications
 - **Contact Form**: Professional contact interface
 
@@ -39,10 +38,11 @@ This portfolio is configured for automatic deployment to GitHub Pages using GitH
 
 3. **Push to Main Branch**:
    - Any push to the `main` branch will trigger automatic deployment
+   - A daily scheduled run also rebuilds the site so the baked GitHub project data stays fresh
    - The workflow will build and deploy your site
 
 4. **Access Your Site**:
-   - Your portfolio will be available at: `https://[your-username].github.io/[repository-name]`
+   - Your portfolio will be available at: `https://[your-username].github.io/[repository-name]` (this repo deploys to the custom domain `j2a3e.com` via a CNAME written in the workflow)
 
 ## 📝 Customization
 
@@ -59,8 +59,11 @@ To personalize this portfolio with your information, edit these files:
 - `client/src/components/skills.tsx` - Technical skills and certifications
 - `client/src/components/resume.tsx` - Education and experience
 
+### Project Showcase
+- `client/src/lib/featured-projects.ts` - Which repos appear, their order, and per-project overrides
+
 ### Resume File
-- Replace `public/resume.pdf` with your actual resume
+- Replace `public/Jayden_Alonzo-Estrada_Resume.pdf` with your actual resume (keep the filename in sync with `client/src/components/resume.tsx`)
 
 ## 🔧 Local Development
 
@@ -71,7 +74,13 @@ npm install
 # Start development server
 npm run dev
 
-# Build for production
+# Type-check
+npm run check
+
+# Refresh the baked GitHub project snapshot
+npm run fetch-projects
+
+# Build for production (outputs to docs/)
 npm run build
 ```
 
@@ -82,9 +91,12 @@ npm run build
 │   ├── src/
 │   │   ├── components/     # React components
 │   │   ├── pages/          # Page components
-│   │   ├── lib/            # Utility functions
+│   │   ├── hooks/          # React hooks
+│   │   ├── lib/            # Utilities, featured-project config, GitHub data
 │   │   └── index.css       # Global styles
 │   └── index.html          # HTML template
+├── public/                 # Static assets (resume PDF, robots.txt, sitemap)
+├── scripts/                # Build-time scripts (GitHub data fetch, password hashing)
 ├── .github/
 │   └── workflows/
 │       └── deploy.yml      # GitHub Actions workflow
@@ -101,4 +113,4 @@ The portfolio uses a cybersecurity-inspired dark theme:
 
 ## 📄 License
 
-This project is open source and available under the [MIT License](LICENSE).
+This project is open source and available under the MIT License.
