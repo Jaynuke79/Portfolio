@@ -3,14 +3,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
 import BookingGate from "@/components/booking-gate";
+import { parseBookingSlug } from "@/lib/booking-slug";
 
 function getBookingSlug(): string | null {
-  const hash = window.location.hash;
-  if (hash.startsWith("#book/")) {
-    const slug = hash.slice(6);
-    return slug || null;
-  }
-  return null;
+  return parseBookingSlug(window.location.hash);
 }
 
 function App() {
