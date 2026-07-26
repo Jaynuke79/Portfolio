@@ -44,6 +44,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: node scripts/fetch-github-projects.mjs || echo "GitHub fetch failed — building with committed snapshot"
 
+      - name: Typecheck
+        run: npm run check
+
+      - name: Test
+        run: npm test
+
       - name: Build
         run: npm run build
 

@@ -8,10 +8,14 @@ export interface Appointment {
 
 type AppointmentConfig = Omit<Appointment, 'passwordHash'>;
 
+export function bookingHashEnvKey(slug: string): string {
+  return `VITE_BOOKING_HASH_${slug.toUpperCase().replace(/-/g, '_')}`;
+}
+
 function withHashes(config: Record<string, AppointmentConfig>): Record<string, Appointment> {
   const result: Record<string, Appointment> = {};
   for (const [slug, appt] of Object.entries(config)) {
-    const key = `VITE_BOOKING_HASH_${slug.toUpperCase().replace(/-/g, '_')}`;
+    const key = bookingHashEnvKey(slug);
     result[slug] = {
       ...appt,
       passwordHash: (import.meta.env as Record<string, string>)[key] ?? '',
