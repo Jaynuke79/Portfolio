@@ -1,12 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Award, BookOpen, Bot, Code, Shield, Trophy, Users } from "lucide-react";
 
 export default function Skills() {
   const skillCategories = [
     {
       title: "Programming Languages",
-      icon: "fas fa-code",
+      icon: Code,
       color: "text-cyan-400",
       skills: [
         { name: "Python", level: 90, color: "bg-cyan-500" },
@@ -16,7 +17,7 @@ export default function Skills() {
     },
     {
       title: "Cybersecurity",
-      icon: "fas fa-shield-alt",
+      icon: Shield,
       color: "text-green-400",
       skills: [
         { name: "Network Security", level: 90, color: "bg-green-500" },
@@ -27,7 +28,7 @@ export default function Skills() {
     },
     {
       title: "AI & Backend",
-      icon: "fas fa-robot",
+      icon: Bot,
       color: "text-purple-400",
       skills: [
         { name: "AI Agent Orchestration", level: 90, color: "bg-purple-500" },
@@ -44,20 +45,20 @@ export default function Skills() {
           Springer — MobiSec 2025 <br />
           Sapporo, Japan
         </>
-      ), icon: "fas fa-book", color: "text-purple-400" },
-    { name: "Security+", status: "In Progress", icon: "fas fa-certificate", color: "text-cyan-400" },
+      ), icon: BookOpen, color: "text-purple-400" },
+    { name: "Security+", status: "In Progress", icon: Award, color: "text-cyan-400" },
     { name: "CTF Competitor", status: (
         <>
           Top 15 in RazorHack 2024 <br />
           Top 10 in Cybersecurity Challenge SHPE 2024
         </>
-      ), icon: "fas fa-trophy", color: "text-green-400" },
+      ), icon: Trophy, color: "text-green-400" },
     { name: "Student Leadership", status: (
         <>
           ASG House Speaker <br />
           President, CS & Cybersecurity Clubs
         </>
-      ), icon: "fas fa-users", color: "text-yellow-400" },
+      ), icon: Users, color: "text-yellow-400" },
   ];
 
   return (
@@ -69,7 +70,7 @@ export default function Skills() {
             <Card key={index} className="glass-morphism border-gray-800">
               <CardContent className="p-6">
                 <h3 className={`text-xl font-semibold mb-6 ${category.color} flex items-center`}>
-                  <i className={`${category.icon} mr-3`}></i>
+                  <category.icon className="mr-3 h-5 w-5" />
                   {category.title}
                 </h3>
                 <div className="space-y-4">
@@ -98,7 +99,7 @@ export default function Skills() {
             {certifications.map((cert, index) => (
               <Card key={index} className="glass-morphism border-gray-800 text-center p-4 min-w-[150px]">
                 <CardContent className="p-0">
-                  <i className={`${cert.icon} ${cert.color} text-2xl mb-2`}></i>
+                  <cert.icon className={`${cert.color} h-7 w-7 mx-auto mb-2`} />
                   <div className="text-sm font-medium text-white">{cert.name}</div>
                   <div className="text-xs text-gray-400">{cert.status}</div>
                 </CardContent>

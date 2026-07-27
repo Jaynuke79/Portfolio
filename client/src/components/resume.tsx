@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Eye } from "lucide-react";
+import { Briefcase, Download, GraduationCap } from "lucide-react";
 
 export default function Resume() {
   const education = {
@@ -85,7 +85,7 @@ export default function Resume() {
           <Card className="glass-morphism border-gray-800">
             <CardContent className="p-6">
               <h3 className="text-xl font-semibold mb-4 text-cyan-400 flex items-center">
-                <i className="fas fa-graduation-cap mr-3"></i>Education
+                <GraduationCap className="mr-3 h-5 w-5" />Education
               </h3>
               <div className="space-y-4">
                 <div>
@@ -101,7 +101,7 @@ export default function Resume() {
           <Card className="glass-morphism border-gray-800">
             <CardContent className="p-6">
               <h3 className="text-xl font-semibold mb-4 text-green-400 flex items-center">
-                <i className="fas fa-briefcase mr-3"></i>Experience
+                <Briefcase className="mr-3 h-5 w-5" />Experience
               </h3>
               <div className="space-y-4">
                 {experiences.map((exp, index) => (

@@ -44,11 +44,12 @@ export default function Hero() {
           </p>
           
           <div className="mb-8 animate-float">
-            <img 
-              src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400" 
-              alt="Modern cybersecurity workspace with multiple monitors" 
+            <img
+              src="/hero-workspace.jpg"
+              alt="Modern cybersecurity workspace with multiple monitors"
+              width={800}
+              height={400}
               className="rounded-xl shadow-2xl mx-auto w-full max-w-2xl glow-blue"
-              loading="lazy"
             />
           </div>
           
