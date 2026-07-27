@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Github, Linkedin, Mail, MapPin } from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
+import { GithubIcon, LinkedinIcon } from "@/components/icons";
 import emailjs from '@emailjs/browser';
 
 const HONEYPOT_FIELD = "website";
@@ -72,12 +73,12 @@ export default function Contact() {
   ];
 
   const socialLinks = [
-    { icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/in/jayae/", color: "text-cyan-400 hover:text-cyan-300" },
-    { icon: Github, label: "GitHub", href: "https://github.com/Jaynuke79", color: "text-white hover:text-gray-300" },
+    { icon: LinkedinIcon, label: "LinkedIn", href: "https://www.linkedin.com/in/jayae/", color: "text-cyan-400 hover:text-cyan-300" },
+    { icon: GithubIcon, label: "GitHub", href: "https://github.com/Jaynuke79", color: "text-white hover:text-gray-300" },
   ];
 
   return (
-    <section id="contact" className="py-20 bg-gradient-to-br from-gray-900 to-black">
+    <section id="contact" className="py-20 bg-linear-to-br from-gray-900 to-black">
       <div className="max-w-4xl mx-auto px-4">
         <h2 className="text-4xl font-bold text-center mb-16 gradient-text">Get In Touch</h2>
         
@@ -121,7 +122,7 @@ export default function Contact() {
           <Card className="glass-morphism border-gray-800 rounded-xl">
             <CardContent className="p-8">
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="absolute -left-[9999px] h-px w-px overflow-hidden" aria-hidden="true">
+                <div className="absolute left-[-9999px] h-px w-px overflow-hidden" aria-hidden="true">
                   <label htmlFor={HONEYPOT_FIELD}>Leave this field empty</label>
                   <input
                     id={HONEYPOT_FIELD}
@@ -139,7 +140,7 @@ export default function Contact() {
                     id="name"
                     name="from_name"
                     type="text" 
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-none transition-colors text-white" 
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-hidden transition-colors text-white" 
                     placeholder="Your Name" 
                     required 
                   />
@@ -152,7 +153,7 @@ export default function Contact() {
                     id="email"
                     name="from_email"
                     type="email" 
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-none transition-colors text-white" 
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-hidden transition-colors text-white" 
                     placeholder="your@email.com" 
                     required 
                   />
@@ -165,7 +166,7 @@ export default function Contact() {
                     id="subject"
                     name="subject"
                     type="text" 
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-none transition-colors text-white" 
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-hidden transition-colors text-white" 
                     placeholder="Subject" 
                     required 
                   />
@@ -178,7 +179,7 @@ export default function Contact() {
                     id="message"
                     name="message"
                     rows={4} 
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-none transition-colors resize-none text-white" 
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-hidden transition-colors resize-none text-white" 
                     placeholder="Your message..." 
                     required 
                   />
@@ -186,7 +187,7 @@ export default function Contact() {
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-cyan-500 to-green-500 text-black py-3 rounded-lg font-semibold hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-linear-to-r from-cyan-500 to-green-500 text-black py-3 rounded-lg font-semibold hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>

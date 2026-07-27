@@ -88,7 +88,7 @@ export default function BookingGate({ slug }: Props) {
                 rel="noopener noreferrer"
                 className="flex-1"
               >
-                <Button className="w-full bg-gradient-to-r from-cyan-500 to-green-500 text-black font-semibold">
+                <Button className="w-full bg-linear-to-r from-cyan-500 to-green-500 text-black font-semibold">
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Open again
                 </Button>
@@ -126,7 +126,7 @@ export default function BookingGate({ slug }: Props) {
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-none transition-colors text-white"
+                className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-hidden transition-colors text-white"
                 placeholder="Enter password"
                 autoFocus
                 required
@@ -136,7 +136,7 @@ export default function BookingGate({ slug }: Props) {
             <Button
               type="submit"
               disabled={isChecking || !password}
-              className="w-full bg-gradient-to-r from-cyan-500 to-green-500 text-black py-3 rounded-lg font-semibold hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-linear-to-r from-cyan-500 to-green-500 text-black py-3 rounded-lg font-semibold hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isChecking ? "Verifying..." : "Continue"}
             </Button>

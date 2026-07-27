@@ -1,7 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Github, Star } from "lucide-react";
+import { ExternalLink, Star } from "lucide-react";
+import { GithubIcon } from "@/components/icons";
 import { FEATURED_PROJECTS } from "@/lib/featured-projects";
 import { githubOgImageUrl } from "@/lib/github";
 import { useGithubRepos } from "@/hooks/use-github-repos";
@@ -99,7 +100,7 @@ export default function Projects() {
                       className="text-cyan-400 hover:text-cyan-300 p-0 h-auto font-medium"
                     >
                       <a href={project.codeUrl} target="_blank" rel="noopener noreferrer">
-                        <Github className="mr-1 h-4 w-4" />
+                        <GithubIcon className="mr-1 h-4 w-4" />
                         Code
                       </a>
                     </Button>
