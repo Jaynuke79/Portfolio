@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, MapPin } from "lucide-react";
+import { Github, Linkedin, Mail, MapPin } from "lucide-react";
 import emailjs from '@emailjs/browser';
 
 const HONEYPOT_FIELD = "website";
@@ -72,8 +72,8 @@ export default function Contact() {
   ];
 
   const socialLinks = [
-    { icon: "fab fa-linkedin", href: "https://www.linkedin.com/in/jayae/", color: "text-cyan-400 hover:text-cyan-300" },
-    { icon: "fab fa-github", href: "https://github.com/Jaynuke79", color: "text-white hover:text-gray-300" },
+    { icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/in/jayae/", color: "text-cyan-400 hover:text-cyan-300" },
+    { icon: Github, label: "GitHub", href: "https://github.com/Jaynuke79", color: "text-white hover:text-gray-300" },
   ];
 
   return (
@@ -109,9 +109,10 @@ export default function Contact() {
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${link.color} text-2xl transition-colors duration-200`}
+                  aria-label={link.label}
+                  className={`${link.color} transition-colors duration-200`}
                 >
-                  <i className={link.icon}></i>
+                  <link.icon className="h-7 w-7" />
                 </a>
               ))}
             </div>
