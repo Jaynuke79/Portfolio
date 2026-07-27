@@ -33,11 +33,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Hash booking passwords
+      - name: Encrypt booking URLs
         env:
           BOOKING_PASSWORDS: ${{ secrets.BOOKING_PASSWORDS }}
+          BOOKING_URLS: ${{ secrets.BOOKING_URLS }}
           ENV_OUTPUT: client/.env
-        run: node scripts/hash-passwords.mjs
+        run: node scripts/encrypt-bookings.mjs
 
       - name: Refresh GitHub project data
         env:
