@@ -5,11 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { appointments } from "@/lib/appointments";
-
-async function sha256hex(input: string): Promise<string> {
-  const buffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(input));
-  return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, "0")).join("");
-}
+import { decryptBookingUrl } from "@/lib/booking-crypto";
 
 function goHome() {
   history.pushState(null, "", window.location.pathname);
@@ -23,11 +19,11 @@ interface Props {
 export default function BookingGate({ slug }: Props) {
   const appointment = appointments[slug];
   const [password, setPassword] = useState("");
-  const [unlocked, setUnlocked] = useState(false);
+  const [bookingsUrl, setBookingsUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(false);
 
-  if (!appointment || !appointment.passwordHash) {
+  if (!appointment || !appointment.cipher) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <p className="text-gray-500">Page not found.</p>
@@ -39,10 +35,10 @@ export default function BookingGate({ slug }: Props) {
     e.preventDefault();
     setIsChecking(true);
     setError(null);
-    const inputHash = await sha256hex(password);
-    if (inputHash === appointment.passwordHash) {
-      setUnlocked(true);
-      window.open(appointment.bookingsUrl, "_blank", "noopener,noreferrer");
+    const url = await decryptBookingUrl(appointment.cipher, password);
+    if (url) {
+      setBookingsUrl(url);
+      window.open(url, "_blank", "noopener,noreferrer");
     } else {
       setError("Incorrect password.");
       setPassword("");
@@ -50,7 +46,7 @@ export default function BookingGate({ slug }: Props) {
     setIsChecking(false);
   };
 
-  if (unlocked) {
+  if (bookingsUrl) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center px-4">
         <Card className="glass-morphism border-gray-800 w-full max-w-md rounded-xl">
@@ -67,7 +63,7 @@ export default function BookingGate({ slug }: Props) {
               <p className="text-gray-400 text-sm text-center">
                 The booking page has opened in a new tab. If it didn't open,{" "}
                 <a
-                  href={appointment.bookingsUrl}
+                  href={bookingsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-cyan-400 hover:text-cyan-300 underline"
@@ -87,7 +83,7 @@ export default function BookingGate({ slug }: Props) {
                 Back
               </Button>
               <a
-                href={appointment.bookingsUrl}
+                href={bookingsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1"

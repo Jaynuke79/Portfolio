@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "check": "tsc",
     "test": "vitest run",
-    "hash-passwords": "node scripts/hash-passwords.mjs",
+    "encrypt-bookings": "node scripts/encrypt-bookings.mjs",
     "fetch-projects": "node scripts/fetch-github-projects.mjs"
   },
   "dependencies": {
