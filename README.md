@@ -8,10 +8,11 @@ Visit the live portfolio: [j2a3e.com](https://j2a3e.com)
 
 ## 🛠️ Technologies Used
 
-- React 18 with TypeScript
-- Tailwind CSS for styling
+- React 19 with TypeScript
+- Tailwind CSS 4 for styling
 - Lucide React for icons
-- Vite for build tooling
+- Vite 7 for build tooling
+- Vitest for tests (typecheck, tests, and build run in CI on every PR and deploy)
 
 ## 📱 Features
 
@@ -77,6 +78,9 @@ npm run dev
 # Type-check
 npm run check
 
+# Run the test suite
+npm test
+
 # Refresh the baked GitHub project snapshot
 npm run fetch-projects
 
@@ -95,8 +99,8 @@ npm run build
 │   │   ├── lib/            # Utilities, featured-project config, GitHub data
 │   │   └── index.css       # Global styles
 │   └── index.html          # HTML template
-├── public/                 # Static assets (resume PDF, robots.txt, sitemap)
-├── scripts/                # Build-time scripts (GitHub data fetch, password hashing)
+├── public/                 # Static assets (resume PDF, images, robots.txt, sitemap)
+├── scripts/                # Build-time scripts (GitHub data fetch, booking-link encryption)
 └── .github/
     └── workflows/
         ├── ci.yml          # PR validation (typecheck, tests, build)
