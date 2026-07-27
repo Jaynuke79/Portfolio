@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Github, Linkedin, Mail, MapPin } from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
+import { GithubIcon, LinkedinIcon } from "@/components/icons";
 import emailjs from '@emailjs/browser';
 
 const HONEYPOT_FIELD = "website";
@@ -72,8 +73,8 @@ export default function Contact() {
   ];
 
   const socialLinks = [
-    { icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/in/jayae/", color: "text-cyan-400 hover:text-cyan-300" },
-    { icon: Github, label: "GitHub", href: "https://github.com/Jaynuke79", color: "text-white hover:text-gray-300" },
+    { icon: LinkedinIcon, label: "LinkedIn", href: "https://www.linkedin.com/in/jayae/", color: "text-cyan-400 hover:text-cyan-300" },
+    { icon: GithubIcon, label: "GitHub", href: "https://github.com/Jaynuke79", color: "text-white hover:text-gray-300" },
   ];
 
   return (
