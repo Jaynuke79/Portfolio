@@ -7,14 +7,16 @@ export default function Hero() {
 
   useEffect(() => {
     let i = 0;
+    let timer: ReturnType<typeof setTimeout>;
     const typeWriter = () => {
       if (i < fullText.length) {
         setTypedText(fullText.slice(0, i + 1));
         i++;
-        setTimeout(typeWriter, 100);
+        timer = setTimeout(typeWriter, 100);
       }
     };
-    setTimeout(typeWriter, 500);
+    timer = setTimeout(typeWriter, 500);
+    return () => clearTimeout(timer);
   }, []);
 
   const scrollToSection = (sectionId: string) => {
