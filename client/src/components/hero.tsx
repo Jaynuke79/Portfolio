@@ -33,7 +33,7 @@ export default function Hero() {
 
   return (
     <section id="home" className="min-h-screen flex items-center justify-center relative cyber-grid">
-      <div className="absolute inset-0 bg-gradient-to-br from-black via-transparent to-black opacity-80"></div>
+      <div className="absolute inset-0 bg-linear-to-br from-black via-transparent to-black opacity-80"></div>
       <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
         <div className="animate-slide-up">
           <h1 className="text-5xl md:text-7xl font-bold mb-6">

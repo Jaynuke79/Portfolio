@@ -68,7 +68,7 @@ export default function Resume() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                 size="lg"
-                className="bg-gradient-to-r from-cyan-500 to-green-500 text-black hover:scale-105 transition-all duration-300"
+                className="bg-linear-to-r from-cyan-500 to-green-500 text-black hover:scale-105 transition-all duration-300"
                 asChild
               >
                 <a href="/Jayden_Alonzo-Estrada_Resume.pdf" download="Jayden_Alonzo-Estrada_Resume.pdf">
