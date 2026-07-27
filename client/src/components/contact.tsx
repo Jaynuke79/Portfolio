@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,12 +8,29 @@ import { useToast } from "@/hooks/use-toast";
 import { Mail, MapPin } from "lucide-react";
 import emailjs from '@emailjs/browser';
 
+const HONEYPOT_FIELD = "website";
+const MIN_FILL_TIME_MS = 3000;
+
 export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const mountedAt = useRef(Date.now());
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const form = e.target as HTMLFormElement;
+
+    const honeypot = form.elements.namedItem(HONEYPOT_FIELD) as HTMLInputElement | null;
+    const filledTooFast = Date.now() - mountedAt.current < MIN_FILL_TIME_MS;
+    if (honeypot?.value || filledTooFast) {
+      form.reset();
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for your message. I'll get back to you soon.",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -103,6 +120,16 @@ export default function Contact() {
           <Card className="glass-morphism border-gray-800 rounded-xl">
             <CardContent className="p-8">
               <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="absolute -left-[9999px] h-px w-px overflow-hidden" aria-hidden="true">
+                  <label htmlFor={HONEYPOT_FIELD}>Leave this field empty</label>
+                  <input
+                    id={HONEYPOT_FIELD}
+                    name={HONEYPOT_FIELD}
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+                </div>
                 <div>
                   <Label htmlFor="name" className="block text-sm font-medium mb-2 text-gray-300">
                     Name
