@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, MapPin } from "lucide-react";
 import emailjs from '@emailjs/browser';
 
 export default function Contact() {
@@ -17,12 +17,11 @@ export default function Contact() {
     setIsSubmitting(true);
 
     try {
-      // Initialize EmailJS (you'll need to replace these with your actual values)
-      const result = await emailjs.sendForm(
-        'service_ybl7r1f', // Replace with your EmailJS service ID
-        'template_zbihedb', // Replace with your EmailJS template ID
+      await emailjs.sendForm(
+        'service_ybl7r1f',
+        'template_zbihedb',
         e.target as HTMLFormElement,
-        's4koIaxc-EHwml43g' // Replace with your EmailJS public key
+        's4koIaxc-EHwml43g'
       );
 
       toast({
@@ -48,11 +47,6 @@ export default function Contact() {
       text: "jjalonzo-estra@mavs.coloradomesa.edu",
       color: "text-cyan-400"
     },
-    // {
-    //   icon: Phone,
-    //   text: "+1 (808) 491-5116",
-    //   color: "text-green-400"
-    // },
     {
       icon: MapPin,
       text: "Grand Junction, CO",
@@ -63,8 +57,6 @@ export default function Contact() {
   const socialLinks = [
     { icon: "fab fa-linkedin", href: "https://www.linkedin.com/in/jayae/", color: "text-cyan-400 hover:text-cyan-300" },
     { icon: "fab fa-github", href: "https://github.com/Jaynuke79", color: "text-white hover:text-gray-300" },
-    // { icon: "fab fa-twitter", href: "https://twitter.com/your-handle", color: "text-cyan-400 hover:text-blue-300" },
-    // { icon: "fab fa-youtube", href: "https://youtube.com/your-channel", color: "text-red-400 hover:text-red-300" },
   ];
 
   return (
@@ -95,9 +87,11 @@ export default function Contact() {
 
             <div className="flex space-x-6 mt-8">
               {socialLinks.map((link, index) => (
-                <a 
+                <a
                   key={index}
-                  href={link.href} 
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={`${link.color} text-2xl transition-colors duration-200`}
                 >
                   <i className={link.icon}></i>

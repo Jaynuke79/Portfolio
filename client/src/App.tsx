@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
 import BookingGate from "@/components/booking-gate";
 import { parseBookingSlug } from "@/lib/booking-slug";
@@ -19,10 +18,10 @@ function App() {
   }, []);
 
   return (
-    <TooltipProvider>
+    <>
       {bookingSlug !== null ? <BookingGate slug={bookingSlug} /> : <Home />}
       <Toaster />
-    </TooltipProvider>
+    </>
   );
 }
 
