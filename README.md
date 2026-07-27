@@ -80,7 +80,7 @@ npm run check
 # Refresh the baked GitHub project snapshot
 npm run fetch-projects
 
-# Build for production (outputs to docs/)
+# Build for production (outputs to docs/, untracked — CI builds and deploys the artifact)
 npm run build
 ```
 
@@ -97,11 +97,15 @@ npm run build
 │   └── index.html          # HTML template
 ├── public/                 # Static assets (resume PDF, robots.txt, sitemap)
 ├── scripts/                # Build-time scripts (GitHub data fetch, password hashing)
-├── .github/
-│   └── workflows/
-│       └── deploy.yml      # GitHub Actions workflow
-└── docs/                   # Built files for GitHub Pages
+└── .github/
+    └── workflows/
+        ├── ci.yml          # PR validation (typecheck, tests, build)
+        └── deploy.yml      # Builds and deploys to GitHub Pages
 ```
+
+The site is deployed by GitHub Actions: every push to `main` (and a daily
+refresh) builds the app and publishes the artifact to GitHub Pages. The
+`docs/` build output is not committed.
 
 ## 🎨 Color Scheme
 

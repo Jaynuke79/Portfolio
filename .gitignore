@@ -1,4 +1,6 @@
 node_modules
+docs/
+dist/
 CLAUDE.md
 client/.env
 client/.env.local
