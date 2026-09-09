@@ -1,35 +1,21 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { ExternalLink, Star } from "lucide-react";
 import { GithubIcon } from "@/components/icons";
+import Reveal from "@/components/reveal";
 import { FEATURED_PROJECTS } from "@/lib/featured-projects";
 import { githubOgImageUrl } from "@/lib/github";
 import { useGithubRepos } from "@/hooks/use-github-repos";
-
-const TECH_COLORS: Record<string, string> = {
-  "C++": "bg-blue-600/20 text-blue-400",
-  "Python": "bg-blue-600/20 text-blue-400",
-  "Jupyter Notebook": "bg-orange-600/20 text-orange-400",
-  "Sk-learn": "bg-green-600/20 text-green-400",
-  "Pandas": "bg-blue-600/20 text-blue-400",
-  "Numpy": "bg-yellow-600/20 text-yellow-400",
-  "py-torch": "bg-orange-600/20 text-orange-400",
-  "API": "bg-green-600/20 text-green-400",
-  "HTML / JS": "bg-yellow-600/20 text-yellow-400",
-  "AI Security": "bg-purple-600/20 text-purple-400",
-  "CLI": "bg-cyan-600/20 text-cyan-400",
-};
-
-const DEFAULT_TECH_COLOR = "bg-gray-600/20 text-gray-300";
+import { cn } from "@/lib/utils";
 
 function formatPushedAt(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, {
     month: "short",
-    day: "numeric",
     year: "numeric",
   });
 }
+
+const linkClass =
+  "inline-flex items-center gap-1.5 text-sm font-medium text-brand underline-offset-4 hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-sm";
 
 export default function Projects() {
   const repos = useGithubRepos();
@@ -38,7 +24,7 @@ export default function Projects() {
     const repo = featured.repo ? repos.get(featured.repo) : undefined;
     return {
       ...featured,
-      image: featured.image ?? (featured.repo ? githubOgImageUrl(featured.repo) : ""),
+      image: featured.image ?? (featured.repo ? githubOgImageUrl(featured.repo) : undefined),
       alt: featured.alt ?? `${featured.title} repository card`,
       description: featured.description ?? repo?.description ?? "",
       codeUrl: featured.codeUrl ?? repo?.html_url,
@@ -50,81 +36,100 @@ export default function Projects() {
   });
 
   return (
-    <section id="projects" className="py-20 bg-black">
-      <div className="max-w-6xl mx-auto px-4">
-        <h2 className="text-4xl font-bold text-center mb-16 gradient-text">Featured Projects and Events</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <section id="projects" className="scroll-mt-20 border-t border-border py-24">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <Reveal>
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Projects and research</h2>
+          <p className="mt-3 max-w-[60ch] text-lg text-muted-foreground">
+            Repository cards pull live from GitHub. The research entry links to the talk.
+          </p>
+        </Reveal>
+
+        <ul className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (
-            <Card
+            <Reveal
+              as="li"
               key={project.title}
-              className="glass-morphism border-gray-800 hover:scale-105 transition-all duration-300 group hover:glow-blue"
+              className={cn(
+                "group flex flex-col overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-foreground/30",
+                project.featured && "bg-brand-soft md:col-span-2"
+              )}
             >
-              <CardContent className="p-6">
+              {project.image && (
                 <img
                   src={project.image}
                   alt={project.alt}
-                  className="w-full h-48 object-cover rounded-lg mb-4"
+                  width={1200}
+                  height={600}
                   loading="lazy"
+                  decoding="async"
+                  className="aspect-[2/1] w-full border-b border-border object-cover"
                 />
-                <h3 className={`text-xl font-semibold mb-3 ${project.titleColor}`}>
+              )}
+              <div className={cn("flex flex-1 flex-col p-6", project.featured && "md:p-8")}>
+                <h3 className={cn("font-semibold tracking-tight", project.featured ? "text-2xl" : "text-lg")}>
                   {project.title}
                 </h3>
-                <p className="text-gray-300 mb-4 text-sm leading-relaxed">
+                <p
+                  className={cn(
+                    "mt-3 flex-1 leading-relaxed text-muted-foreground",
+                    project.featured ? "max-w-[60ch] text-base" : "text-sm"
+                  )}
+                >
                   {project.description}
                 </p>
+
                 {project.pushedAt && (
-                  <div className="flex items-center gap-3 text-xs text-gray-400 mb-4">
-                    <span className="flex items-center">
-                      <Star className="mr-1 h-3 w-3" />
-                      {project.stars}
-                    </span>
-                    {project.language && <span>{project.language}</span>}
-                    <span>Updated {formatPushedAt(project.pushedAt)}</span>
-                  </div>
+                  <dl className="mt-4 flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <dt className="sr-only">Stars</dt>
+                      <Star className="h-3 w-3" aria-hidden="true" />
+                      <dd>{project.stars}</dd>
+                    </div>
+                    {project.language && (
+                      <div>
+                        <dt className="sr-only">Language</dt>
+                        <dd>{project.language}</dd>
+                      </div>
+                    )}
+                    <div>
+                      <dt className="sr-only">Last updated</dt>
+                      <dd>Updated {formatPushedAt(project.pushedAt)}</dd>
+                    </div>
+                  </dl>
                 )}
-                <div className="flex flex-wrap gap-2 mb-4">
+
+                <ul className="mt-4 flex flex-wrap gap-2">
                   {project.technologies.map((tech) => (
-                    <Badge
-                      key={tech}
-                      className={`${TECH_COLORS[tech] ?? DEFAULT_TECH_COLOR} border-none text-xs`}
-                    >
-                      {tech}
-                    </Badge>
+                    <li key={tech}>
+                      <Badge variant="secondary" className="border-border bg-background font-normal text-muted-foreground">
+                        {tech}
+                      </Badge>
+                    </li>
                   ))}
-                </div>
-                <div className="flex space-x-4">
+                </ul>
+
+                <div className="mt-5 flex flex-wrap items-center gap-5">
                   {project.codeUrl && (
-                    <Button
-                      asChild
-                      variant="link"
-                      className="text-cyan-400 hover:text-cyan-300 p-0 h-auto font-medium"
-                    >
-                      <a href={project.codeUrl} target="_blank" rel="noopener noreferrer">
-                        <GithubIcon className="mr-1 h-4 w-4" />
-                        Code
-                      </a>
-                    </Button>
+                    <a href={project.codeUrl} target="_blank" rel="noopener noreferrer" className={linkClass}>
+                      <GithubIcon className="h-4 w-4" />
+                      Code
+                    </a>
                   )}
                   {project.demoUrl && (
-                    <Button
-                      asChild
-                      variant="link"
-                      className="text-green-400 hover:text-green-300 p-0 h-auto font-medium"
-                    >
-                      <a href={project.demoUrl} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="mr-1 h-4 w-4" />
-                        {project.demoLabel ?? "Demo"}
-                      </a>
-                    </Button>
+                    <a href={project.demoUrl} target="_blank" rel="noopener noreferrer" className={linkClass}>
+                      <ExternalLink className="h-4 w-4" />
+                      {project.demoLabel ?? "Demo"}
+                    </a>
                   )}
-                  {!project.codeUrl && !project.demoUrl && project.linksNote && (
-                    <p className="text-gray-500 text-xs italic">{project.linksNote}</p>
+                  {project.linksNote && (
+                    <p className="text-xs text-muted-foreground">{project.linksNote}</p>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </Reveal>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );
