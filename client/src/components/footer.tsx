@@ -1,25 +1,33 @@
-export default function Footer() {
-  const footerLinks = [
-    { label: "Hi there :)", href: "#" },
-  ];
+import { GithubIcon, LinkedinIcon } from "@/components/icons";
 
+const SOCIAL_LINKS = [
+  { icon: GithubIcon, label: "GitHub", href: "https://github.com/Jaynuke79" },
+  { icon: LinkedinIcon, label: "LinkedIn", href: "https://www.linkedin.com/in/jayae/" },
+];
+
+export default function Footer() {
   return (
-    <footer className="bg-black border-t border-gray-800 py-8">
-      <div className="max-w-6xl mx-auto px-4 text-center">
-        <p className="text-gray-400">
-          © {new Date().getFullYear()} Jayden Alonzo-Estrada. Built with Ai tools and restless nights.
+    <footer className="border-t border-border py-10">
+      <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+        <p>
+          &copy; {new Date().getFullYear()} Jayden Alonzo-Estrada. Built with AI tools and
+          restless nights.
         </p>
-        <div className="flex justify-center space-x-6 mt-4">
-          {footerLinks.map((link) => (
-            <a 
-              key={link.label}
-              href={link.href} 
-              className="text-gray-400 hover:text-cyan-400 transition-colors duration-200"
-            >
-              {link.label}
-            </a>
+        <ul className="flex items-center gap-5">
+          {SOCIAL_LINKS.map((link) => (
+            <li key={link.label}>
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={link.label}
+                className="inline-flex text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <link.icon className="h-5 w-5" />
+              </a>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </footer>
   );

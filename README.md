@@ -17,8 +17,8 @@ Visit the live portfolio: [j2a3e.com](https://j2a3e.com)
 ## 📱 Features
 
 - **Responsive Design**: Optimized for all devices
-- **Dark Theme**: Cybersecurity-inspired color scheme
-- **Smooth Animations**: Professional transitions and effects
+- **Light and Dark Themes**: Follows the system color scheme with a single teal accent
+- **Restrained Motion**: Scroll reveals and hero entrance that honor `prefers-reduced-motion`
 - **Interactive Navigation**: Smooth scrolling between sections
 - **Live Project Showcase**: Cards are driven by a curated repo list enriched from the GitHub API — stars, language, last-pushed date, links, and auto-updating OpenGraph images — with a baked snapshot as offline fallback
 - **Skills Display**: Technical competencies and certifications
@@ -111,13 +111,14 @@ The site is deployed by GitHub Actions: every push to `main` (and a daily
 refresh) builds the app and publishes the artifact to GitHub Pages. The
 `docs/` build output is not committed.
 
-## 🎨 Color Scheme
+## 🎨 Design System
 
-The portfolio uses a cybersecurity-inspired dark theme:
-- Primary: Cyber Blue (#00D9FF)
-- Secondary: Cyber Green (#00FF94)
-- Accent: Cyber Purple (#A855F7)
-- Background: Dark Gray (#0A0A0A)
+Semantic tokens live in `client/src/index.css` as HSL custom properties and
+switch with `prefers-color-scheme`:
+- Neutrals: zinc-based off-white and off-black backgrounds, never pure white or black
+- Brand accent: teal (`--brand`), used for CTAs, links, focus rings, and tinted surfaces
+- Type: Geist and Geist Mono, self-hosted via Fontsource
+- Radius: 12px for cards and images, 10px for buttons and inputs
 
 ## 📄 License
 

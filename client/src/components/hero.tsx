@@ -1,74 +1,48 @@
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ArrowDown } from "lucide-react";
 
 export default function Hero() {
-  const [typedText, setTypedText] = useState("");
-  const fullText = "Jayden Alonzo-Estrada";
-
-  useEffect(() => {
-    let i = 0;
-    let timer: ReturnType<typeof setTimeout>;
-    const typeWriter = () => {
-      if (i < fullText.length) {
-        setTypedText(fullText.slice(0, i + 1));
-        i++;
-        timer = setTimeout(typeWriter, 100);
-      }
-    };
-    timer = setTimeout(typeWriter, 500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      const offset = 80;
-      const elementPosition = element.offsetTop - offset;
-      window.scrollTo({
-        top: elementPosition,
-        behavior: "smooth",
-      });
-    }
-  };
-
   return (
-    <section id="home" className="min-h-screen flex items-center justify-center relative cyber-grid">
-      <div className="absolute inset-0 bg-linear-to-br from-black via-transparent to-black opacity-80"></div>
-      <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-        <div className="animate-slide-up">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6">
-            Hi, I'm <span className="gradient-text">{typedText}</span>
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-300 mb-8">
-            <span className="text-green-400">AI Services, Cybersecurity, and Software Engineer</span>
-          </p>
-          
-          <div className="mb-8 animate-float">
-            <img
-              src="/hero-workspace.jpg"
-              alt="Modern cybersecurity workspace with multiple monitors"
-              width={800}
-              height={400}
-              className="rounded-xl shadow-2xl mx-auto w-full max-w-2xl glow-blue"
-            />
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              onClick={() => scrollToSection("projects")}
-              className="bg-cyan-500 hover:bg-cyan-400 text-black px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
-            >
-              View My Work
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={() => scrollToSection("contact")}
-              className="border-cyan-500 text-cyan-500 hover:bg-cyan-500 hover:text-black px-8 py-3 rounded-lg font-semibold transition-all duration-300"
-            >
-              Get In Touch
-            </Button>
-          </div>
+    <section
+      id="home"
+      className="mx-auto grid min-h-[100dvh] max-w-6xl items-center gap-10 px-4 pt-24 pb-16 sm:px-6 md:grid-cols-12 md:gap-8 lg:px-8"
+    >
+      <div className="hero-enter md:col-span-7">
+        <h1 className="tracking-tight">
+          <span className="block text-base font-medium text-muted-foreground">
+            Jayden Alonzo-Estrada
+          </span>
+          <span className="mt-4 block text-4xl font-semibold leading-[1.05] text-foreground sm:text-5xl lg:text-6xl">
+            AI, security, and the software in between.
+          </span>
+        </h1>
+        <p className="mt-6 max-w-[52ch] text-lg leading-relaxed text-muted-foreground">
+          Computer science student at Colorado Mesa University, AI Services Intern at
+          EggNest.ai, and lead author of published IoMT threat-detection research.
+        </p>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Button asChild size="lg" className="h-12 px-6 text-base active:scale-[0.98]">
+            <a href="#projects">
+              View projects
+              <ArrowDown className="h-4 w-4" />
+            </a>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="h-12 px-6 text-base active:scale-[0.98]">
+            <a href="#contact">Contact me</a>
+          </Button>
         </div>
+      </div>
+
+      <div className="hero-enter hero-enter-delay md:col-span-5 md:justify-self-end">
+        <img
+          src="/headshot.jpg"
+          alt="Jayden Alonzo-Estrada"
+          width={480}
+          height={600}
+          fetchPriority="high"
+          decoding="async"
+          className="aspect-[4/5] w-full max-w-sm rounded-lg border border-border object-cover md:max-w-[420px]"
+        />
       </div>
     </section>
   );

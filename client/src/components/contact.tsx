@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, MapPin } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/icons";
+import Reveal from "@/components/reveal";
 import emailjs from '@emailjs/browser';
 
 const HONEYPOT_FIELD = "website";
@@ -60,141 +60,87 @@ export default function Contact() {
   };
 
   const contactInfo = [
-    {
-      icon: Mail,
-      text: "jjalonzo-estra@mavs.coloradomesa.edu",
-      color: "text-cyan-400"
-    },
-    {
-      icon: MapPin,
-      text: "Grand Junction, CO",
-      color: "text-purple-400"
-    }
+    { icon: Mail, label: "Email", text: "jjalonzo-estra@mavs.coloradomesa.edu", href: "mailto:jjalonzo-estra@mavs.coloradomesa.edu" },
+    { icon: MapPin, label: "Location", text: "Grand Junction, CO" },
   ];
 
   const socialLinks = [
-    { icon: LinkedinIcon, label: "LinkedIn", href: "https://www.linkedin.com/in/jayae/", color: "text-cyan-400 hover:text-cyan-300" },
-    { icon: GithubIcon, label: "GitHub", href: "https://github.com/Jaynuke79", color: "text-white hover:text-gray-300" },
+    { icon: LinkedinIcon, label: "LinkedIn", href: "https://www.linkedin.com/in/jayae/" },
+    { icon: GithubIcon, label: "GitHub", href: "https://github.com/Jaynuke79" },
   ];
 
   return (
-    <section id="contact" className="py-20 bg-linear-to-br from-gray-900 to-black">
-      <div className="max-w-4xl mx-auto px-4">
-        <h2 className="text-4xl font-bold text-center mb-16 gradient-text">Get In Touch</h2>
-        
-        <div className="grid md:grid-cols-2 gap-12">
-          <div>
-            <h3 className="text-2xl font-semibold mb-6 text-white">Let's Connect</h3>
-            <p className="text-gray-300 mb-8 leading-relaxed">
-              I'm always interested in discussing cybersecurity, new opportunities, 
-              collaborating on innovative projects, or just nerding out on any topics.
-              Feel free to reach out!
-            </p>
-            
-            <div className="space-y-4">
-              {contactInfo.map((info, index) => {
-                const IconComponent = info.icon;
-                return (
-                  <div key={index} className="flex items-center">
-                    <IconComponent className={`${info.color} mr-4 h-5 w-5`} />
-                    <span className="text-gray-300">{info.text}</span>
-                  </div>
-                );
-              })}
-            </div>
+    <section id="contact" className="scroll-mt-20 border-t border-border py-24">
+      <div className="mx-auto grid max-w-6xl gap-12 px-4 sm:px-6 md:grid-cols-12 lg:px-8">
+        <Reveal className="md:col-span-5">
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Contact</h2>
+          <p className="mt-3 max-w-[45ch] text-lg leading-relaxed text-muted-foreground">
+            Open to conversations about cybersecurity, new opportunities, collaboration, or
+            just nerding out on any topic.
+          </p>
 
-            <div className="flex space-x-6 mt-8">
-              {socialLinks.map((link, index) => (
+          <ul className="mt-8 space-y-3">
+            {contactInfo.map((info) => (
+              <li key={info.label} className="flex items-center gap-3 text-muted-foreground">
+                <info.icon className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
+                <span className="sr-only">{info.label}:</span>
+                {info.href ? (
+                  <a href={info.href} className="break-all underline-offset-4 hover:text-foreground hover:underline">
+                    {info.text}
+                  </a>
+                ) : (
+                  <span>{info.text}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+
+          <ul className="mt-8 flex items-center gap-4">
+            {socialLinks.map((link) => (
+              <li key={link.label}>
                 <a
-                  key={index}
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={link.label}
-                  className={`${link.color} transition-colors duration-200`}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
                 >
-                  <link.icon className="h-7 w-7" />
+                  <link.icon className="h-5 w-5" />
                 </a>
-              ))}
-            </div>
-          </div>
+              </li>
+            ))}
+          </ul>
+        </Reveal>
 
-          <Card className="glass-morphism border-gray-800 rounded-xl">
-            <CardContent className="p-8">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="absolute left-[-9999px] h-px w-px overflow-hidden" aria-hidden="true">
-                  <label htmlFor={HONEYPOT_FIELD}>Leave this field empty</label>
-                  <input
-                    id={HONEYPOT_FIELD}
-                    name={HONEYPOT_FIELD}
-                    type="text"
-                    tabIndex={-1}
-                    autoComplete="off"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="name" className="block text-sm font-medium mb-2 text-gray-300">
-                    Name
-                  </Label>
-                  <Input 
-                    id="name"
-                    name="from_name"
-                    type="text" 
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-hidden transition-colors text-white" 
-                    placeholder="Your Name" 
-                    required 
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email" className="block text-sm font-medium mb-2 text-gray-300">
-                    Email
-                  </Label>
-                  <Input 
-                    id="email"
-                    name="from_email"
-                    type="email" 
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-hidden transition-colors text-white" 
-                    placeholder="your@email.com" 
-                    required 
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="subject" className="block text-sm font-medium mb-2 text-gray-300">
-                    Subject
-                  </Label>
-                  <Input 
-                    id="subject"
-                    name="subject"
-                    type="text" 
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-hidden transition-colors text-white" 
-                    placeholder="Subject" 
-                    required 
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="message" className="block text-sm font-medium mb-2 text-gray-300">
-                    Message
-                  </Label>
-                  <Textarea 
-                    id="message"
-                    name="message"
-                    rows={4} 
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-hidden transition-colors resize-none text-white" 
-                    placeholder="Your message..." 
-                    required 
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="w-full bg-linear-to-r from-cyan-500 to-green-500 text-black py-3 rounded-lg font-semibold hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? "Sending..." : "Send Message"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
+        <Reveal className="md:col-span-7">
+          <form onSubmit={handleSubmit} className="space-y-5 rounded-lg border border-border bg-card p-6 sm:p-8">
+            <div className="absolute left-[-9999px] h-px w-px overflow-hidden" aria-hidden="true">
+              <label htmlFor={HONEYPOT_FIELD}>Leave this field empty</label>
+              <input id={HONEYPOT_FIELD} name={HONEYPOT_FIELD} type="text" tabIndex={-1} autoComplete="off" />
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="name">Name</Label>
+                <Input id="name" name="from_name" type="text" autoComplete="name" required className="h-11" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" name="from_email" type="email" autoComplete="email" required className="h-11" />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="subject">Subject</Label>
+              <Input id="subject" name="subject" type="text" required className="h-11" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="message">Message</Label>
+              <Textarea id="message" name="message" rows={5} required className="resize-y" />
+            </div>
+            <Button type="submit" size="lg" disabled={isSubmitting} className="h-12 w-full px-6 active:scale-[0.98] sm:w-auto">
+              {isSubmitting ? "Sending..." : "Send message"}
+            </Button>
+          </form>
+        </Reveal>
       </div>
     </section>
   );

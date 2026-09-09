@@ -1,175 +1,136 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap')
-layer(base);
-
 @import 'tailwindcss';
 
 @config '../../tailwind.config.ts';
 
-/*
-  The default border color has changed to `currentcolor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
+@theme {
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
 
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
 @layer base {
   *,
   ::after,
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
+    border-color: hsl(var(--border));
   }
 }
 
-@utility gradient-text {
-  background: linear-gradient(
-    90deg,
-    hsl(var(--cyber-blue)),
-    hsl(var(--cyber-green))
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-@utility glass-morphism {
-  backdrop-filter: blur(10px);
-  background: hsla(var(--glass-bg));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-@utility cyber-grid {
-  background-image:
-    linear-gradient(hsla(var(--cyber-blue)) 0.1, transparent 1px),
-    linear-gradient(90deg, hsla(var(--cyber-blue)) 0.1, transparent 1px);
-  background-size: 50px 50px;
-}
-
-@utility glow-blue {
-  box-shadow: 0 0 20px hsla(var(--cyber-blue) / 0.3);
-}
-
-@utility glow-green {
-  box-shadow: 0 0 20px hsla(var(--cyber-green) / 0.3);
-}
-
-@utility glow-purple {
-  box-shadow: 0 0 20px hsla(var(--cyber-purple) / 0.3);
-}
-
-@utility animate-glow {
-  animation: glow 2s ease-in-out infinite alternate;
-}
-
-@utility animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-@utility animate-slide-up {
-  animation: slideUp 0.6s ease-out;
-}
-
+/*
+  Radius scale: cards and images use --radius (12px), buttons and inputs use
+  the md step (10px), badges are pills. One accent (teal) drives CTAs, links,
+  focus rings, and tinted surfaces in both themes.
+*/
 @layer utilities {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --primary: 207 90% 54%;
-    --primary-foreground: 211 100% 99%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    color-scheme: light;
+    --background: 0 0% 98%;
+    --foreground: 240 6% 10%;
+    --muted: 240 5% 93%;
+    --muted-foreground: 240 4% 38%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 6% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 6% 10%;
+    --border: 240 5% 86%;
+    --input: 240 5% 80%;
+    --primary: 168 72% 28%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 5% 93%;
+    --secondary-foreground: 240 6% 10%;
+    --accent: 240 5% 93%;
+    --accent-foreground: 240 6% 10%;
+    --brand: 168 72% 28%;
+    --brand-soft: 168 40% 92%;
+    --destructive: 0 72% 42%;
     --destructive-foreground: 0 0% 98%;
-    --ring: 240 4.9% 83.9%;
-    --radius: 0.5rem;
-
-    /* Custom cybersecurity theme colors */
-    --cyber-blue: 190 100% 50%;
-    --cyber-green: 150 100% 50%;
-    --cyber-purple: 250 70% 60%;
-    --dark-bg: 240 10% 4%;
-    --dark-card: 240 6% 10%;
-    --glass-bg: 240 10% 3.9% / 0.8;
+    --ring: 168 72% 28%;
+    --radius: 0.75rem;
   }
 
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --primary: 207 90% 54%;
-    --primary-foreground: 211 100% 99%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --ring: 240 4.9% 83.9%;
-    --radius: 0.5rem;
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --background: 240 6% 6%;
+      --foreground: 0 0% 95%;
+      --muted: 240 5% 12%;
+      --muted-foreground: 240 5% 68%;
+      --popover: 240 6% 9%;
+      --popover-foreground: 0 0% 95%;
+      --card: 240 6% 8%;
+      --card-foreground: 0 0% 95%;
+      --border: 240 5% 16%;
+      --input: 240 5% 22%;
+      --primary: 168 58% 56%;
+      --primary-foreground: 240 6% 6%;
+      --secondary: 240 5% 12%;
+      --secondary-foreground: 0 0% 95%;
+      --accent: 240 5% 12%;
+      --accent-foreground: 0 0% 95%;
+      --brand: 168 58% 56%;
+      --brand-soft: 168 30% 12%;
+      --destructive: 0 62% 50%;
+      --destructive-foreground: 0 0% 98%;
+      --ring: 168 58% 56%;
+    }
   }
+}
+
+@utility reveal {
+  opacity: 1;
+  transform: none;
 }
 
 @layer base {
-  * {
-    border-color: hsl(var(--border));
-  }
-
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   html {
     scroll-behavior: smooth;
   }
-}
 
-@keyframes glow {
-  from { 
-    box-shadow: 0 0 20px hsla(var(--cyber-blue) / 0.3); 
-  }
-  to { 
-    box-shadow: 0 0 30px hsla(var(--cyber-blue) / 0.6); 
+  ::selection {
+    background-color: hsl(var(--brand) / 0.25);
   }
 }
 
-@keyframes float {
-  0%, 100% { 
-    transform: translateY(0px); 
+@media (prefers-reduced-motion: no-preference) {
+  .reveal[data-reveal='pending'] {
+    opacity: 0;
+    transform: translateY(16px);
   }
-  50% { 
-    transform: translateY(-10px); 
+
+  .reveal[data-reveal='visible'] {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .hero-enter {
+    animation: heroEnter 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .hero-enter-delay {
+    animation-delay: 0.12s;
   }
 }
 
-@keyframes slideUp {
-  from { 
-    opacity: 0; 
-    transform: translateY(50px); 
+@keyframes heroEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
   }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
+  to {
+    opacity: 1;
+    transform: none;
   }
 }

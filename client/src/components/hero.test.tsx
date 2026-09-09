@@ -1,44 +1,34 @@
 // @vitest-environment jsdom
 import { StrictMode } from "react";
-import { act, cleanup, render } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, render } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 import Hero from "./hero";
 
-const FULL_NAME = "Jayden Alonzo-Estrada";
+afterEach(cleanup);
 
-beforeEach(() => {
-  vi.useFakeTimers();
-});
-
-afterEach(() => {
-  cleanup();
-  vi.useRealTimers();
-});
-
-describe("Hero typewriter", () => {
-  it("types the full name, including under StrictMode double effects", () => {
+describe("Hero", () => {
+  it("names the author in the page heading", () => {
     const { getByRole } = render(
       <StrictMode>
         <Hero />
       </StrictMode>
     );
 
-    act(() => {
-      vi.advanceTimersByTime(500 + FULL_NAME.length * 100);
-    });
-
-    expect(getByRole("heading", { level: 1 }).textContent).toContain(FULL_NAME);
+    expect(getByRole("heading", { level: 1 }).textContent).toContain("Jayden Alonzo-Estrada");
   });
 
-  it("clears its pending timer when unmounted mid-animation", () => {
-    const { unmount } = render(<Hero />);
+  it("links both calls to action to sections on the page", () => {
+    const { getByRole } = render(<Hero />);
 
-    act(() => {
-      vi.advanceTimersByTime(700);
-    });
+    expect(getByRole("link", { name: /view projects/i })).toHaveProperty("hash", "#projects");
+    expect(getByRole("link", { name: /contact me/i })).toHaveProperty("hash", "#contact");
+  });
 
-    unmount();
+  it("loads the headshot eagerly as the largest above-the-fold image", () => {
+    const { getByRole } = render(<Hero />);
 
-    expect(vi.getTimerCount()).toBe(0);
+    const img = getByRole("img") as HTMLImageElement;
+    expect(img.getAttribute("loading")).not.toBe("lazy");
+    expect(img.getAttribute("fetchpriority")).toBe("high");
   });
 });

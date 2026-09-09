@@ -9,14 +9,16 @@ import Footer from "@/components/footer";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-[100dvh] bg-background text-foreground">
       <Navigation />
-      <Hero />
-      <About />
-      <Projects />
-      <Skills />
-      <Resume />
-      <Contact />
+      <main>
+        <Hero />
+        <About />
+        <Projects />
+        <Skills />
+        <Resume />
+        <Contact />
+      </main>
       <Footer />
     </div>
   );

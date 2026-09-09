@@ -25,8 +25,8 @@ export default function BookingGate({ slug }: Props) {
 
   if (!appointment || !appointment.cipher) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <p className="text-gray-500">Page not found.</p>
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Page not found.</p>
       </div>
     );
   }
@@ -48,25 +48,25 @@ export default function BookingGate({ slug }: Props) {
 
   if (bookingsUrl) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center px-4">
-        <Card className="glass-morphism border-gray-800 w-full max-w-md rounded-xl">
+      <div className="min-h-[100dvh] bg-background text-foreground flex items-center justify-center px-4">
+        <Card className="w-full max-w-md rounded-lg border-border bg-card shadow-none">
           <CardContent className="p-8">
             <div className="flex flex-col items-center mb-8">
-              <div className="w-14 h-14 rounded-full bg-gray-900 border border-green-500/30 flex items-center justify-center mb-4 glow-green">
-                <Calendar className="h-6 w-6 text-green-400" />
+              <div className="w-12 h-12 rounded-md bg-brand-soft flex items-center justify-center mb-4">
+                <Calendar className="h-5 w-5 text-brand" />
               </div>
-              <h1 className="text-2xl font-bold text-white mb-1">{appointment.name}</h1>
-              <div className="flex items-center gap-2 text-gray-400 text-sm mb-4">
-                <Clock className="h-4 w-4 text-green-400" />
+              <h1 className="text-2xl font-semibold tracking-tight mb-1">{appointment.name}</h1>
+              <div className="flex items-center gap-2 text-muted-foreground text-sm mb-4">
+                <Clock className="h-4 w-4" aria-hidden="true" />
                 <span>{appointment.duration} min</span>
               </div>
-              <p className="text-gray-400 text-sm text-center">
+              <p className="text-muted-foreground text-sm text-center">
                 The booking page has opened in a new tab. If it didn't open,{" "}
                 <a
                   href={bookingsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-cyan-400 hover:text-cyan-300 underline"
+                  className="text-brand underline underline-offset-4"
                 >
                   click here
                 </a>
@@ -77,22 +77,17 @@ export default function BookingGate({ slug }: Props) {
               <Button
                 onClick={goHome}
                 variant="outline"
-                className="flex-1 border-gray-600 text-gray-300 hover:text-white hover:border-gray-400"
+                className="flex-1"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
-              <a
-                href={bookingsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1"
-              >
-                <Button className="w-full bg-linear-to-r from-cyan-500 to-green-500 text-black font-semibold">
-                  <ExternalLink className="h-4 w-4 mr-2" />
+              <Button asChild className="flex-1">
+                <a href={bookingsUrl} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-4 w-4" />
                   Open again
-                </Button>
-              </a>
+                </a>
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -101,24 +96,24 @@ export default function BookingGate({ slug }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4">
-      <Card className="glass-morphism border-gray-800 w-full max-w-md rounded-xl">
+    <div className="min-h-[100dvh] bg-background text-foreground flex items-center justify-center px-4">
+      <Card className="w-full max-w-md rounded-lg border-border bg-card shadow-none">
         <CardContent className="p-8">
           <div className="flex flex-col items-center mb-8">
-            <div className="w-14 h-14 rounded-full bg-gray-900 border border-cyan-500/30 flex items-center justify-center mb-4 glow-blue">
-              <Lock className="h-6 w-6 text-cyan-400" />
+            <div className="w-12 h-12 rounded-md bg-brand-soft flex items-center justify-center mb-4">
+              <Lock className="h-5 w-5 text-brand" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-1">{appointment.name}</h1>
-            <div className="flex items-center gap-2 text-gray-400 text-sm mb-4">
-              <Clock className="h-4 w-4 text-green-400" />
+            <h1 className="text-2xl font-semibold tracking-tight mb-1">{appointment.name}</h1>
+            <div className="flex items-center gap-2 text-muted-foreground text-sm mb-4">
+              <Clock className="h-4 w-4" aria-hidden="true" />
               <span>{appointment.duration} min</span>
             </div>
-            <p className="text-gray-400 text-sm text-center">{appointment.description}</p>
+            <p className="text-muted-foreground text-sm text-center">{appointment.description}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="booking-password" className="block text-sm font-medium mb-2 text-gray-300">
+              <Label htmlFor="booking-password" className="block mb-2">
                 Password
               </Label>
               <Input
@@ -126,17 +121,17 @@ export default function BookingGate({ slug }: Props) {
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg focus:border-cyan-500 focus:outline-hidden transition-colors text-white"
+                className="h-11"
                 placeholder="Enter password"
                 autoFocus
                 required
               />
-              {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
+              {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
             </div>
             <Button
               type="submit"
               disabled={isChecking || !password}
-              className="w-full bg-linear-to-r from-cyan-500 to-green-500 text-black py-3 rounded-lg font-semibold hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-11 active:scale-[0.98]"
             >
               {isChecking ? "Verifying..." : "Continue"}
             </Button>
