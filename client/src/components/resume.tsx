@@ -20,14 +20,46 @@ const GROUPS: Group[] = [
     heading: "Professional experience",
     entries: [
       {
+        title: "AI Engineer",
+        org: "EggNest.ai",
+        location: "Grand Junction, CO",
+        period: "Sep 2026 to present",
+        bullets: [
+          "Promoted from intern after a year of connector delivery. Own customer communications, project coordination in Productive and HubSpot, and VM provisioning for customer deployments.",
+          "Built the team's multi-agent engineering environment: agent roles, hooks, an SSH rulebook, and an issue-burndown skill packaged as one verified plugin.",
+          "Hold the company seat on the OpenAI Partner Portal.",
+        ],
+      },
+      {
         title: "AI Services Intern",
         org: "EggNest.ai",
         location: "Grand Junction, CO",
-        period: "Oct 2025 to present",
+        period: "Oct 2025 to Sep 2026",
         bullets: [
-          "Grew the HubSpot connector into a deep CRM integration across 11 object types, with write actions and UAT agents so Glean can inspect and act on records.",
-          "Took a customer Zoho Desk connector to production: sync model, support-ticket indexing, custom-field auto-discovery, and URL resolution fixes.",
-          "Orchestrate AI agent pipelines from codebase audits to PR merges, shipping 168 commits and 26,000+ lines across 408 files in one month.",
+          "Grew the HubSpot connector into a deep CRM integration across 11 object types with write actions and UAT agents, and took a customer Zoho Desk connector from foundation to production.",
+          "Ran audit-to-burndown pipelines with agent teams: verified every CodeQL finding, filed 12 issues and 2 epics, merged 10 PRs closing all 9 targets, and shipped a connector with 225 passing tests. 158 commits and 25,900+ lines across 562 files in 21 working days.",
+          "Standardized connector development with shared ConnectorLib skills, administered the Linux servers, Lambdas, and databases behind the EggNest Portal, and drafted the company's HIPAA and PII compliance roadmap.",
+        ],
+      },
+      {
+        title: "Software Developer, independent contractor",
+        org: "Rotary Club of Grand Junction",
+        location: "Grand Junction, CO",
+        period: "Nov 2024 to present",
+        bullets: [
+          "Rebuilt the club's sweepstakes platform from scratch in three weeks on Next.js, TypeScript, Vercel, and Neon Postgres, replacing a 2020 build on unpatched Node.js 10 and migrating 38 charities, 5 sponsors, and historical ticket records intact.",
+          "Scrubbed live credentials from git history, retired 689 password-less buyer accounts in favor of throttled admin auth, and made tickets issue only from signature-verified payment webhooks across Stripe, Authorize.net, and Square.",
+          "Gated deployment on 96+ automated tests and Playwright checks, fixed nine pre-launch security-audit findings, and shipped training mode, member roles, and Excel export under a maintenance contract.",
+        ],
+      },
+      {
+        title: "Field Technician",
+        org: "Greenflare Technologies",
+        location: "Denver, CO",
+        period: "Oct 2024 to Sep 2026",
+        bullets: [
+          "Repaired and maintained high-throughput Linux compute systems in production, restoring failed nodes and improving hardware uptime.",
+          "Diagnosed Ethernet bottlenecks with packet captures and targeted load tests, boosting network throughput by about 20% in high-traffic areas.",
         ],
       },
       {
@@ -36,38 +68,8 @@ const GROUPS: Group[] = [
         location: "Grand Junction, CO",
         period: "Jun 2025 to Aug 2025",
         bullets: [
-          "Shipped an internal RAG service with LangChain, Supabase, FastAPI, and React, cutting document lookup by about 3 hours a week.",
+          "Shipped and operated an internal RAG service on Linux with FastAPI, LangChain, Supabase PostgreSQL, and React, cutting document lookup by about 3 hours a week.",
           "Added retrieval evaluation and logging for top-k accuracy and latency across 2-week sprints in an 8-week delivery window.",
-        ],
-      },
-      {
-        title: "Ice Cream Scooper",
-        org: "3rd Bowl Homemade Ice Cream",
-        location: "Grand Junction, CO",
-        period: "Aug 2025 to present",
-        bullets: [
-          "Serve 50+ customers per shift while balancing cash handling, cleaning, and inventory in a busy local parlor.",
-        ],
-      },
-      {
-        title: "Backend Developer",
-        org: "Rotary Club",
-        location: "Grand Junction, CO",
-        period: "Nov 2024 to present",
-        bullets: [
-          "Enforce PII and card-data compliance on web applications, reducing organizational liability.",
-          "Optimized database retrieval and payment processing, cutting wait times by up to 20%.",
-          "Automated fund-dispersal calculations with Python, improving response time by up to 2 days.",
-        ],
-      },
-      {
-        title: "Field Technician",
-        org: "Greenflare Technologies",
-        location: "Denver, CO",
-        period: "Oct 2024 to present",
-        bullets: [
-          "Repair and maintain high-throughput compute systems, restoring nodes and improving hardware uptime.",
-          "Diagnose bottlenecks with packet captures, boosting network throughput by about 20% in high-traffic areas.",
         ],
       },
       {
@@ -76,8 +78,7 @@ const GROUPS: Group[] = [
         location: "Albuquerque, NM",
         period: "Jun 2024 to Aug 2024",
         bullets: [
-          "Delivered an RF-to-optical testing protocol and pipeline in two weeks with MPLAB and low-level C for mission-critical equipment validation.",
-          "Authored repeatable evaluation procedures and scripts, shortening debug cycles for hardware teams.",
+          "Delivered an RF-to-optical testing protocol and pipeline in two weeks with MPLAB and low-level C, automating signal sweeps and data capture for mission-critical equipment validation.",
         ],
       },
       {
@@ -86,8 +87,8 @@ const GROUPS: Group[] = [
         location: "Grand Junction, CO",
         period: "Dec 2023 to present",
         bullets: [
-          "Lead a 6-person team building ML pipelines for IoMT detection and small cybersecurity language models.",
-          "Standardize code review, experiment tracking, and documentation for reproducible work across contributors.",
+          "Lead a 6-person team building ML pipelines for IoMT intrusion detection and small cybersecurity language models.",
+          "Manage repos, sprints, code review, and experiment tracking for reproducibility.",
         ],
       },
     ],
@@ -102,14 +103,14 @@ const GROUPS: Group[] = [
         period: "Dec 2023 to Mar 2025",
         bullets: [
           "Research lead and author with A. Mora, A. Avila, and R. Basnet.",
-          "Benchmarked six ML models across packet-level (DPKT) and flow-level (CICFlowMeter) features on the CICIoMT2024 dataset.",
+          "Benchmarked six ML models across packet-level (DPKT) and flow-level (CICFlowMeter) features on the CICIoMT2024 dataset, quantifying accuracy-versus-compute tradeoffs for real-time detection.",
         ],
       },
       {
         title: "Exploring Agentic Misalignment in Commercial Level Applications",
         period: "Sep 2025 to present",
         bullets: [
-          "Developing best practices for using AI in business settings, written for non-technical stakeholders.",
+          "Ongoing research developing best practices for using AI in business settings, written for non-technical stakeholders.",
         ],
       },
     ],
@@ -126,12 +127,19 @@ const GROUPS: Group[] = [
         ],
       },
       {
-        title: "President",
+        title: "Treasurer",
+        org: "Society of Hispanic Professional Engineers, CMU Chapter",
+        period: "Aug 2025 to present",
+        bullets: [
+          "Manage the chapter's finances and budget in support of its professional development and outreach programming.",
+        ],
+      },
+      {
+        title: "President and Cluster Administrator",
         org: "CMU Computer Science Club",
         period: "Aug 2023 to present",
         bullets: [
-          "Run weekly coding sessions and tech talks for about 15 members.",
-          "Built and operate a student distributed-computing cluster for coursework and competition practice.",
+          "Built and operate a student Linux HPC cluster, provisioning nodes and managing user access for coursework, experiments, and competition practice.",
           "Coached competitive coding teams to national events with average top-10 placements.",
         ],
       },
@@ -140,9 +148,28 @@ const GROUPS: Group[] = [
         org: "CMU Cybersecurity Club",
         period: "Aug 2023 to present",
         bullets: [
-          "Run weekly hands-on labs on packet analysis and detection engineering for about 7 members.",
-          "Partner with a local cybersecurity firm for workshops and guest speakers.",
-          "Led teams to national competitions with average top-15 results.",
+          "Run weekly hands-on labs on packet analysis and detection engineering for about 7 members to strengthen blue-team skills.",
+        ],
+      },
+    ],
+  },
+  {
+    heading: "Honors and fellowships",
+    entries: [
+      {
+        title: "Springboard Fellow",
+        org: "Colorado Mesa University",
+        period: "Sep 2026 to present",
+        bullets: [
+          "Fellowship pairing first-generation students with mentors from the Grand Junction professional community, with cohort programming in Denver and Washington, D.C.",
+        ],
+      },
+      {
+        title: "Thrive Scholar",
+        org: "Thrive Scholars, Class of 2027",
+        period: "Jun 2022 to present",
+        bullets: [
+          "Multi-year career program in quantitative analysis, communication, and career readiness.",
         ],
       },
     ],
@@ -156,17 +183,9 @@ const GROUPS: Group[] = [
         location: "Grand Junction, CO",
         period: "Aug 2023 to May 2027 (expected)",
         bullets: [
-          "GPA 3.56 / 4.0. Focus on AI application.",
+          "GPA 3.63 / 4.0. Focus on AI application.",
           "Captained coding and cybersecurity teams to national competitions, placing 4th regionally in the first year.",
           "Coursework: Probability and Statistics, OOP and Design Patterns, Databases, Algorithms, Python Machine Learning.",
-        ],
-      },
-      {
-        title: "Thrive Scholar",
-        org: "Thrive Scholars, Class of 2027",
-        period: "Jun 2022 to present",
-        bullets: [
-          "Multi-year career program with training in quantitative analysis, communication, and career readiness.",
         ],
       },
     ],
@@ -179,21 +198,21 @@ const GROUPS: Group[] = [
         org: "Mesa Catholic",
         location: "Grand Junction, CO",
         period: "Jun 2025 to Aug 2025",
-        bullets: ["Property cleanups for elderly community members during summer sessions."],
+        bullets: ["Property cleanups with elderly community members."],
       },
       {
         title: "STEM volunteer",
         org: "Mount Garfield Middle School",
         location: "Clifton, CO",
         period: "Nov 2024",
-        bullets: ["Taught basic network visualization concepts to introduce students to computing."],
+        bullets: ["Taught network visualization basics to introduce students to computing."],
       },
       {
         title: "Volunteer judge",
         org: "MATHCOUNTS Colorado",
         location: "Grand Junction, CO",
         period: "Feb 2024",
-        bullets: ["Assisted with scoring and logistics at a statewide math competition."],
+        bullets: ["Scoring and logistics at a statewide math competition."],
       },
     ],
   },
@@ -206,7 +225,7 @@ export default function Resume() {
         <Reveal className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Experience</h2>
-            <p className="mt-3 text-lg text-muted-foreground">Resume and CV last updated July 2026.</p>
+            <p className="mt-3 text-lg text-muted-foreground">Resume and CV last updated September 2026.</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg" className="h-12 px-6 active:scale-[0.98]">

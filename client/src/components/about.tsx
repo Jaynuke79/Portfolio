@@ -8,8 +8,9 @@ export default function About() {
         <div className="mt-8 max-w-[65ch] space-y-5 text-lg leading-relaxed text-muted-foreground">
           <p>
             I'm a computer science student at Colorado Mesa University specializing in
-            cybersecurity and applied AI, currently building deep CRM integrations and AI
-            agent pipelines as an AI Services Intern at EggNest.ai.
+            cybersecurity and applied AI. At EggNest.ai I moved from AI Services Intern to
+            AI Engineer, where I build CRM connectors and agent pipelines, coordinate
+            customer projects, and administer the Linux systems behind the portal.
           </p>
           <p>
             I lead a 6-person research team whose work on detecting malicious IoMT network

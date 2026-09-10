@@ -17,8 +17,8 @@ export default function Hero() {
           </span>
         </h1>
         <p className="mt-6 max-w-[52ch] text-lg leading-relaxed text-muted-foreground">
-          Computer science student at Colorado Mesa University, AI Services Intern at
-          EggNest.ai, and lead author of published IoMT threat-detection research.
+          AI Engineer at EggNest.ai, computer science student at Colorado Mesa University,
+          and lead author of published IoMT threat-detection research.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Button asChild size="lg" className="h-12 px-6 text-base active:scale-[0.98]">
