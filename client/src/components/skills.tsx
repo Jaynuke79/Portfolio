@@ -4,20 +4,27 @@ import Reveal from "@/components/reveal";
 const SKILL_GROUPS = [
   {
     title: "Languages",
-    skills: ["Python", "TypeScript and React", "C and C++", "System architecture"],
+    skills: ["Python", "C", "TypeScript and React"],
   },
   {
-    title: "Cybersecurity",
-    skills: ["Network security", "Zero Trust principles", "SecOps", "Risk and compliance mechanisms", "AuthN and AuthZ systems"],
+    title: "Systems and security",
+    skills: [
+      "Linux system administration",
+      "SSH and firewall hardening",
+      "Zero Trust, PCI, and HIPAA",
+      "HPC cluster operations",
+      "PostgreSQL and web servers",
+    ],
   },
   {
     title: "AI and backend",
     skills: [
       "AI agent orchestration",
-      "AI and ML modeling",
-      "Backend services and REST APIs",
-      "Testing and evaluation automation",
-      "Project management",
+      "REST APIs and backend services",
+      "Git and GitHub CI/CD and releases",
+      "Test and evaluation automation",
+      "Stripe, Square, and Authorize.net integrations",
+      "Project and customer coordination",
     ],
   },
 ];
@@ -30,8 +37,8 @@ const RECOGNITION = [
   },
   {
     icon: Award,
-    title: "CompTIA Security+",
-    detail: "In progress",
+    title: "Springboard Fellow",
+    detail: "Colorado Mesa University, 2026. Thrive Scholar, Class of 2027.",
   },
   {
     icon: Trophy,
@@ -41,7 +48,7 @@ const RECOGNITION = [
   {
     icon: Users,
     title: "Student leadership",
-    detail: "ASG House Speaker. President of the CS and Cybersecurity clubs.",
+    detail: "ASG House Speaker. SHPE chapter Treasurer. President of the CS and Cybersecurity clubs.",
   },
 ];
 
