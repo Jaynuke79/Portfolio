@@ -6,7 +6,27 @@
     "homepage": "https://j2a3e.com/",
     "language": "TypeScript",
     "stargazers_count": 0,
-    "pushed_at": "2026-07-18T02:32:17Z",
+    "pushed_at": "2026-09-10T01:49:17Z",
+    "topics": []
+  },
+  {
+    "name": "linkedin-mcp-server",
+    "description": "MCP server that posts to your own LinkedIn feed via the official Posts API. Stdlib only, no scraping, no session cookies.",
+    "html_url": "https://github.com/Jaynuke79/linkedin-mcp-server",
+    "homepage": null,
+    "language": "Python",
+    "stargazers_count": 0,
+    "pushed_at": "2026-09-07T20:34:51Z",
+    "topics": []
+  },
+  {
+    "name": "file-index",
+    "description": "Fully local filesystem content indexer: hybrid FTS5+vector search, VLM/Whisper deep extraction, agent CLI",
+    "html_url": "https://github.com/Jaynuke79/file-index",
+    "homepage": null,
+    "language": "Python",
+    "stargazers_count": 0,
+    "pushed_at": "2026-09-06T20:50:03Z",
     "topics": []
   },
   {
