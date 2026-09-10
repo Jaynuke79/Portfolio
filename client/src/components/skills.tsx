@@ -4,11 +4,11 @@ import Reveal from "@/components/reveal";
 const SKILL_GROUPS = [
   {
     title: "Languages",
-    skills: ["Python", "TypeScript and React", "C and C++"],
+    skills: ["Python", "TypeScript and React", "C and C++", "System architecture"],
   },
   {
     title: "Cybersecurity",
-    skills: ["Network security", "Zero Trust principles", "SecOps", "AuthN and AuthZ systems"],
+    skills: ["Network security", "Zero Trust principles", "SecOps", "Risk and compliance mechanisms", "AuthN and AuthZ systems"],
   },
   {
     title: "AI and backend",
@@ -17,6 +17,7 @@ const SKILL_GROUPS = [
       "AI and ML modeling",
       "Backend services and REST APIs",
       "Testing and evaluation automation",
+      "Project management",
     ],
   },
 ];
