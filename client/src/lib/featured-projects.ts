@@ -24,39 +24,31 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     featured: true,
   },
   {
-    repo: "Intentionally-Vulnerable-Bad-rAG",
-    title: "Intentionally Vulnerable Bad RAG",
-    technologies: ["Python", "AI Security"],
+    repo: "file-index",
+    title: "file-index",
+    description:
+      "Fully local filesystem indexer. Crawls directories, extracts text from documents, images, and audio with Ollama vision models and Whisper, and serves hybrid FTS5 plus vector search through an agent-friendly CLI. Nothing leaves the machine.",
+    technologies: ["Python", "SQLite FTS5", "sqlite-vec", "Ollama", "Whisper", "pytest"],
   },
   {
-    repo: "Social-Media-Downloader",
-    title: "Social Media Downloader",
-    technologies: ["Python", "CLI"],
+    repo: "linkedin-mcp-server",
+    title: "LinkedIn MCP Server",
+    description:
+      "MCP server that lets an agent post to your own LinkedIn feed through the official Posts API with OAuth. Standard library only, with no scraping or session cookies, plus guards for post length and reserved characters.",
+    technologies: ["Python", "MCP", "OAuth 2.0", "LinkedIn API"],
   },
   {
     repo: "PokemonDetector",
-    title: "Pokemon Detector Webapp",
-    description: "Trained a machine learning algorithm to detect Gen1 Pokemon and made a webapp.",
-    technologies: ["py-torch", "HTML / JS"],
-  },
-  {
-    repo: "AutoMenu",
-    title: "AutoMenu",
+    title: "Pokemon Detector",
     description:
-      "After having to make a CLI menu multiple times for multiple classes, I decided to make a general function to do it automatically.",
-    technologies: ["C++"],
+      "ConvNeXt image classifier trained to identify all 151 Gen 1 Pokemon, packaged as a CLI, a Flask web app, and a Docker image with a live demo on Vercel.",
+    technologies: ["PyTorch", "ConvNeXt", "Flask", "Docker"],
   },
   {
-    repo: "100PrisonerProblem",
-    title: "The 100 Prisoners Problem",
+    repo: "Intentionally-Vulnerable-Bad-rAG",
+    title: "Intentionally Vulnerable Bad RAG",
     description:
-      "Inspired by Veritasium and spurred on by a debate with my professor, I coded up a simulation of the 100 prisoners problem.",
-    technologies: ["C++"],
-  },
-  {
-    repo: "WeatherApiApp",
-    title: "Weather APP",
-    description: "A classic beginning coder project.",
-    technologies: ["Python", "API", "HTML / JS"],
+      "Deliberately insecure retrieval-augmented generation pipeline that demonstrates PII exfiltration and prompt injection, with worked exploits, a model comparison, and security lessons. Built to show why models should get the least personal data possible.",
+    technologies: ["Python", "RAG", "AI Security", "Prompt Injection"],
   },
 ];
