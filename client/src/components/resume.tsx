@@ -59,14 +59,22 @@ export default function Resume() {
         <Reveal className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Experience</h2>
-            <p className="mt-3 text-lg text-muted-foreground">Resume last updated July 2026.</p>
+            <p className="mt-3 text-lg text-muted-foreground">Resume and CV last updated July 2026.</p>
           </div>
-          <Button asChild size="lg" className="h-12 px-6 active:scale-[0.98]">
-            <a href="/Jayden_Alonzo-Estrada_Resume.pdf" download="Jayden_Alonzo-Estrada_Resume.pdf">
-              <Download className="h-4 w-4" />
-              Download resume
-            </a>
-          </Button>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button asChild size="lg" className="h-12 px-6 active:scale-[0.98]">
+              <a href="/Jayden_Alonzo-Estrada_Resume.pdf" download="Jayden_Alonzo-Estrada_Resume.pdf">
+                <Download className="h-4 w-4" />
+                Download resume
+              </a>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="h-12 px-6 active:scale-[0.98]">
+              <a href="/Jayden_Alonzo-Estrada_CV.pdf" download="Jayden_Alonzo-Estrada_CV.pdf">
+                <Download className="h-4 w-4" />
+                Download CV
+              </a>
+            </Button>
+          </div>
         </Reveal>
 
         <Reveal as="div" className="mt-12">
