@@ -17,6 +17,8 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     title: "Machine Learning Research Lead",
     description:
       "Research lead and author of The Effect of Increased Dimensionality on Detecting Malicious IoMT Network Traffic, published by Springer and presented at MobiSec 2025 in Sapporo, Japan. Benchmarked six ML models across packet-level and flow-level feature sets on the CICIoMT2024 dataset.",
+    image: "/mobisec-2025.webp",
+    alt: "Jayden Alonzo-Estrada beside the MobiSec 2025 conference banner in Sapporo, Japan",
     technologies: ["Jupyter Notebook", "Sk-learn", "Pandas", "Numpy"],
     demoUrl: "https://easychair.org/smart-slide/slide/2N9Q",
     demoLabel: "Talk slides",
