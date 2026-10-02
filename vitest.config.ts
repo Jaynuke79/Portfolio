@@ -10,6 +10,6 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["client/src/**/*.test.{ts,tsx}", "scripts/**/*.test.ts"],
+    include: ["client/src/**/*.test.{ts,tsx}", "scripts/**/*.test.ts", "apps-script/**/*.test.ts"],
   },
 });

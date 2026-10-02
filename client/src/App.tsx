@@ -1,25 +1,24 @@
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import Home from "@/pages/home";
-import BookingGate from "@/components/booking-gate";
-import { parseBookingSlug } from "@/lib/booking-slug";
-
-function getBookingSlug(): string | null {
-  return parseBookingSlug(window.location.hash);
-}
+import Scheduler from "@/components/scheduler";
+import ScheduleAdmin from "@/components/schedule-admin";
+import { routeForHash } from "@/lib/hash-route";
 
 function App() {
-  const [bookingSlug, setBookingSlug] = useState<string | null>(getBookingSlug);
+  const [route, setRoute] = useState(() => routeForHash(window.location.hash));
 
   useEffect(() => {
-    const onHashChange = () => setBookingSlug(getBookingSlug());
+    const onHashChange = () => setRoute(routeForHash(window.location.hash));
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
 
   return (
     <>
-      {bookingSlug !== null ? <BookingGate slug={bookingSlug} /> : <Home />}
+      {route === "schedule" && <Scheduler />}
+      {route === "schedule-admin" && <ScheduleAdmin />}
+      {route === "home" && <Home />}
       <Toaster />
     </>
   );
