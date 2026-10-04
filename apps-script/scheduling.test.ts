@@ -22,6 +22,7 @@ interface AppsScriptGlobals {
   };
   typesForKey(types: { id: string }[], record: Record<string, unknown>): { id: string }[];
   defaultBookingConfig(): Record<string, any>;
+  buildConfirmationEmails(input: Record<string, any>): Record<string, any>[];
   validateBookingConfig(input: unknown, current: Record<string, any> | null): {
     config?: Record<string, any>;
     error?: string;
@@ -31,7 +32,7 @@ interface AppsScriptGlobals {
 
 const dir = dirname(fileURLToPath(import.meta.url));
 const context = createContext({ Intl, Date, Math, Number, String });
-for (const file of ["Slots.js", "Keys.js", "Config.js"]) {
+for (const file of ["Slots.js", "Keys.js", "Config.js", "Mail.js"]) {
   runInContext(readFileSync(resolve(dir, file), "utf8"), context);
 }
 const gs = context as unknown as AppsScriptGlobals;
@@ -286,6 +287,7 @@ describe("validateBookingConfig", () => {
     [{ keyDefaults: { expiresInDays: 0, maxUses: 1, typeIds: null } }, "invalid_expiry", "keyDefaults"],
     [{ keyDefaults: { expiresInDays: 7, maxUses: 0, typeIds: null } }, "invalid_uses", "keyDefaults"],
     [{ keyDefaults: { expiresInDays: 7, maxUses: 1, typeIds: ["60min"] } }, "unknown_type", "keyDefaults"],
+    [{ notifications: { emailGuest: true, emailOwner: true, ownerEmail: "not-an-email" } }, "invalid_email", "notifications"],
   ])("rejects %j", (patch, error, field) => {
     expect(check(patch)).toEqual({ error, field });
   });
@@ -295,5 +297,78 @@ describe("validateBookingConfig", () => {
     const { config } = gs.validateBookingConfig({ ...base(), calendarId: "evil@example.com" }, current);
     expect(config!.calendarId).toBe("work@example.com");
     expect(config!.busyCalendarIds).toEqual(["work@example.com", "primary"]);
+  });
+});
+
+describe("buildConfirmationEmails", () => {
+  const input = (patch: Record<string, any> = {}) => ({
+    config: gs.defaultBookingConfig(),
+    type: { id: "30min", name: "30 Minute Chat", durationMinutes: 30 },
+    guest: { name: "Ada Lovelace", email: "ada@example.com", notes: "" },
+    start: "2026-10-06T15:00:00.000Z",
+    end: "2026-10-06T15:30:00.000Z",
+    meetLink: "https://meet.google.com/abc-defg-hij",
+    guestTimeZone: "Europe/London",
+    ownerEmail: "owner@example.com",
+    keyLabel: "Recruiter at Acme",
+    ...patch,
+  });
+  const byRecipient = (emails: Record<string, any>[]) => Object.fromEntries(emails.map(e => [e.recipient, e]));
+
+  it("emails the guest in their own time zone with replies going to the owner", () => {
+    const { guest } = byRecipient(gs.buildConfirmationEmails(input()));
+    expect(guest.to).toBe("ada@example.com");
+    expect(guest.replyTo).toBe("owner@example.com");
+    expect(guest.subject).toBe("Confirmed: 30 Minute Chat on Tuesday, October 6, 2026, 4:00 PM – 4:30 PM GMT+1");
+    expect(guest.body).toContain("Google Meet: https://meet.google.com/abc-defg-hij");
+    expect(guest.htmlBody).toContain('href="https://meet.google.com/abc-defg-hij"');
+  });
+
+  it("emails the owner in the owner's zone, with guest contact, guest time and the private label", () => {
+    const { owner } = byRecipient(gs.buildConfirmationEmails(input()));
+    expect(owner.to).toBe("owner@example.com");
+    expect(owner.replyTo).toBe("ada@example.com");
+    expect(owner.body).toContain("When: Tuesday, October 6, 2026, 9:00 AM – 9:30 AM MDT");
+    expect(owner.body).toContain("Guest: Ada Lovelace <ada@example.com>");
+    expect(owner.body).toContain("Guest time: Tuesday, October 6, 2026, 4:00 PM – 4:30 PM GMT+1");
+    expect(owner.body).toContain("Key: Recruiter at Acme");
+  });
+
+  it("keeps the private key label out of the guest's email", () => {
+    const { guest } = byRecipient(gs.buildConfirmationEmails(input()));
+    expect(guest.body).not.toContain("Recruiter");
+    expect(guest.htmlBody).not.toContain("Recruiter");
+  });
+
+  it("escapes guest-supplied text in HTML and keeps subjects on one line", () => {
+    const emails = gs.buildConfirmationEmails(
+      input({ guest: { name: 'Eve <a href="x">\nhi', email: "eve@example.com", notes: "line 1\n<script>alert(1)</script>" } })
+    );
+    for (const email of emails) {
+      expect(email.htmlBody).not.toContain("<script>");
+      expect(email.htmlBody).not.toContain('<a href="x">');
+      expect(email.subject).not.toMatch(/[\r\n]/);
+    }
+    expect(byRecipient(emails).owner.htmlBody).toContain("line 1<br>&lt;script&gt;");
+  });
+
+  it("falls back to the owner's zone for a missing or bogus guest zone", () => {
+    for (const guestTimeZone of [null, "Not/AZone"]) {
+      const { guest, owner } = byRecipient(gs.buildConfirmationEmails(input({ guestTimeZone })));
+      expect(guest.subject).toContain("9:00 AM – 9:30 AM MDT");
+      expect(owner.body).not.toContain("Guest time");
+    }
+  });
+
+  it("respects the notification toggles and a missing owner address", () => {
+    const config = { ...gs.defaultBookingConfig(), notifications: { emailGuest: false, emailOwner: true, ownerEmail: "" } };
+    expect(gs.buildConfirmationEmails(input({ config })).map(e => e.recipient)).toEqual(["owner"]);
+    expect(gs.buildConfirmationEmails(input({ ownerEmail: "" })).map(e => e.recipient)).toEqual(["guest"]);
+  });
+
+  it("omits empty optional rows", () => {
+    const { guest } = byRecipient(gs.buildConfirmationEmails(input({ meetLink: null })));
+    expect(guest.body).not.toContain("Google Meet");
+    expect(guest.body).not.toContain("Your notes");
   });
 });

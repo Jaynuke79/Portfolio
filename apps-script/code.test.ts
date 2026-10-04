@@ -15,11 +15,15 @@ let busy: { start: string; end: string }[];
 let inserted: Json[];
 let post: (body: Json) => Json;
 let defaultConfig: () => Json;
+let sentMail: Json[];
+let mailFailsFor: string | null;
 
-function loadBackend() {
+function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Code.js"]) {
   props = { ADMIN_TOKEN: ADMIN };
   busy = [];
   inserted = [];
+  sentMail = [];
+  mailFailsFor = null;
   const cache = new Map<string, string>();
   const context = createContext({
     console: { log() {}, error() {} },
@@ -61,12 +65,20 @@ function loadBackend() {
         },
       },
     },
+    MailApp: {
+      sendEmail: (message: Json) => {
+        if (mailFailsFor === message.to) throw new Error("Service invoked too many times");
+        sentMail.push(message);
+      },
+      getRemainingDailyQuota: () => 100,
+    },
+    Session: { getEffectiveUser: () => ({ getEmail: () => "owner@example.com" }) },
     ContentService: {
       MimeType: { JSON: "json" },
       createTextOutput: (text: string) => ({ setMimeType: () => JSON.parse(text) }),
     },
   });
-  for (const file of ["Slots.js", "Keys.js", "Config.js", "Code.js"]) {
+  for (const file of files) {
     runInContext(readFileSync(resolve(dir, file), "utf8"), context);
   }
   const globals = context as unknown as { doPost(e: Json): Json; defaultBookingConfig(): Json };
@@ -88,7 +100,7 @@ function confirm(key: string, start: string, extra: Json = {}): Json {
   return post({ action: "confirm", key, type: "30min", start, name: "Ada", email: "ada@example.com", ...extra });
 }
 
-beforeEach(loadBackend);
+beforeEach(() => loadBackend());
 
 describe("admin actions", () => {
   it("require the admin token", () => {
@@ -296,5 +308,81 @@ describe("config editing", () => {
     expect(preview.slots.length).toBeGreaterThan(0);
     busy.push({ start: preview.slots[0].start, end: preview.slots[0].end });
     expect(post({ action: "previewSlots", adminToken: ADMIN, type: "30min" }).slots[0].start).not.toBe(preview.slots[0].start);
+  });
+});
+
+describe("confirmation emails", () => {
+  it("emails the guest and the owner after a booking", () => {
+    const { key } = issue({ label: "Recruiter" });
+    const result = confirm(key, upcomingSlots(key)[0].start, { guestTimeZone: "Europe/London" });
+    expect(result.emailed).toEqual({ guest: true, owner: true });
+    expect(sentMail.map(m => [m.to, m.replyTo])).toEqual([
+      ["ada@example.com", "owner@example.com"],
+      ["owner@example.com", "ada@example.com"],
+    ]);
+    expect(sentMail[0].name).toBe("Meet with Jayden");
+    expect(sentMail[0].subject).toMatch(/GMT\+1$/);
+    expect(sentMail[1].body).toContain("Key: Recruiter");
+  });
+
+  it("keeps the booking when an email fails, and reports which one", () => {
+    mailFailsFor = "ada@example.com";
+    const { key } = issue();
+    const result = confirm(key, upcomingSlots(key)[0].start);
+    expect(result).toMatchObject({ ok: true, emailed: { guest: false, owner: true } });
+    expect(inserted).toHaveLength(1);
+    expect(post({ action: "access", key }).error).toBe("key_used_up");
+  });
+
+  it("sends to the configured owner address, and only what is switched on", () => {
+    props.BOOKING_CONFIG = JSON.stringify({
+      ...defaultConfig(),
+      notifications: { emailGuest: false, emailOwner: true, ownerEmail: "alerts@example.com" },
+    });
+    const { key } = issue();
+    expect(confirm(key, upcomingSlots(key)[0].start).emailed).toEqual({ guest: false, owner: true });
+    expect(sentMail.map(m => m.to)).toEqual(["alerts@example.com"]);
+  });
+
+  it("sends nothing for honeypot or rejected bookings", () => {
+    const { key } = issue();
+    const start = upcomingSlots(key)[0].start;
+    confirm(key, start, { website: "spam" });
+    confirm(key, "2030-01-01T00:07:00Z");
+    expect(sentMail).toHaveLength(0);
+  });
+
+  it("keeps booking working if Mail.js was never pasted into the project", () => {
+    loadBackend(["Slots.js", "Keys.js", "Config.js", "Code.js"]);
+    const { key } = issue();
+    expect(post({ action: "access", key }).ok).toBe(true);
+    const result = confirm(key, upcomingSlots(key)[0].start);
+    expect(result).toMatchObject({ ok: true, emailed: { guest: false, owner: false } });
+    expect(inserted).toHaveLength(1);
+  });
+
+  it("fills notification defaults for configs saved before the feature existed", () => {
+    const legacy = defaultConfig();
+    delete legacy.notifications;
+    props.BOOKING_CONFIG = JSON.stringify(legacy);
+    const { config } = post({ action: "getConfig", adminToken: ADMIN });
+    expect(config.notifications).toEqual({ emailGuest: true, emailOwner: true, ownerEmail: "" });
+  });
+
+  it("validates and saves notification settings from the admin page", () => {
+    const bad = post({
+      action: "saveConfig",
+      adminToken: ADMIN,
+      config: { ...defaultConfig(), notifications: { emailGuest: true, emailOwner: true, ownerEmail: "nope" } },
+      version: null,
+    });
+    expect(bad.error).toBe("invalid_email:notifications");
+    const good = post({
+      action: "saveConfig",
+      adminToken: ADMIN,
+      config: { ...defaultConfig(), notifications: { emailGuest: true, emailOwner: false, ownerEmail: " me@example.com " } },
+      version: null,
+    });
+    expect(good.config.notifications).toEqual({ emailGuest: true, emailOwner: false, ownerEmail: "me@example.com" });
   });
 });

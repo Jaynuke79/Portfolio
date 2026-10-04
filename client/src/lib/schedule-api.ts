@@ -20,6 +20,7 @@ export interface ConfirmResult {
   start: string;
   end?: string;
   meetLink: string | null;
+  emailed?: { guest: boolean; owner: boolean };
 }
 
 export interface ConfirmInput {
@@ -30,6 +31,7 @@ export interface ConfirmInput {
   email: string;
   notes: string;
   honeypot: string;
+  guestTimeZone: string;
 }
 
 export class ScheduleApiError extends Error {
@@ -96,11 +98,11 @@ export async function fetchSlots(accessKey: string, typeId: string, start: strin
 }
 
 /**
- * Deliberately takes no time zone: the visitor can re-read slots in another
- * zone, but that is a display choice. The instant booked is the one the
- * backend's slot grid produced.
+ * The instant booked is always `start`, the one the backend's slot grid
+ * produced. `guestTimeZone` only chooses how the guest's confirmation email
+ * reads that instant; the backend validates it and never derives a time from it.
  */
-export function buildConfirmBody({ accessKey, typeId, slot, name, email, notes, honeypot }: ConfirmInput) {
+export function buildConfirmBody({ accessKey, typeId, slot, name, email, notes, honeypot, guestTimeZone }: ConfirmInput) {
   return {
     action: "confirm",
     key: accessKey,
@@ -110,6 +112,7 @@ export function buildConfirmBody({ accessKey, typeId, slot, name, email, notes, 
     email: email.trim(),
     notes: notes.trim(),
     website: honeypot,
+    guestTimeZone,
   };
 }
 

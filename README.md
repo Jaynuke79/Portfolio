@@ -23,7 +23,7 @@ Visit the live portfolio: [j2a3e.com](https://j2a3e.com)
 - **Live Project Showcase**: Cards are driven by a curated repo list enriched from the GitHub API — stars, language, last-pushed date, links, and auto-updating OpenGraph images — with a baked snapshot as offline fallback
 - **Skills Display**: Technical competencies and certifications
 - **Contact Form**: Professional contact interface
-- **Key-Gated Scheduling**: `j2a3e.com/#schedule` books straight into Google Calendar with a Meet link, offering only times inside your weekly hours that your calendar shows free. Visitors need an access key; hours, meeting types, booking rules and keys (expiry, uses, allowed types) are managed at `#schedule/admin` (backend and setup in [`apps-script/`](apps-script/README.md))
+- **Key-Gated Scheduling**: `j2a3e.com/#schedule` books straight into Google Calendar with a Meet link and emails a confirmation to both sides, offering only times inside your weekly hours that your calendar shows free. Visitors need an access key; hours, meeting types, booking rules and keys (expiry, uses, allowed types) are managed at `#schedule/admin` (backend and setup in [`apps-script/`](apps-script/README.md))
 
 ## 🏗️ Deployment to GitHub Pages
 

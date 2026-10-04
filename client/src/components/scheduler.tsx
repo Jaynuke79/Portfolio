@@ -254,6 +254,7 @@ export default function Scheduler() {
         email,
         notes,
         honeypot,
+        guestTimeZone: timeZone,
       });
       storeKey(null);
       setResult(confirmed);
@@ -339,7 +340,8 @@ export default function Scheduler() {
           <p className="text-sm text-muted-foreground">{type.name}</p>
           <p className="mt-1 font-medium">{formatSlotDateTime(result.start, timeZone)}</p>
           <p className="mt-4 text-sm text-muted-foreground">
-            A calendar invite is on its way to <span className="text-foreground">{email.trim()}</span>.
+            {result.emailed?.guest ? "A confirmation email and calendar invite are on their way" : "A calendar invite is on its way"} to{" "}
+            <span className="text-foreground">{email.trim()}</span>.
           </p>
           {result.meetLink && (
             <Button asChild variant="outline" className="mt-6">
