@@ -32,6 +32,7 @@ function config(): adminApi.BookingConfig {
     minLeadHours: 12,
     horizonDays: 30,
     keyDefaults: { expiresInDays: 14, maxUses: 1, typeIds: ["15min"] },
+    notifications: { emailGuest: true, emailOwner: true, ownerEmail: "" },
     weeklyHours: { 1: [["09:00", "17:00"]] },
     types: [
       { id: "15min", name: "15 Minute Chat", durationMinutes: 15 },
@@ -117,6 +118,21 @@ describe("ScheduleAdmin", () => {
 
     expect(adminApi.saveConfig).not.toHaveBeenCalled();
     expect(screen.getByRole("status").textContent).toMatch(/New key uses needs a number/);
+  });
+
+  it("saves confirmation email settings", async () => {
+    vi.mocked(adminApi.saveConfig).mockImplementation(async (_t, saved) => ({ config: saved, version: "v2" }));
+    await signIn();
+    fireEvent.click(screen.getByRole("tab", { name: "Booking rules" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: /Email the guest/ }));
+    fireEvent.change(screen.getByLabelText("Send my copy to"), { target: { value: "alerts@example.com" } });
+    await clickSave();
+
+    expect(vi.mocked(adminApi.saveConfig).mock.calls[0][1].notifications).toEqual({
+      emailGuest: false,
+      emailOwner: true,
+      ownerEmail: "alerts@example.com",
+    });
   });
 
   it("moves between tabs with the arrow keys", async () => {

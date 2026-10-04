@@ -57,6 +57,9 @@ function doPost(e) {
  * triggers the Calendar consent prompt.
  */
 function checkSetup() {
+  const modules = { Slots: 'buildSlots', Keys: 'resolveKeyTerms', Config: 'validateBookingConfig', Mail: 'buildConfirmationEmails' };
+  const missing = Object.keys(modules).filter(file => typeof globalThis[modules[file]] !== 'function');
+  console.log(missing.length ? `MISSING script files: ${missing.join(', ')}` : 'All script files present');
   const config = readConfig();
   const probe = new Date(wallTimeToEpochMs('2026-10-06', '09:00', 'America/Denver')).toISOString();
   console.log(`Time-zone math: ${probe === '2026-10-06T15:00:00.000Z' ? 'OK' : `WRONG (${probe})`}`);
@@ -71,6 +74,7 @@ function checkSetup() {
     null
   );
   console.log(`Key defaults: ${defaults.error ? `INVALID (${defaults.error})` : JSON.stringify(defaults.terms)}`);
+  console.log(`Confirmation emails go to ${ownerAddress(config)}; ${MailApp.getRemainingDailyQuota()} sends left today`);
 }
 
 function route(body) {
@@ -85,10 +89,14 @@ function route(body) {
   throw new BookingError('unknown_action');
 }
 
-/** The saved config, or the built-in default until the admin page first saves. */
+/**
+ * The saved config, or the built-in default until the admin page first saves.
+ * Settings added after a config was saved fall back to their defaults.
+ */
 function readConfig() {
   const raw = PropertiesService.getScriptProperties().getProperty('BOOKING_CONFIG');
-  return raw ? JSON.parse(raw) : defaultBookingConfig();
+  const config = raw ? JSON.parse(raw) : defaultBookingConfig();
+  return Object.assign({}, config, { notifications: notificationSettings(config) });
 }
 
 function sha256Hex(text) {
@@ -361,6 +369,7 @@ function confirmBooking(body, keyHash) {
   if (!Number.isFinite(startMs)) throw new BookingError('invalid_slot');
   const startIso = new Date(startMs).toISOString();
 
+  let booked;
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
@@ -395,8 +404,54 @@ function confirmBooking(body, keyHash) {
     );
 
     writeKeyRecord(keyHash, Object.assign({}, record, { uses: record.uses + 1, lastUsedAt: new Date().toISOString() }));
-    return { start: offered.start, end: offered.end, meetLink: event.hangoutLink || null };
+    booked = { type, offered, meetLink: event.hangoutLink || null, keyLabel: record.label || '' };
   } finally {
     lock.releaseLock();
   }
+
+  const emailed = sendConfirmationEmails(config, {
+    type: booked.type,
+    guest,
+    start: booked.offered.start,
+    end: booked.offered.end,
+    meetLink: booked.meetLink,
+    guestTimeZone: typeof body.guestTimeZone === 'string' ? body.guestTimeZone : null,
+    keyLabel: booked.keyLabel,
+  });
+  return { start: booked.offered.start, end: booked.offered.end, meetLink: booked.meetLink, emailed };
+}
+
+function ownerAddress(config) {
+  return config.notifications.ownerEmail || Session.getEffectiveUser().getEmail();
+}
+
+/**
+ * Sends after the booking is committed and the lock released. A failed send is
+ * logged and reported, never thrown: the event already exists, so failing the
+ * request would tell the guest their booking didn't happen when it did.
+ */
+function sendConfirmationEmails(config, details) {
+  const emailed = { guest: false, owner: false };
+  let messages = [];
+  try {
+    messages = buildConfirmationEmails(Object.assign({ config, ownerEmail: ownerAddress(config) }, details));
+  } catch (err) {
+    console.error('Could not build confirmation emails', err);
+  }
+  for (const message of messages) {
+    try {
+      MailApp.sendEmail({
+        to: message.to,
+        replyTo: message.replyTo,
+        name: config.title,
+        subject: message.subject,
+        body: message.body,
+        htmlBody: message.htmlBody,
+      });
+      emailed[message.recipient] = true;
+    } catch (err) {
+      console.error(`Confirmation email to ${message.recipient} failed`, err);
+    }
+  }
+  return emailed;
 }

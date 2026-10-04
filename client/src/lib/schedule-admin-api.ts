@@ -9,6 +9,12 @@ export interface KeyDefaults {
   typeIds: string[] | null;
 }
 
+export interface NotificationSettings {
+  emailGuest: boolean;
+  emailOwner: boolean;
+  ownerEmail: string;
+}
+
 export interface BookingConfig {
   title: string;
   description: string;
@@ -19,6 +25,7 @@ export interface BookingConfig {
   minLeadHours: number;
   horizonDays: number;
   keyDefaults: KeyDefaults;
+  notifications: NotificationSettings;
   weeklyHours: WeeklyHours;
   types: MeetingType[];
 }
@@ -101,6 +108,7 @@ const FIELD_LABELS: Record<string, string> = {
   types: "Meeting types",
   weeklyHours: "Weekly hours",
   keyDefaults: "New key defaults",
+  notifications: "Confirmation emails",
 };
 
 const ADMIN_ERRORS: Record<string, string> = {
@@ -118,6 +126,7 @@ const ADMIN_ERRORS: Record<string, string> = {
   unknown_type: "it refers to a meeting type that doesn't exist.",
   invalid_key_id: "that key no longer exists.",
   invalid_config: "the value is out of range.",
+  invalid_email: "enter a valid email address, or leave it blank.",
 };
 
 /** Messages for admin failures, including the `error:field` codes from saveConfig. */

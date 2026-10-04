@@ -82,7 +82,12 @@ describe("Scheduler", () => {
     const slot = slotTomorrowAtNoonUtc();
     vi.mocked(api.fetchBookingInfo).mockResolvedValue(INFO);
     vi.mocked(api.fetchSlots).mockResolvedValue([slot]);
-    vi.mocked(api.confirmBooking).mockResolvedValue({ start: slot.start, end: slot.end, meetLink: "https://meet.google.com/abc" });
+    vi.mocked(api.confirmBooking).mockResolvedValue({
+      start: slot.start,
+      end: slot.end,
+      meetLink: "https://meet.google.com/abc",
+      emailed: { guest: true, owner: true },
+    });
     render(<Scheduler />);
     await reachDetails(slot);
 
@@ -93,11 +98,29 @@ describe("Scheduler", () => {
     });
 
     expect(api.confirmBooking).toHaveBeenCalledWith(
-      expect.objectContaining({ accessKey: "ABCD-EFGH-JKMN-PQRS", typeId: "30min", slot, honeypot: "" })
+      expect.objectContaining({ accessKey: "ABCD-EFGH-JKMN-PQRS", typeId: "30min", slot, honeypot: "", guestTimeZone: "Africa/Abidjan" })
     );
     expect(screen.getByRole("heading", { name: "You're booked" })).toBeTruthy();
+    expect(screen.getByText(/A confirmation email and calendar invite are on their way to/)).toBeTruthy();
     expect(screen.getByRole("link", { name: /Google Meet/ }).getAttribute("href")).toBe("https://meet.google.com/abc");
     expect(sessionStorage.getItem("schedule-access-key")).toBeNull();
+  });
+
+  it("promises only the calendar invite when the backend reports no confirmation email", async () => {
+    const slot = slotTomorrowAtNoonUtc();
+    vi.mocked(api.fetchBookingInfo).mockResolvedValue(INFO);
+    vi.mocked(api.fetchSlots).mockResolvedValue([slot]);
+    vi.mocked(api.confirmBooking).mockResolvedValue({ start: slot.start, end: slot.end, meetLink: null });
+    render(<Scheduler />);
+    await reachDetails(slot);
+    fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Ada" } });
+    fireEvent.change(screen.getByLabelText("Email"), { target: { value: "ada@example.com" } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Confirm booking" }));
+    });
+
+    expect(screen.getByText(/A calendar invite is on its way to/)).toBeTruthy();
+    expect(screen.queryByText(/confirmation email/)).toBeNull();
   });
 
   it("sends the visitor back to pick again when the slot was taken", async () => {

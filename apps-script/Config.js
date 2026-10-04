@@ -17,12 +17,41 @@ function defaultBookingConfig() {
     minLeadHours: 12,
     horizonDays: 30,
     keyDefaults: { expiresInDays: 14, maxUses: 1, typeIds: null },
+    notifications: { emailGuest: true, emailOwner: true, ownerEmail: '' },
     weeklyHours: { 1: workday, 2: workday, 3: workday, 4: workday, 5: [['09:00', '12:00'], ['13:00', '15:00']] },
     types: [
       { id: '15min', name: '15 Minute Chat', durationMinutes: 15 },
       { id: '30min', name: '30 Minute Chat', durationMinutes: 30 },
     ],
   };
+}
+
+/** Notification settings with defaults filled in for configs saved before they existed. */
+function notificationSettings(config) {
+  const n = config.notifications || {};
+  return {
+    emailGuest: n.emailGuest !== false,
+    emailOwner: n.emailOwner !== false,
+    ownerEmail: typeof n.ownerEmail === 'string' ? n.ownerEmail : '',
+  };
+}
+
+function renderEmail(heading, rows, footer) {
+  const htmlRows = rows
+    .map(([label, value, isLink]) => {
+      const shown = isLink
+        ? `<a href="${escapeHtml(value)}" style="color:#0f766e">${escapeHtml(value)}</a>`
+        : escapeHtml(value).replace(/\n/g, '<br>');
+      return `<tr><td style="padding:6px 16px 6px 0;color:#6b7280;vertical-align:top;white-space:nowrap">${escapeHtml(label)}</td><td style="padding:6px 0">${shown}</td></tr>`;
+    })
+    .join('');
+  const htmlBody =
+    `<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-size:15px;color:#111827;max-width:560px">` +
+    `<h2 style="font-size:20px;margin:0 0 16px">${escapeHtml(heading)}</h2>` +
+    `<table style="border-collapse:collapse">${htmlRows}</table>` +
+    `<p style="margin:20px 0 0;color:#6b7280;font-size:13px">${escapeHtml(footer)}</p></div>`;
+  const body = [heading, '', ...rows.map(([label, value]) => `${label}: ${value}`), '', footer].join('\n');
+  return { htmlBody, body };
 }
 
 function isValidTimeZone(timeZone) {
@@ -106,6 +135,17 @@ function validateBookingConfig(input, current) {
     if (keyDefaults.typeIds.some(id => !types.some(t => t.id === id))) return fail('keyDefaults', 'unknown_type');
   }
 
+  const rawNotifications = input.notifications || {};
+  const ownerEmail = typeof rawNotifications.ownerEmail === 'string' ? rawNotifications.ownerEmail.trim() : '';
+  if (ownerEmail && (ownerEmail.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerEmail))) {
+    return fail('notifications', 'invalid_email');
+  }
+  const notifications = {
+    emailGuest: rawNotifications.emailGuest !== false,
+    emailOwner: rawNotifications.emailOwner !== false,
+    ownerEmail,
+  };
+
   const base = current || defaultBookingConfig();
   return {
     config: {
@@ -118,6 +158,7 @@ function validateBookingConfig(input, current) {
       minLeadHours: input.minLeadHours,
       horizonDays: input.horizonDays,
       keyDefaults,
+      notifications,
       weeklyHours,
       types,
     },

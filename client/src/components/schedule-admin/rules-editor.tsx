@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import TypePicker from "@/components/schedule-admin/type-picker";
-import type { BookingConfig, KeyDefaults } from "@/lib/schedule-admin-api";
+import type { BookingConfig, KeyDefaults, NotificationSettings } from "@/lib/schedule-admin-api";
 import { timeZoneOptions } from "@/lib/slot-calendar";
 
 function NumberField({
@@ -52,6 +52,9 @@ export default function RulesEditor({ config, onChange }: Props) {
   const zones = useMemo(() => timeZoneOptions(config.timeZone), [config.timeZone]);
   const defaults = config.keyDefaults;
   const setDefaults = (patch: Partial<KeyDefaults>) => onChange({ keyDefaults: { ...defaults, ...patch } });
+  const notifications = config.notifications;
+  const setNotifications = (patch: Partial<NotificationSettings>) =>
+    onChange({ notifications: { ...notifications, ...patch } });
 
   return (
     <div className="grid gap-10">
@@ -88,6 +91,49 @@ export default function RulesEditor({ config, onChange }: Props) {
           <NumberField label="Buffer (minutes)" hint="Kept free before and after every busy block." value={config.bufferMinutes} min={0} max={240} onChange={bufferMinutes => onChange({ bufferMinutes })} />
           <NumberField label="Minimum notice (hours)" hint="How soon a meeting can be booked." value={config.minLeadHours} min={0} max={720} onChange={minLeadHours => onChange({ minLeadHours })} />
           <NumberField label="Booking window (days)" hint="How far ahead visitors can book." value={config.horizonDays} min={1} max={365} onChange={horizonDays => onChange({ horizonDays })} />
+        </div>
+      </section>
+
+      <section className="grid gap-5">
+        <div>
+          <h3 className="text-base font-semibold">Confirmation emails</h3>
+          <p className="text-sm text-muted-foreground">Sent when a booking is confirmed, in addition to the calendar invite.</p>
+        </div>
+        <div className="grid gap-3 text-sm">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={notifications.emailGuest}
+              onChange={e => setNotifications({ emailGuest: e.target.checked })}
+              className="h-4 w-4 accent-[hsl(var(--brand))]"
+            />
+            Email the guest a confirmation (in their time zone, replies come to you)
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={notifications.emailOwner}
+              onChange={e => setNotifications({ emailOwner: e.target.checked })}
+              className="h-4 w-4 accent-[hsl(var(--brand))]"
+            />
+            Email me about each new booking (replies go to the guest)
+          </label>
+        </div>
+        <div className="grid content-start gap-2 sm:max-w-sm">
+          <Label htmlFor={`${id}-owner-email`}>Send my copy to</Label>
+          <Input
+            id={`${id}-owner-email`}
+            type="email"
+            value={notifications.ownerEmail}
+            disabled={!notifications.emailOwner}
+            placeholder="The Google account running the backend"
+            onChange={e => setNotifications({ ownerEmail: e.target.value })}
+            aria-describedby={`${id}-owner-email-hint`}
+            className="h-10"
+          />
+          <p id={`${id}-owner-email-hint`} className="text-xs text-muted-foreground">
+            Leave blank to use the account that deployed the scheduling backend.
+          </p>
         </div>
       </section>
 
