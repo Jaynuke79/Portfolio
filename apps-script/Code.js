@@ -218,10 +218,20 @@ function listKeys() {
   return { keys };
 }
 
+/**
+ * Holds the lock confirm and updateKey hold across their read and write-back,
+ * so neither can write a revoked key's record back after the delete.
+ */
 function revokeKey(body) {
-  const keyHash = findKeyHash(body.id);
-  PropertiesService.getScriptProperties().deleteProperty(KEY_PROPERTY_PREFIX + keyHash);
-  return { revoked: keyIdOf(keyHash) };
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const keyHash = findKeyHash(body.id);
+    PropertiesService.getScriptProperties().deleteProperty(KEY_PROPERTY_PREFIX + keyHash);
+    return { revoked: keyIdOf(keyHash) };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function getConfig() {
@@ -403,7 +413,12 @@ function confirmBooking(body, keyHash) {
       { conferenceDataVersion: 1, sendUpdates: 'all' }
     );
 
-    writeKeyRecord(keyHash, Object.assign({}, record, { uses: record.uses + 1, lastUsedAt: new Date().toISOString() }));
+    // The event already exists, so a key revoked meanwhile still gets its
+    // booking, but its record must not be written back into existence.
+    const latest = readKeyRecord(keyHash);
+    if (latest) {
+      writeKeyRecord(keyHash, Object.assign({}, latest, { uses: latest.uses + 1, lastUsedAt: new Date().toISOString() }));
+    }
     booked = { type, offered, meetLink: event.hangoutLink || null, keyLabel: record.label || '' };
   } finally {
     lock.releaseLock();
