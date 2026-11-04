@@ -34,7 +34,8 @@ export interface KeyTermsForm {
   label: string;
   unlimitedUses: boolean;
   uses: string;
-  expiryMode: "days" | "date";
+  /** "keep" sends no expiry fields, so an edit leaves the key's expiry untouched. */
+  expiryMode: "keep" | "days" | "date";
   days: string;
   date: string;
   allTypes: boolean;
@@ -54,16 +55,20 @@ export function formFromDefaults(defaults: KeyDefaults): KeyTermsForm {
   };
 }
 
-export function formFromKey(key: AccessKey, timeZone: string): KeyTermsForm {
+/**
+ * Ids of meeting types deleted since the key was saved are dropped: the picker
+ * can't show them to untick, and the backend rejects them.
+ */
+export function formFromKey(key: AccessKey, timeZone: string, types: { id: string }[]): KeyTermsForm {
   return {
     label: key.label,
     unlimitedUses: key.maxUses === null,
     uses: String(key.maxUses ?? Math.max(1, key.uses)),
-    expiryMode: "date",
+    expiryMode: "keep",
     days: "14",
     date: new Intl.DateTimeFormat("en-CA", { timeZone }).format(new Date(key.expiresAt)),
     allTypes: key.typeIds === null,
-    typeIds: key.typeIds ?? [],
+    typeIds: (key.typeIds ?? []).filter(id => types.some(type => type.id === id)),
   };
 }
 
@@ -83,7 +88,7 @@ export function termsFromForm(form: KeyTermsForm): { terms: KeyTerms } | { error
     const days = Number(form.days);
     if (!(days > 0 && days <= 365)) return { error: "Expiry must be between 1 and 365 days." };
     terms.expiresInDays = days;
-  } else {
+  } else if (form.expiryMode === "date") {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(form.date)) return { error: "Pick an expiry date." };
     terms.expiresOn = form.date;
   }
