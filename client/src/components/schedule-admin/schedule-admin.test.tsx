@@ -74,6 +74,68 @@ describe("ScheduleAdmin", () => {
     expect(sessionStorage.getItem("schedule-admin-token")).toBeNull();
   });
 
+  it("signs out when a wrong token is rate limited", async () => {
+    sessionStorage.setItem("schedule-admin-token", "wrong");
+    vi.mocked(adminApi.getConfig).mockRejectedValue(new ScheduleApiError("rate_limited"));
+    await act(async () => {
+      render(<ScheduleAdmin />);
+    });
+    expect(screen.getByRole("alert").textContent).toMatch(/Too many attempts/);
+    expect(sessionStorage.getItem("schedule-admin-token")).toBeNull();
+  });
+
+  it("keeps the stored token when the network fails on sign-in", async () => {
+    sessionStorage.setItem("schedule-admin-token", "secret");
+    vi.mocked(adminApi.getConfig).mockRejectedValueOnce(new ScheduleApiError("network_error"));
+    await act(async () => {
+      render(<ScheduleAdmin />);
+    });
+    expect(screen.getByRole("alert").textContent).not.toMatch(/isn't valid/);
+    expect(sessionStorage.getItem("schedule-admin-token")).toBe("secret");
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+    });
+    expect(adminApi.getConfig).toHaveBeenLastCalledWith("secret");
+    expect(screen.getByRole("tablist")).toBeTruthy();
+  });
+
+  it("stays signed in when reloading the latest settings hits a server error", async () => {
+    vi.mocked(adminApi.saveConfig).mockRejectedValue(new ScheduleApiError("config_conflict"));
+    await signIn();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Tuesday" }));
+    await clickSave();
+
+    vi.mocked(adminApi.getConfig).mockRejectedValueOnce(new ScheduleApiError("server_error"));
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Reload latest" }));
+    });
+    expect(screen.getByRole("tablist")).toBeTruthy();
+    expect(sessionStorage.getItem("schedule-admin-token")).toBe("secret");
+    expect(screen.getByRole("status").textContent).not.toMatch(/another tab/);
+  });
+
+  it("keeps edits made while a save is in flight", async () => {
+    let finishSave: (result: adminApi.VersionedConfig) => void = () => {};
+    vi.mocked(adminApi.saveConfig).mockImplementationOnce(() => new Promise(resolve => (finishSave = resolve)));
+    await signIn();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Tuesday" }));
+    await clickSave();
+    const sent = vi.mocked(adminApi.saveConfig).mock.calls[0][1];
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "Wednesday" }));
+    await act(async () => finishSave({ config: sent, version: "v2" }));
+
+    expect((screen.getByRole("checkbox", { name: "Wednesday" }) as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByRole("status").textContent).toMatch(/unsaved changes/);
+
+    vi.mocked(adminApi.saveConfig).mockImplementationOnce(async (_t, saved) => ({ config: saved, version: "v3" }));
+    await clickSave();
+    const [, resent, version] = vi.mocked(adminApi.saveConfig).mock.calls[1];
+    expect(version).toBe("v2");
+    expect(Object.keys(resent.weeklyHours).sort()).toEqual(["1", "2", "3"]);
+  });
+
   it("saves edited weekly hours with the version it loaded", async () => {
     vi.mocked(adminApi.saveConfig).mockImplementation(async (_t, saved) => ({ config: saved, version: "v2" }));
     await signIn();
