@@ -30,6 +30,11 @@ describe("booking-keys CLI", () => {
     });
   });
 
+  it("accepts the last day of a month, including a leap day", () => {
+    expect(request("issue", "--expires", "2026-12-31")).toEqual({ action: "issueKey", expiresOn: "2026-12-31" });
+    expect(request("issue", "--expires", "2028-02-29")).toEqual({ action: "issueKey", expiresOn: "2028-02-29" });
+  });
+
   it("only mints an unlimited key when asked explicitly", () => {
     expect(request("issue", "--uses", "unlimited")).toEqual({ action: "issueKey", unlimitedUses: true });
   });
@@ -40,6 +45,8 @@ describe("booking-keys CLI", () => {
     expect(request("issue", "--days", "-1")).toBeNull();
     expect(request("issue", "--days", "400")).toBeNull();
     expect(request("issue", "--expires", "10/31/2026")).toBeNull();
+    expect(request("issue", "--expires", "2026-11-31")).toBeNull();
+    expect(request("issue", "--expires", "2026-02-30")).toBeNull();
     expect(request("issue", "--days", "7", "--expires", "2026-10-31")).toBeNull();
     expect(request("issue", "--types", ",")).toBeNull();
     expect(request("issue", "--typo", "x")).toBeNull();

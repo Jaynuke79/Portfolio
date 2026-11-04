@@ -205,6 +205,18 @@ describe("resolveKeyTerms", () => {
     expect(resolve({}, { typeIds: ["gone"] }).error).toBe("unknown_type");
   });
 
+  it("rejects impossible dates instead of rolling them into the next month", () => {
+    expect(resolve({ expiresOn: "2026-11-31" }).error).toBe("invalid_expiry");
+    expect(resolve({ expiresOn: "2026-02-30" }).error).toBe("invalid_expiry");
+    expect(resolve({ expiresOn: "2026-10-00" }).error).toBe("invalid_expiry");
+    expect(resolve({ expiresOn: "2026-13-01" }).error).toBe("invalid_expiry");
+    expect(resolve({ expiresOn: "2026-12-31" }).terms!.expiresAt).toBe("2027-01-01T06:59:59.999Z");
+    const leapYearCtx = { ...ctx(), nowMs: Date.parse("2027-10-01T12:00:00Z") };
+    expect(gs.resolveKeyTerms({ expiresOn: "2028-02-29" }, leapYearCtx, null).terms!.expiresAt).toBe(
+      "2028-03-01T06:59:59.999Z"
+    );
+  });
+
   it("dedupes type ids", () => {
     expect(resolve({ typeIds: ["30min", "30min"] }).terms!.typeIds).toEqual(["30min"]);
   });
