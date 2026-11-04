@@ -571,16 +571,20 @@ describe("booking rate limits", () => {
     expect(bookNext(key, "ada@example.com").ok).toBe(true);
   });
 
-  it.todo("counts only an email's bookings from the trailing six hours, not all since its last booking");
+  it.todo(
+    "resets an email's count only after six hours with no booking, since each booking restarts the expiry, so it caps a chain of bookings rather than the trailing six hours"
+  );
 
-  it("caps all bookings at twenty per hour and resets on the next hour", () => {
+  it("caps all bookings at twenty per clock hour and resets when the next hour starts", () => {
+    vi.setSystemTime(new Date("2026-10-05T16:40:00Z"));
     for (let i = 0; i < 20; i++) expect(bookNext(issue().key, `guest${i}@example.com`).ok).toBe(true);
 
     const { key } = issue();
+    vi.setSystemTime(new Date("2026-10-05T16:59:59Z"));
     expect(bookNext(key, "late@example.com").error).toBe("rate_limited");
     expect(inserted).toHaveLength(20);
 
-    vi.setSystemTime(MONDAY_MORNING_DENVER.getTime() + HOUR_MS);
+    vi.setSystemTime(new Date("2026-10-05T17:00:01Z"));
     expect(bookNext(key, "late@example.com").ok).toBe(true);
   });
 });
