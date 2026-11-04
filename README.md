@@ -44,7 +44,8 @@ This portfolio is configured for automatic deployment to GitHub Pages using GitH
    - The workflow will build and deploy your site
 
 4. **Access Your Site**:
-   - Your portfolio will be available at: `https://[your-username].github.io/[repository-name]` (this repo deploys to the custom domain `j2a3e.com` via a CNAME written in the workflow)
+   - The site is served only at [https://j2a3e.com](https://j2a3e.com); the workflow writes a `CNAME` for that domain into the build output
+   - The `github.io` address is not supported: asset paths are absolute (for example `/Jayden_Alonzo-Estrada_Resume.pdf`), so images and PDFs break there
 
 ## 📝 Customization
 
@@ -57,15 +58,15 @@ To personalize this portfolio with your information, edit these files:
 
 ### Content Sections
 - `client/src/components/about.tsx` - Bio and background
-- `client/src/components/projects.tsx` - Project details and descriptions
+- `client/src/components/projects.tsx` - Renders the project cards (card content comes from `client/src/lib/featured-projects.ts`, below)
 - `client/src/components/skills.tsx` - Technical skills and certifications
 - `client/src/components/resume.tsx` - Education and experience
 
 ### Project Showcase
-- `client/src/lib/featured-projects.ts` - Which repos appear, their order, and per-project overrides
+- `client/src/lib/featured-projects.ts` - Project-card content: which repos appear, their order, and per-project overrides
 
-### Resume File
-- Replace `public/Jayden_Alonzo-Estrada_Resume.pdf` with your actual resume (keep the filename in sync with `client/src/components/resume.tsx`)
+### Resume and CV Files
+- Replace `public/Jayden_Alonzo-Estrada_Resume.pdf` with your actual resume and `public/Jayden_Alonzo-Estrada_CV.pdf` with your CV (keep both filenames in sync with the download links in `client/src/components/resume.tsx`)
 
 ## 🔧 Local Development
 
@@ -100,7 +101,7 @@ npm run build
 │   │   ├── lib/            # Utilities, featured-project config, GitHub data
 │   │   └── index.css       # Global styles
 │   └── index.html          # HTML template
-├── public/                 # Static assets (resume PDF, images, robots.txt, sitemap)
+├── public/                 # Static assets (resume and CV PDFs, images, robots.txt, sitemap)
 ├── apps-script/            # Google Apps Script scheduling backend (availability, booking, access keys)
 ├── scripts/                # GitHub data fetch, access-key CLI
 └── .github/
