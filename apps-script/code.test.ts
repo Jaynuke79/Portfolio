@@ -17,6 +17,10 @@ let post: (body: Json) => Json;
 let defaultConfig: () => Json;
 let sentMail: Json[];
 let mailFailsFor: string | null;
+let interleave: { at: "insert" | "configRead"; run: () => void } | null;
+let lockHeld: boolean;
+let lockWaiters: (() => void)[];
+let blockedOnLock: boolean;
 
 function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Code.js"]) {
   props = { ADMIN_TOKEN: ADMIN };
@@ -24,6 +28,16 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
   inserted = [];
   sentMail = [];
   mailFailsFor = null;
+  interleave = null;
+  lockHeld = false;
+  lockWaiters = [];
+  blockedOnLock = false;
+  const interleaveAt = (point: "insert" | "configRead") => {
+    if (interleave?.at !== point) return;
+    const { run } = interleave;
+    interleave = null;
+    run();
+  };
   const cache = new Map<string, string>();
   const context = createContext({
     console: { log() {}, error() {} },
@@ -37,7 +51,10 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
     Error,
     PropertiesService: {
       getScriptProperties: () => ({
-        getProperty: (k: string) => props[k] ?? null,
+        getProperty: (k: string) => {
+          if (k === "BOOKING_CONFIG") interleaveAt("configRead");
+          return props[k] ?? null;
+        },
         setProperty: (k: string, v: string) => (props[k] = v),
         setProperties: (values: Record<string, string>) => Object.assign(props, values),
         getProperties: () => ({ ...props }),
@@ -47,7 +64,21 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
     CacheService: {
       getScriptCache: () => ({ get: (k: string) => cache.get(k) ?? null, put: (k: string, v: string) => cache.set(k, v) }),
     },
-    LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+    LockService: {
+      getScriptLock: () => ({
+        waitLock() {
+          if (lockHeld) {
+            blockedOnLock = true;
+            throw new Error("Lock wait would block");
+          }
+          lockHeld = true;
+        },
+        releaseLock() {
+          lockHeld = false;
+          lockWaiters.splice(0).forEach(waiter => waiter());
+        },
+      }),
+    },
     Utilities: {
       getUuid: randomUUID,
       DigestAlgorithm: { SHA_256: "sha256" },
@@ -59,6 +90,7 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
       Freebusy: { query: () => ({ calendars: { primary: { busy } } }) },
       Events: {
         insert: (event: Json) => {
+          interleaveAt("insert");
           inserted.push(event);
           busy.push({ start: event.start.dateTime, end: event.end.dateTime });
           return { hangoutLink: "https://meet.google.com/test" };
@@ -98,6 +130,18 @@ function upcomingSlots(key: string, type = "30min"): { start: string; end: strin
 
 function confirm(key: string, start: string, extra: Json = {}): Json {
   return post({ action: "confirm", key, type: "30min", start, name: "Ada", email: "ada@example.com", ...extra });
+}
+
+/**
+ * Sends `body` as if from a second request arriving while another action is
+ * mid-flight. A real waitLock would park it until the lock frees, so if it hits
+ * the held lock it is replayed once the running action releases.
+ */
+function concurrently(body: Json, results: Json[]) {
+  blockedOnLock = false;
+  const result = post(body);
+  if (blockedOnLock) lockWaiters.push(() => results.push(post(body)));
+  else results.push(result);
 }
 
 beforeEach(() => loadBackend());
@@ -221,6 +265,36 @@ describe("meeting-type restrictions", () => {
     const config = defaultConfig();
     props.BOOKING_CONFIG = JSON.stringify({ ...config, types: config.types.filter((t: Json) => t.id !== "15min") });
     expect(post({ action: "access", key }).error).toBe("key_no_types");
+  });
+});
+
+describe("revoking a key while it is in use", () => {
+  it("keeps the key revoked when a booking with it is in flight", () => {
+    const { key, id } = issue({ maxUses: 3 });
+    const revoked: Json[] = [];
+    interleave = { at: "insert", run: () => concurrently({ action: "revokeKey", adminToken: ADMIN, id }, revoked) };
+    expect(confirm(key, upcomingSlots(key)[0].start).ok).toBe(true);
+    expect(revoked).toEqual([{ ok: true, revoked: id }]);
+    expect(post({ action: "access", key }).error).toBe("invalid_key");
+  });
+
+  it("keeps the booking but not the key when its property is deleted outside the lock", () => {
+    const { key, id } = issue({ maxUses: 3 });
+    const property = Object.keys(props).find(name => name.startsWith(`key:${id}`))!;
+    interleave = { at: "insert", run: () => delete props[property] };
+    expect(confirm(key, upcomingSlots(key)[0].start).ok).toBe(true);
+    expect(inserted).toHaveLength(1);
+    expect(props[property]).toBeUndefined();
+  });
+
+  it("keeps the key revoked when an edit to it is in flight", () => {
+    const { key, id } = issue();
+    const revoked: Json[] = [];
+    interleave = { at: "configRead", run: () => concurrently({ action: "revokeKey", adminToken: ADMIN, id }, revoked) };
+    expect(post({ action: "updateKey", adminToken: ADMIN, id, label: "renamed" }).ok).toBe(true);
+    expect(revoked).toEqual([{ ok: true, revoked: id }]);
+    expect(post({ action: "access", key }).error).toBe("invalid_key");
+    expect(post({ action: "listKeys", adminToken: ADMIN }).keys).toEqual([]);
   });
 });
 

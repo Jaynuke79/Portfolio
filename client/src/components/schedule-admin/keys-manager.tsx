@@ -40,7 +40,7 @@ export default function KeysManager({ token, config }: Props) {
   const [copied, setCopied] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<KeyTermsForm | null>(null);
-  const [rowError, setRowError] = useState<string | null>(null);
+  const [rowError, setRowError] = useState<{ keyId: string; message: string } | null>(null);
   const [confirmRevokeId, setConfirmRevokeId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
@@ -87,7 +87,7 @@ export default function KeysManager({ token, config }: Props) {
 
   const startEdit = (key: AccessKey) => {
     setEditingId(key.id);
-    setEditForm(formFromKey(key, config.timeZone));
+    setEditForm(formFromKey(key, config.timeZone, config.types));
     setRowError(null);
     setConfirmRevokeId(null);
   };
@@ -95,13 +95,13 @@ export default function KeysManager({ token, config }: Props) {
   const saveEdit = async (id: string) => {
     if (!editForm) return;
     const parsed = termsFromForm(editForm);
-    if ("error" in parsed) return setRowError(parsed.error);
+    if ("error" in parsed) return setRowError({ keyId: id, message: parsed.error });
     try {
       await updateKey(token, id, parsed.terms);
       setEditingId(null);
       await refresh();
     } catch (err) {
-      setRowError(errorMessage(err));
+      setRowError({ keyId: id, message: errorMessage(err) });
     }
   };
 
@@ -111,7 +111,7 @@ export default function KeysManager({ token, config }: Props) {
       setConfirmRevokeId(null);
       await refresh();
     } catch (err) {
-      setRowError(errorMessage(err));
+      setRowError({ keyId: id, message: errorMessage(err) });
     }
   };
 
@@ -179,13 +179,18 @@ export default function KeysManager({ token, config }: Props) {
               </div>
               {editingId === key.id && editForm && (
                 <div className="grid gap-4 rounded-md bg-muted/50 p-4">
-                  <KeyTermsFields form={editForm} onChange={setEditForm} types={config.types} />
-                  {rowError && <p role="alert" className="text-sm text-destructive">{rowError}</p>}
+                  <KeyTermsFields
+                    form={editForm}
+                    onChange={setEditForm}
+                    types={config.types}
+                    currentExpiry={formatExpiry(key.expiresAt, config.timeZone)}
+                  />
+                  {rowError?.keyId === key.id && <p role="alert" className="text-sm text-destructive">{rowError.message}</p>}
                   <Button type="button" className="w-fit" onClick={() => void saveEdit(key.id)}>Save key</Button>
                 </div>
               )}
-              {editingId !== key.id && confirmRevokeId === key.id && rowError && (
-                <p role="alert" className="text-sm text-destructive">{rowError}</p>
+              {editingId !== key.id && confirmRevokeId === key.id && rowError?.keyId === key.id && (
+                <p role="alert" className="text-sm text-destructive">{rowError.message}</p>
               )}
             </li>
           ))}

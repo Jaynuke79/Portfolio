@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { AccessKey } from "@/lib/schedule-admin-api";
 import { configNumberProblem, describeKeyTypes, formFromDefaults, formFromKey, newTypeId, termsFromForm } from "./booking-config";
 
 describe("newTypeId", () => {
@@ -34,21 +35,39 @@ describe("termsFromForm", () => {
 });
 
 describe("formFromKey", () => {
-  it("prefills an edit form with the key's expiry date in the owner's zone", () => {
-    const form = formFromKey(
-      {
-        id: "abc",
-        label: "Acme",
-        maxUses: null,
-        uses: 3,
-        createdAt: "2026-10-01T00:00:00Z",
-        expiresAt: "2026-11-01T05:59:59.999Z",
-        typeIds: ["15min"],
-        status: "ok",
-      },
-      "America/Denver"
-    );
-    expect(form).toMatchObject({ unlimitedUses: true, expiryMode: "date", date: "2026-10-31", allTypes: false, typeIds: ["15min"] });
+  const key: AccessKey = {
+    id: "abc",
+    label: "Acme",
+    maxUses: null,
+    uses: 3,
+    createdAt: "2026-10-01T00:00:00Z",
+    expiresAt: "2026-11-01T05:59:59.999Z",
+    typeIds: ["15min"],
+    status: "ok",
+  };
+  const types = [{ id: "15min" }, { id: "30min" }];
+
+  it("keeps the current expiry, with the date prefilled in the owner's zone", () => {
+    const form = formFromKey(key, "America/Denver", types);
+    expect(form).toMatchObject({ unlimitedUses: true, expiryMode: "keep", date: "2026-10-31", allTypes: false, typeIds: ["15min"] });
+  });
+
+  it("sends no expiry fields when only the label changes", () => {
+    const form = { ...formFromKey(key, "America/Denver", types), label: "Acme recruiter" };
+    expect(termsFromForm(form)).toEqual({ terms: { label: "Acme recruiter", unlimitedUses: true, typeIds: ["15min"] } });
+  });
+
+  it("sends the new expiry once the admin picks one", () => {
+    const form = formFromKey(key, "America/Denver", types);
+    expect(termsFromForm({ ...form, expiryMode: "days", days: "30" })).toMatchObject({ terms: { expiresInDays: 30 } });
+    expect(termsFromForm({ ...form, expiryMode: "date", date: "2026-12-01" })).toMatchObject({ terms: { expiresOn: "2026-12-01" } });
+  });
+
+  it("drops ids of meeting types that were deleted", () => {
+    expect(formFromKey({ ...key, typeIds: ["gone", "30min"] }, "America/Denver", types).typeIds).toEqual(["30min"]);
+    const emptied = formFromKey({ ...key, typeIds: ["gone"] }, "America/Denver", types);
+    expect(emptied).toMatchObject({ allTypes: false, typeIds: [] });
+    expect(termsFromForm(emptied)).toEqual({ error: expect.stringMatching(/meeting type/) });
   });
 });
 
