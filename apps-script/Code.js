@@ -391,14 +391,31 @@ function validateGuest(body) {
   return { name, email, notes };
 }
 
+/**
+ * Booking times for one email inside the trailing window. The counter the
+ * previous version stored here is a bare number with no times behind it, so it
+ * reads as no bookings.
+ */
+function readEmailBookingTimes(cache, emailKey, nowMs) {
+  let times;
+  try {
+    times = JSON.parse(cache.get(emailKey) || '[]');
+  } catch (err) {
+    times = [];
+  }
+  const windowStartMs = nowMs - PER_EMAIL_WINDOW_SECONDS * 1000;
+  return Array.isArray(times) ? times.filter(t => typeof t === 'number' && t > windowStartMs) : [];
+}
+
 function enforceRateLimit(email) {
   const cache = CacheService.getScriptCache();
+  const now = Date.now();
   const emailKey = `rl:email:${email}`;
-  const hourKey = `rl:hour:${Math.floor(Date.now() / 3600000)}`;
-  const emailCount = Number(cache.get(emailKey) || 0);
+  const hourKey = `rl:hour:${Math.floor(now / 3600000)}`;
+  const emailTimes = readEmailBookingTimes(cache, emailKey, now);
   const hourCount = Number(cache.get(hourKey) || 0);
-  if (emailCount >= PER_EMAIL_LIMIT || hourCount >= GLOBAL_HOURLY_LIMIT) throw new BookingError('rate_limited');
-  cache.put(emailKey, String(emailCount + 1), PER_EMAIL_WINDOW_SECONDS);
+  if (emailTimes.length >= PER_EMAIL_LIMIT || hourCount >= GLOBAL_HOURLY_LIMIT) throw new BookingError('rate_limited');
+  cache.put(emailKey, JSON.stringify(emailTimes.concat(now)), PER_EMAIL_WINDOW_SECONDS);
   cache.put(hourKey, String(hourCount + 1), 3600);
 }
 
