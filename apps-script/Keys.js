@@ -53,6 +53,15 @@ function keyStatus(record, nowMs) {
   return 'ok';
 }
 
+/** True for a YYYY-MM-DD string naming a real day, so 2026-11-31 is refused rather than read as December 1. */
+function isCalendarDateKey(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value));
+  if (!match) return false;
+  const [year, month, day] = match.slice(1).map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
 /**
  * The terms a key is issued or updated with. Each field comes from the request
  * when present, else from the key being updated, else from `keyDefaults`.
@@ -76,7 +85,7 @@ function resolveKeyTerms(body, { defaults, knownTypeIds, timeZone, nowMs }, curr
   if (body.expiresInDays !== undefined && body.expiresOn !== undefined) return { error: 'invalid_expiry' };
   let expiresMs;
   if (body.expiresOn !== undefined) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(body.expiresOn))) return { error: 'invalid_expiry' };
+    if (!isCalendarDateKey(body.expiresOn)) return { error: 'invalid_expiry' };
     expiresMs = wallTimeToEpochMs(body.expiresOn, '23:59', timeZone) + 59999;
   } else if (body.expiresInDays !== undefined) {
     expiresMs = nowMs + Number(body.expiresInDays) * 86400000;

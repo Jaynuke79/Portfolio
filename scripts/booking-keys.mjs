@@ -31,6 +31,14 @@ export function parseArgs(argv) {
   return { command, options, positional };
 }
 
+function isCalendarDateKey(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const [year, month, day] = match.slice(1).map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
 /** Request fields for the options given, or null if any option is malformed. */
 export function keyTermsFromOptions(options) {
   if (Object.keys(options).some(name => !OPTION_NAMES.has(name) || options[name] === undefined)) return null;
@@ -53,7 +61,7 @@ export function keyTermsFromOptions(options) {
     terms.expiresInDays = days;
   }
   if (options.expires !== undefined) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(options.expires)) return null;
+    if (!isCalendarDateKey(options.expires)) return null;
     terms.expiresOn = options.expires;
   }
 
