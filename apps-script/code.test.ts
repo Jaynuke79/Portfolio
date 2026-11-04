@@ -25,6 +25,7 @@ let interleave: { at: "insert" | "configRead"; run: () => void } | null;
 let lockHeld: boolean;
 let lockWaiters: (() => void)[];
 let blockedOnLock: boolean;
+let scriptCache: Map<string, { value: string; expiresAt: number }>;
 
 function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Code.js"]) {
   props = { ADMIN_TOKEN: ADMIN };
@@ -46,7 +47,7 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
     interleave = null;
     run();
   };
-  const cache = new Map<string, { value: string; expiresAt: number }>();
+  const cache = (scriptCache = new Map());
   const context = createContext({
     console: { log() {}, error() {} },
     Intl,
@@ -571,9 +572,35 @@ describe("booking rate limits", () => {
     expect(bookNext(key, "ada@example.com").ok).toBe(true);
   });
 
-  it.todo(
-    "resets an email's count only after six hours with no booking, since each booking restarts the expiry, so it caps a chain of bookings rather than the trailing six hours"
-  );
+  it("counts only the bookings in the trailing six hours, so spaced-out bookings never lock an email out", () => {
+    const { key } = issue({ maxUses: 10 });
+    for (const hours of [0, 5, 10]) {
+      vi.setSystemTime(MONDAY_MORNING_DENVER.getTime() + hours * HOUR_MS);
+      expect(bookNext(key, "ada@example.com").ok).toBe(true);
+    }
+    vi.setSystemTime(MONDAY_MORNING_DENVER.getTime() + 12 * HOUR_MS);
+    expect(bookNext(key, "ada@example.com").ok).toBe(true);
+  });
+
+  it("refuses a fourth booking until the oldest of three in six hours is more than six hours old", () => {
+    const { key } = issue({ maxUses: 10 });
+    for (const hours of [0, 2, 4]) {
+      vi.setSystemTime(MONDAY_MORNING_DENVER.getTime() + hours * HOUR_MS);
+      expect(bookNext(key, "ada@example.com").ok).toBe(true);
+    }
+    vi.setSystemTime(MONDAY_MORNING_DENVER.getTime() + 6 * HOUR_MS - 1000);
+    expect(bookNext(key, "ada@example.com").error).toBe("rate_limited");
+    vi.setSystemTime(MONDAY_MORNING_DENVER.getTime() + 6 * HOUR_MS + 1000);
+    expect(bookNext(key, "ada@example.com").ok).toBe(true);
+    expect(bookNext(key, "ada@example.com").error).toBe("rate_limited");
+  });
+
+  it("ignores a count left in the cache by the old per-email counter", () => {
+    const { key } = issue({ maxUses: 10 });
+    scriptCache.set("rl:email:ada@example.com", { value: "3", expiresAt: Infinity });
+    for (let i = 0; i < 3; i++) expect(bookNext(key, "ada@example.com").ok).toBe(true);
+    expect(bookNext(key, "ada@example.com").error).toBe("rate_limited");
+  });
 
   it("caps all bookings at twenty per clock hour and resets when the next hour starts", () => {
     vi.setSystemTime(new Date("2026-10-05T16:40:00Z"));
