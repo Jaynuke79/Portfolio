@@ -115,6 +115,63 @@ describe("buildSlots", () => {
     const result = slots({ busy: [{ start: "2026-10-05T15:00:00Z", end: "2026-10-05T17:00:00Z" }] });
     expect(result).toHaveLength(4);
   });
+
+  describe("across a DST switch", () => {
+    const EVERY_DAY_9_TO_11 = Object.fromEntries(["0", "1", "2", "3", "4", "5", "6"].map(d => [d, [["09:00", "11:00"]]]));
+    const wallClock = (iso: string) =>
+      new Intl.DateTimeFormat("en-CA", {
+        timeZone: DENVER,
+        hourCycle: "h23",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(new Date(iso));
+
+    it("keeps 9 AM wall-clock slots on the day DST starts", () => {
+      const result = slots({ startDate: "2026-03-07", endDate: "2026-03-09", weeklyHours: EVERY_DAY_9_TO_11 });
+      expect(result.filter((_, i) => i % 4 === 0).map(s => s.start)).toEqual([
+        "2026-03-07T16:00:00.000Z",
+        "2026-03-08T15:00:00.000Z",
+        "2026-03-09T15:00:00.000Z",
+      ]);
+      expect(result.map(s => wallClock(s.start).slice(-5))).toEqual(Array(3).fill(["09:00", "09:30", "10:00", "10:30"]).flat());
+    });
+
+    it("keeps 9 AM wall-clock slots on the day DST ends", () => {
+      const result = slots({ startDate: "2026-10-31", endDate: "2026-11-02", weeklyHours: EVERY_DAY_9_TO_11 });
+      expect(result.filter((_, i) => i % 4 === 0).map(s => s.start)).toEqual([
+        "2026-10-31T15:00:00.000Z",
+        "2026-11-01T16:00:00.000Z",
+        "2026-11-02T16:00:00.000Z",
+      ]);
+      expect(result.map(s => wallClock(s.start).slice(-5))).toEqual(Array(3).fill(["09:00", "09:30", "10:00", "10:30"]).flat());
+    });
+
+    it("skips the missing hour in a window that spans spring-forward", () => {
+      const result = slots({ startDate: "2026-03-08", endDate: "2026-03-08", weeklyHours: { 0: [["00:00", "04:00"]] } });
+      expect(result.map(s => s.start)).toEqual([
+        "2026-03-08T07:00:00.000Z",
+        "2026-03-08T07:30:00.000Z",
+        "2026-03-08T08:00:00.000Z",
+        "2026-03-08T08:30:00.000Z",
+        "2026-03-08T09:00:00.000Z",
+        "2026-03-08T09:30:00.000Z",
+      ]);
+      expect(result.map(s => wallClock(s.start).slice(-5))).toEqual(["00:00", "00:30", "01:00", "01:30", "03:00", "03:30"]);
+    });
+
+    it("offers the repeated hour once per instant in a window that spans fall-back", () => {
+      const result = slots({ startDate: "2026-11-01", endDate: "2026-11-01", weeklyHours: { 0: [["00:00", "04:00"]] } });
+      const starts = result.map(s => s.start);
+      expect(starts).toHaveLength(10);
+      expect(new Set(starts).size).toBe(10);
+      expect(starts[0]).toBe("2026-11-01T06:00:00.000Z");
+      expect(result.at(-1)!.end).toBe("2026-11-01T11:00:00.000Z");
+      expect(result.every((s, i) => i === 0 || Date.parse(s.start) - Date.parse(result[i - 1].start) === 30 * 60000)).toBe(true);
+    });
+  });
 });
 
 describe("access keys", () => {
