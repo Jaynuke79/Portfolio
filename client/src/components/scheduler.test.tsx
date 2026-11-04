@@ -39,8 +39,8 @@ async function enterKey(value: string) {
   });
 }
 
-async function reachDetails(slot: api.Slot) {
-  await enterKey("ABCD-EFGH-JKMN-PQRS");
+async function reachDetails(slot: api.Slot, { keyEntered = false } = {}) {
+  if (!keyEntered) await enterKey("ABCD-EFGH-JKMN-PQRS");
   await act(async () => {
     fireEvent.click(screen.getByRole("button", { name: /30 Minute Chat/ }));
   });
@@ -141,6 +141,61 @@ describe("Scheduler", () => {
     expect(screen.getByRole("alert").textContent).toMatch(/just taken/);
     expect(screen.getByLabelText("Time zone")).toBeTruthy();
     expect(vi.mocked(api.fetchSlots).mock.calls.length).toBeGreaterThan(fetchesBefore);
+  });
+
+  it("moves focus to the new step's heading after choosing a type and a time", async () => {
+    const slot = slotTomorrowAtNoonUtc();
+    vi.mocked(api.fetchBookingInfo).mockResolvedValue(INFO);
+    vi.mocked(api.fetchSlots).mockResolvedValue([slot]);
+    render(<Scheduler />);
+    await enterKey("ABCD-EFGH-JKMN-PQRS");
+    expect(document.activeElement).toBe(screen.getByRole("heading", { name: "Choose a meeting type" }));
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /30 Minute Chat/ }));
+    });
+    expect(document.activeElement).toBe(screen.getByRole("heading", { name: "Pick a time" }));
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Change meeting type" }));
+    });
+    await reachDetails(slot, { keyEntered: true });
+    expect(document.activeElement).toBe(screen.getByRole("heading", { name: "Your details" }));
+  });
+
+  it("leaves focus alone when a stored key unlocks the flow on page load", async () => {
+    sessionStorage.setItem("schedule-access-key", "ABCD-EFGH-JKMN-PQRS");
+    vi.mocked(api.fetchBookingInfo).mockResolvedValue(INFO);
+    await act(async () => {
+      render(<Scheduler />);
+    });
+
+    expect(screen.getByRole("heading", { name: "Choose a meeting type" })).toBeTruthy();
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it("drops the previous type's slots when the meeting type changes", async () => {
+    const slot = slotTomorrowAtNoonUtc();
+    vi.mocked(api.fetchBookingInfo).mockResolvedValue(INFO);
+    vi.mocked(api.fetchSlots).mockImplementation((_key, typeId) =>
+      typeId === "30min" ? Promise.resolve([slot]) : new Promise(() => {})
+    );
+    render(<Scheduler />);
+    await enterKey("ABCD-EFGH-JKMN-PQRS");
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /30 Minute Chat/ }));
+    });
+    expect(screen.queryAllByRole("button", { name: /\d+ times? available/ }).length).toBeGreaterThan(0);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Change meeting type" }));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /15 Minute Chat/ }));
+    });
+
+    expect(screen.queryAllByRole("button", { name: /\d+ times? available/ })).toEqual([]);
+    expect(screen.queryByRole("button", { name: "12:00 PM" })).toBeNull();
   });
 
   it("returns to the key gate when the key stops working mid-flow", async () => {
