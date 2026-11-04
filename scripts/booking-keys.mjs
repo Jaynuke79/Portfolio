@@ -1,3 +1,5 @@
+import { pathToFileURL } from 'node:url';
+
 const USAGE = `Usage:
   npm run booking-keys -- issue [options]
   npm run booking-keys -- update <id> [options]
@@ -138,6 +140,6 @@ async function main() {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   await main();
 }

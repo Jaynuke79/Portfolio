@@ -18,6 +18,24 @@ function singleLine(text) {
   return String(text).replace(/[\r\n]+/g, ' ').trim();
 }
 
+function renderEmail(heading, rows, footer) {
+  const htmlRows = rows
+    .map(([label, value, isLink]) => {
+      const shown = isLink
+        ? `<a href="${escapeHtml(value)}" style="color:#0f766e">${escapeHtml(value)}</a>`
+        : escapeHtml(value).replace(/\n/g, '<br>');
+      return `<tr><td style="padding:6px 16px 6px 0;color:#6b7280;vertical-align:top;white-space:nowrap">${escapeHtml(label)}</td><td style="padding:6px 0">${shown}</td></tr>`;
+    })
+    .join('');
+  const htmlBody =
+    `<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;font-size:15px;color:#111827;max-width:560px">` +
+    `<h2 style="font-size:20px;margin:0 0 16px">${escapeHtml(heading)}</h2>` +
+    `<table style="border-collapse:collapse">${htmlRows}</table>` +
+    `<p style="margin:20px 0 0;color:#6b7280;font-size:13px">${escapeHtml(footer)}</p></div>`;
+  const body = [heading, '', ...rows.map(([label, value]) => `${label}: ${value}`), '', footer].join('\n');
+  return { htmlBody, body };
+}
+
 /** "Tuesday, October 6, 2026, 9:00 AM – 9:30 AM MDT", read in `timeZone`. */
 function formatMeetingWhen(startIso, endIso, timeZone) {
   const date = new Intl.DateTimeFormat('en-US', {
