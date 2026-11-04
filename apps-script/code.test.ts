@@ -533,17 +533,20 @@ describe("confirmation emails", () => {
   });
 });
 
-describe("booking rate limits", () => {
-  const MONDAY_MORNING_DENVER = new Date("2026-10-05T16:00:00Z");
-  const HOUR_MS = 60 * 60 * 1000;
+const MONDAY_MORNING_DENVER = new Date("2026-10-05T16:00:00Z");
 
+function onFixedClock(at: Date) {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["Date"] });
-    vi.setSystemTime(MONDAY_MORNING_DENVER);
+    vi.setSystemTime(at);
     loadBackend();
   });
-
   afterEach(() => vi.useRealTimers());
+}
+
+describe("booking rate limits", () => {
+  const HOUR_MS = 60 * 60 * 1000;
+  onFixedClock(MONDAY_MORNING_DENVER);
 
   function bookNext(key: string, email: string): Json {
     return confirm(key, upcomingSlots(key)[0].start, { email });
@@ -568,6 +571,8 @@ describe("booking rate limits", () => {
     expect(bookNext(key, "ada@example.com").ok).toBe(true);
   });
 
+  it.todo("counts only an email's bookings from the trailing six hours, not all since its last booking");
+
   it("caps all bookings at twenty per hour and resets on the next hour", () => {
     for (let i = 0; i < 20; i++) expect(bookNext(issue().key, `guest${i}@example.com`).ok).toBe(true);
 
@@ -582,6 +587,7 @@ describe("booking rate limits", () => {
 
 describe("unreadable calendars", () => {
   const BOOKING_CALENDAR = "bookings@example.com";
+  onFixedClock(MONDAY_MORNING_DENVER);
 
   it("refuses to list slots when free/busy reports an error for a calendar", () => {
     const { key } = issue();
@@ -607,6 +613,8 @@ describe("unreadable calendars", () => {
 });
 
 describe("slot range checks", () => {
+  onFixedClock(MONDAY_MORNING_DENVER);
+
   function slotsBetween(start: unknown, end: unknown): Json {
     return post({ action: "slots", key: issue().key, type: "30min", start, end });
   }
