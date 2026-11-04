@@ -314,14 +314,15 @@ describe("config editing", () => {
 describe("confirmation emails", () => {
   it("emails the guest and the owner after a booking", () => {
     const { key } = issue({ label: "Recruiter" });
-    const result = confirm(key, upcomingSlots(key)[0].start, { guestTimeZone: "Europe/London" });
+    const result = confirm(key, upcomingSlots(key)[0].start, { guestTimeZone: "Asia/Tokyo" });
     expect(result.emailed).toEqual({ guest: true, owner: true });
     expect(sentMail.map(m => [m.to, m.replyTo])).toEqual([
       ["ada@example.com", "owner@example.com"],
       ["owner@example.com", "ada@example.com"],
     ]);
     expect(sentMail[0].name).toBe("Meet with Jayden");
-    expect(sentMail[0].subject).toMatch(/GMT\+1$/);
+    expect(sentMail[0].subject).toMatch(/GMT\+9$/);
+    expect(sentMail[1].subject).toMatch(/M[SD]T$/);
     expect(sentMail[1].body).toContain("Key: Recruiter");
   });
 
