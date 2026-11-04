@@ -34,6 +34,12 @@ type Step = "key" | "type" | "time" | "details" | "confirmed";
 
 const KEY_STORAGE = "schedule-access-key";
 const HONEYPOT_FIELD = "website";
+const FOCUSED_HEADING = "rounded-sm ring-offset-background focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2";
+const STEP_HEADINGS: Partial<Record<Step, string>> = {
+  type: "Choose a meeting type",
+  time: "Pick a time",
+  details: "Your details",
+};
 
 function readStoredKey(): string {
   try {
@@ -123,6 +129,10 @@ export default function Scheduler() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [result, setResult] = useState<ConfirmResult | null>(null);
 
+  const stepHeadingRef = useRef<HTMLHeadingElement>(null);
+  const previousStep = useRef(step);
+  const focusOnUnlock = useRef(false);
+
   const rejectKey = useCallback((code: string) => {
     storeKey(null);
     setAccessKey("");
@@ -132,11 +142,12 @@ export default function Scheduler() {
   }, []);
 
   const unlock = useCallback(
-    async (candidate: string) => {
+    async (candidate: string, moveFocus: boolean) => {
       setCheckingKey(true);
       setKeyError(null);
       try {
         const booking = await fetchBookingInfo(candidate);
+        focusOnUnlock.current = moveFocus;
         storeKey(candidate);
         setAccessKey(candidate);
         setInfo(booking);
@@ -160,8 +171,16 @@ export default function Scheduler() {
   useEffect(() => {
     // Only the key restored from storage on first render is auto-checked.
     const restored = readStoredKey();
-    if (restored) void unlock(restored);
+    if (restored) void unlock(restored, false);
   }, [unlock]);
+
+  useEffect(() => {
+    const from = previousStep.current;
+    previousStep.current = step;
+    if (from === step || !STEP_HEADINGS[step]) return;
+    if (from === "key" && !focusOnUnlock.current) return;
+    stepHeadingRef.current?.focus();
+  }, [step]);
 
   useEffect(() => {
     if (step !== "time" || !type || !accessKey) return;
@@ -236,7 +255,7 @@ export default function Scheduler() {
 
   const handleKeySubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    void unlock(keyInput.trim());
+    void unlock(keyInput.trim(), true);
   };
 
   const handleConfirm = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -334,7 +353,7 @@ export default function Scheduler() {
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-md bg-brand-soft">
             <CalendarCheck className="h-5 w-5 text-brand" aria-hidden="true" />
           </div>
-          <h1 className="mb-2 text-2xl font-semibold tracking-tight" tabIndex={-1} ref={el => el?.focus()}>
+          <h1 className={cn("mb-2 text-2xl font-semibold tracking-tight", FOCUSED_HEADING)} tabIndex={-1} ref={el => el?.focus()}>
             You're booked
           </h1>
           <p className="text-sm text-muted-foreground">{type.name}</p>
@@ -369,6 +388,9 @@ export default function Scheduler() {
         </header>
       )}
       <Stepper labels={stepLabels} current={stepIndex} />
+      <h2 ref={stepHeadingRef} tabIndex={-1} className={cn("mb-4 text-lg font-semibold tracking-tight", FOCUSED_HEADING)}>
+        {STEP_HEADINGS[step]}
+      </h2>
 
       {step === "type" && info && (
         <ul className="grid gap-3">
@@ -377,6 +399,10 @@ export default function Scheduler() {
               <button
                 type="button"
                 onClick={() => {
+                  if (t.id !== type?.id) {
+                    setSlots([]);
+                    setSlotsView(null);
+                  }
                   setType(t);
                   setSelectedDate(null);
                   setStep("time");
