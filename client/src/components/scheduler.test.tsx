@@ -198,6 +198,128 @@ describe("Scheduler", () => {
     expect(screen.queryByRole("button", { name: "12:00 PM" })).toBeNull();
   });
 
+  describe("on a fixed date", () => {
+    const MID_OCTOBER = new Date("2026-10-15T18:00:00Z");
+    const OCT_20_3PM_UTC: api.Slot = { start: "2026-10-20T15:00:00.000Z", end: "2026-10-20T15:30:00.000Z" };
+    const NOV_10_5PM_UTC: api.Slot = { start: "2026-11-10T17:00:00.000Z", end: "2026-11-10T17:30:00.000Z" };
+
+    function serveSlots(all: api.Slot[]) {
+      vi.mocked(api.fetchSlots).mockImplementation(async (_key, _type, start, end) =>
+        all.filter(s => s.start.slice(0, 10) >= start && s.start.slice(0, 10) <= end)
+      );
+    }
+
+    async function openCalendar(now: Date, zone = "Africa/Abidjan") {
+      vi.setSystemTime(now);
+      vi.mocked(api.fetchBookingInfo).mockResolvedValue(INFO);
+      render(<Scheduler />);
+      await enterKey("ABCD-EFGH-JKMN-PQRS");
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: /30 Minute Chat/ }));
+      });
+      await act(async () => {
+        fireEvent.change(screen.getByLabelText("Time zone"), { target: { value: zone } });
+      });
+    }
+
+    const day = (label: string) => screen.getByRole("button", { name: new RegExp(`^\\w+day, ${label}, `) });
+    const month = (delta: "Previous month" | "Next month") =>
+      act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: delta }));
+      });
+
+    beforeEach(() => vi.useFakeTimers({ toFake: ["Date"] }));
+    afterEach(() => vi.useRealTimers());
+
+    it("pages between months within the booking horizon", async () => {
+      serveSlots([OCT_20_3PM_UTC, NOV_10_5PM_UTC]);
+      await openCalendar(MID_OCTOBER);
+      expect(screen.getByRole("heading", { name: "October 2026" })).toBeTruthy();
+      expect(day("October 20").getAttribute("aria-label")).toMatch(/1 time available$/);
+
+      const fetches = vi.mocked(api.fetchSlots).mock.calls.length;
+      expect(screen.getByRole("button", { name: "Previous month" }).getAttribute("aria-disabled")).toBe("true");
+      await month("Previous month");
+      expect(screen.getByRole("heading", { name: "October 2026" })).toBeTruthy();
+      expect(vi.mocked(api.fetchSlots).mock.calls.length).toBe(fetches);
+
+      await month("Next month");
+      expect(screen.getByRole("heading", { name: "November 2026" })).toBeTruthy();
+      expect(vi.mocked(api.fetchSlots).mock.lastCall).toEqual(["ABCD-EFGH-JKMN-PQRS", "30min", "2026-10-30", "2026-12-02"]);
+      expect(day("November 10").getAttribute("aria-label")).toMatch(/1 time available$/);
+
+      expect(screen.getByRole("button", { name: "Next month" }).getAttribute("aria-disabled")).toBe("true");
+      await month("Next month");
+      expect(screen.getByRole("heading", { name: "November 2026" })).toBeTruthy();
+
+      await month("Previous month");
+      expect(screen.getByRole("heading", { name: "October 2026" })).toBeTruthy();
+      expect(day("October 20").getAttribute("aria-label")).toMatch(/1 time available$/);
+    });
+
+    it("jumps once to next month when this month has nothing open", async () => {
+      serveSlots([NOV_10_5PM_UTC]);
+      await openCalendar(new Date("2026-10-28T18:00:00Z"));
+      expect(screen.getByRole("heading", { name: "November 2026" })).toBeTruthy();
+      expect(vi.mocked(api.fetchSlots).mock.calls.map(call => call.slice(2))).toEqual([
+        ["2026-09-29", "2026-11-02"],
+        ["2026-10-30", "2026-12-02"],
+      ]);
+      expect(day("November 10").getAttribute("aria-label")).toMatch(/1 time available$/);
+    });
+
+    it("stays on next month rather than chasing availability further", async () => {
+      vi.mocked(api.fetchBookingInfo).mockResolvedValue({ ...INFO, horizonDays: 90 });
+      serveSlots([]);
+      vi.setSystemTime(new Date("2026-10-28T18:00:00Z"));
+      render(<Scheduler />);
+      await enterKey("ABCD-EFGH-JKMN-PQRS");
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: /30 Minute Chat/ }));
+      });
+      expect(screen.getByRole("heading", { name: "November 2026" })).toBeTruthy();
+      await act(async () => {});
+      expect(screen.getByRole("heading", { name: "November 2026" })).toBeTruthy();
+      expect(api.fetchSlots).toHaveBeenCalledTimes(2);
+      expect(screen.getByText(/No open times this month/)).toBeTruthy();
+    });
+
+    it("re-labels slots for the visitor's time zone but books the same instant", async () => {
+      serveSlots([OCT_20_3PM_UTC]);
+      vi.mocked(api.confirmBooking).mockResolvedValue({ start: OCT_20_3PM_UTC.start, end: OCT_20_3PM_UTC.end, meetLink: null });
+      await openCalendar(MID_OCTOBER);
+      const fetches = vi.mocked(api.fetchSlots).mock.calls.length;
+
+      fireEvent.click(day("October 20"));
+      expect(screen.getByRole("button", { name: "3:00 PM" })).toBeTruthy();
+
+      await act(async () => {
+        fireEvent.change(screen.getByLabelText("Time zone"), { target: { value: "Asia/Tokyo" } });
+      });
+      expect(screen.getByRole("heading", { name: "Select a day" })).toBeTruthy();
+      expect(day("October 20").getAttribute("aria-label")).toMatch(/no availability$/);
+      fireEvent.click(day("October 21"));
+      expect(screen.getByRole("button", { name: "12:00 AM" })).toBeTruthy();
+
+      await act(async () => {
+        fireEvent.change(screen.getByLabelText("Time zone"), { target: { value: "America/Denver" } });
+      });
+      fireEvent.click(day("October 20"));
+      fireEvent.click(screen.getByRole("button", { name: "9:00 AM" }));
+      expect(screen.getByText(/Tuesday, October 20 at 9:00 AM MDT/)).toBeTruthy();
+      expect(vi.mocked(api.fetchSlots).mock.calls.length).toBe(fetches);
+
+      fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Ada" } });
+      fireEvent.change(screen.getByLabelText("Email"), { target: { value: "ada@example.com" } });
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: "Confirm booking" }));
+      });
+      expect(api.confirmBooking).toHaveBeenCalledWith(
+        expect.objectContaining({ slot: OCT_20_3PM_UTC, guestTimeZone: "America/Denver" })
+      );
+    });
+  });
+
   it("returns to the key gate when the key stops working mid-flow", async () => {
     vi.mocked(api.fetchBookingInfo).mockResolvedValue(INFO);
     vi.mocked(api.fetchSlots).mockRejectedValue(new api.ScheduleApiError("key_expired"));

@@ -8,6 +8,7 @@
     "build": "vite build --config vite.config.github.ts",
     "preview": "vite preview --config vite.config.github.ts",
     "check": "tsc",
+    "check:tests": "tsc -p tsconfig.test.json",
     "test": "vitest run",
     "booking-keys": "node scripts/booking-keys.mjs",
     "fetch-projects": "node scripts/fetch-github-projects.mjs"

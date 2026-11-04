@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createContext, runInContext } from "node:vm";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 type Json = Record<string, any>;
 
@@ -15,6 +15,7 @@ let busy: { start: string; end: string }[];
 let busyOn: Record<string, { start: string; end: string }[]>;
 let freebusyQueries: string[][];
 let freebusyLags: boolean;
+let unreadableCalendars: Record<string, "errors" | "missing">;
 let inserted: Json[];
 let post: (body: Json) => Json;
 let defaultConfig: () => Json;
@@ -31,6 +32,7 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
   busyOn = { primary: busy };
   freebusyQueries = [];
   freebusyLags = false;
+  unreadableCalendars = {};
   inserted = [];
   sentMail = [];
   mailFailsFor = null;
@@ -44,7 +46,7 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
     interleave = null;
     run();
   };
-  const cache = new Map<string, string>();
+  const cache = new Map<string, { value: string; expiresAt: number }>();
   const context = createContext({
     console: { log() {}, error() {} },
     Intl,
@@ -68,7 +70,14 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
       }),
     },
     CacheService: {
-      getScriptCache: () => ({ get: (k: string) => cache.get(k) ?? null, put: (k: string, v: string) => cache.set(k, v) }),
+      getScriptCache: () => ({
+        get: (k: string) => {
+          const entry = cache.get(k);
+          return entry && entry.expiresAt > Date.now() ? entry.value : null;
+        },
+        put: (k: string, value: string, ttlSeconds?: number) =>
+          cache.set(k, { value, expiresAt: ttlSeconds === undefined ? Infinity : Date.now() + ttlSeconds * 1000 }),
+      }),
     },
     LockService: {
       getScriptLock: () => ({
@@ -96,7 +105,17 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
       Freebusy: {
         query: ({ items }: { items: { id: string }[] }) => {
           freebusyQueries.push(items.map(item => item.id));
-          return { calendars: Object.fromEntries(items.map(({ id }) => [id, { busy: busyOn[id] ?? [] }])) };
+          const readable = items.filter(({ id }) => unreadableCalendars[id] !== "missing");
+          return {
+            calendars: Object.fromEntries(
+              readable.map(({ id }) => [
+                id,
+                unreadableCalendars[id] === "errors"
+                  ? { busy: [], errors: [{ domain: "global", reason: "notFound" }] }
+                  : { busy: busyOn[id] ?? [] },
+              ])
+            ),
+          };
         },
       },
       Events: {
@@ -511,5 +530,101 @@ describe("confirmation emails", () => {
       version: null,
     });
     expect(good.config.notifications).toEqual({ emailGuest: true, emailOwner: false, ownerEmail: "me@example.com" });
+  });
+});
+
+describe("booking rate limits", () => {
+  const MONDAY_MORNING_DENVER = new Date("2026-10-05T16:00:00Z");
+  const HOUR_MS = 60 * 60 * 1000;
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(MONDAY_MORNING_DENVER);
+    loadBackend();
+  });
+
+  afterEach(() => vi.useRealTimers());
+
+  function bookNext(key: string, email: string): Json {
+    return confirm(key, upcomingSlots(key)[0].start, { email });
+  }
+
+  it("allows three bookings per email in six hours, then refuses without booking", () => {
+    const { key } = issue({ maxUses: 10 });
+    for (let i = 0; i < 3; i++) expect(bookNext(key, "ada@example.com").ok).toBe(true);
+
+    expect(bookNext(key, "ADA@example.com").error).toBe("rate_limited");
+    expect(inserted).toHaveLength(3);
+    expect(post({ action: "listKeys", adminToken: ADMIN }).keys[0].uses).toBe(3);
+    expect(bookNext(key, "bob@example.com").ok).toBe(true);
+  });
+
+  it("lets the same email book again once the six-hour window has passed", () => {
+    const { key } = issue({ maxUses: 10 });
+    for (let i = 0; i < 3; i++) bookNext(key, "ada@example.com");
+    vi.setSystemTime(MONDAY_MORNING_DENVER.getTime() + 6 * HOUR_MS - 1000);
+    expect(bookNext(key, "ada@example.com").error).toBe("rate_limited");
+    vi.setSystemTime(MONDAY_MORNING_DENVER.getTime() + 6 * HOUR_MS + 1000);
+    expect(bookNext(key, "ada@example.com").ok).toBe(true);
+  });
+
+  it("caps all bookings at twenty per hour and resets on the next hour", () => {
+    for (let i = 0; i < 20; i++) expect(bookNext(issue().key, `guest${i}@example.com`).ok).toBe(true);
+
+    const { key } = issue();
+    expect(bookNext(key, "late@example.com").error).toBe("rate_limited");
+    expect(inserted).toHaveLength(20);
+
+    vi.setSystemTime(MONDAY_MORNING_DENVER.getTime() + HOUR_MS);
+    expect(bookNext(key, "late@example.com").ok).toBe(true);
+  });
+});
+
+describe("unreadable calendars", () => {
+  const BOOKING_CALENDAR = "bookings@example.com";
+
+  it("refuses to list slots when free/busy reports an error for a calendar", () => {
+    const { key } = issue();
+    unreadableCalendars.primary = "errors";
+    expect(post({ action: "slots", key, type: "30min", start: "2026-10-05", end: "2026-10-09" }).error).toBe(
+      "calendar_unavailable"
+    );
+    expect(post({ action: "previewSlots", adminToken: ADMIN, type: "30min" }).error).toBe("calendar_unavailable");
+  });
+
+  it("refuses to book when a calendar is missing from the free/busy answer, and keeps the key", () => {
+    props.BOOKING_CONFIG = JSON.stringify({ ...defaultConfig(), calendarId: BOOKING_CALENDAR, busyCalendarIds: ["primary"] });
+    const { key } = issue();
+    const start = upcomingSlots(key)[0].start;
+    unreadableCalendars[BOOKING_CALENDAR] = "missing";
+
+    expect(confirm(key, start).error).toBe("calendar_unavailable");
+    expect(inserted).toHaveLength(0);
+    expect(sentMail).toHaveLength(0);
+    delete unreadableCalendars[BOOKING_CALENDAR];
+    expect(confirm(key, start).ok).toBe(true);
+  });
+});
+
+describe("slot range checks", () => {
+  function slotsBetween(start: unknown, end: unknown): Json {
+    return post({ action: "slots", key: issue().key, type: "30min", start, end });
+  }
+
+  it("rejects missing, malformed and backwards ranges before reading the calendar", () => {
+    expect(slotsBetween(undefined, "2026-10-09").error).toBe("invalid_range");
+    expect(slotsBetween("2026-10-05", undefined).error).toBe("invalid_range");
+    expect(slotsBetween("2026-10-5", "2026-10-09").error).toBe("invalid_range");
+    expect(slotsBetween("2026-10-05T00:00", "2026-10-09").error).toBe("invalid_range");
+    expect(slotsBetween("2026-10-09", "2026-10-05").error).toBe("invalid_range");
+    expect(freebusyQueries).toEqual([]);
+  });
+
+  it("accepts a single day and up to 45 days, and refuses 46", () => {
+    expect(slotsBetween("2026-10-05", "2026-10-05").ok).toBe(true);
+    expect(slotsBetween("2026-10-01", "2026-11-14").ok).toBe(true);
+    const queriesBefore = freebusyQueries.length;
+    expect(slotsBetween("2026-10-01", "2026-11-15").error).toBe("invalid_range");
+    expect(freebusyQueries).toHaveLength(queriesBefore);
   });
 });
