@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build --config vite.config.github.ts",
-    "preview": "vite preview",
+    "preview": "vite preview --config vite.config.github.ts",
     "check": "tsc",
     "test": "vitest run",
     "booking-keys": "node scripts/booking-keys.mjs",
@@ -30,7 +30,6 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
-    "@tailwindcss/typography": "^0.5.15",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^20.19.43",
     "@types/react": "^19.2.17",

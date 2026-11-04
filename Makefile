@@ -1,3 +1,3 @@
 all:
 	npx vite build --config vite.config.github.ts
-	serve docs
+	npx vite preview --config vite.config.github.ts
