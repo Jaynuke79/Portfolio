@@ -19,6 +19,8 @@ const PREVIEW_DAYS = 14;
 const PER_EMAIL_LIMIT = 3;
 const PER_EMAIL_WINDOW_SECONDS = 6 * 60 * 60;
 const GLOBAL_HOURLY_LIMIT = 20;
+const RECENT_BOOKINGS_CACHE_KEY = 'recentBookings';
+const RECENT_BOOKING_TTL_SECONDS = 10 * 60;
 
 class BookingError extends Error {}
 
@@ -300,8 +302,40 @@ function bookingWindow(config) {
   };
 }
 
+/** The busy calendars plus the one bookings are written to, so a booking always blocks its own slot. */
+function freebusyCalendarIds(config) {
+  const busyIds = config.busyCalendarIds && config.busyCalendarIds.length ? config.busyCalendarIds : ['primary'];
+  const ids = [config.calendarId || 'primary', ...busyIds];
+  return ids.filter((id, i) => ids.indexOf(id) === i);
+}
+
+/**
+ * Bookings from the last few minutes, which free/busy may not report yet.
+ * Only confirmBooking writes them, under the script lock, so concurrent
+ * bookings accumulate rather than overwrite each other.
+ */
+function readRecentBookings(nowMs) {
+  let entries;
+  try {
+    entries = JSON.parse(CacheService.getScriptCache().get(RECENT_BOOKINGS_CACHE_KEY) || '[]');
+  } catch (err) {
+    entries = [];
+  }
+  return Array.isArray(entries) ? entries.filter(entry => entry.until > nowMs) : [];
+}
+
+function rememberBooking(slot) {
+  const now = Date.now();
+  const entries = readRecentBookings(now).concat({
+    start: slot.start,
+    end: slot.end,
+    until: now + RECENT_BOOKING_TTL_SECONDS * 1000,
+  });
+  CacheService.getScriptCache().put(RECENT_BOOKINGS_CACHE_KEY, JSON.stringify(entries), RECENT_BOOKING_TTL_SECONDS);
+}
+
 function fetchBusy(config, timeMinMs, timeMaxMs) {
-  const ids = config.busyCalendarIds && config.busyCalendarIds.length ? config.busyCalendarIds : ['primary'];
+  const ids = freebusyCalendarIds(config);
   const result = Calendar.Freebusy.query({
     timeMin: new Date(timeMinMs).toISOString(),
     timeMax: new Date(timeMaxMs).toISOString(),
@@ -315,6 +349,7 @@ function fetchBusy(config, timeMinMs, timeMaxMs) {
     if (!calendar || (calendar.errors && calendar.errors.length)) throw new BookingError('calendar_unavailable');
     busy.push(...calendar.busy);
   }
+  for (const { start, end } of readRecentBookings(Date.now())) busy.push({ start, end });
   return busy;
 }
 
@@ -412,6 +447,12 @@ function confirmBooking(body, keyHash) {
       config.calendarId || 'primary',
       { conferenceDataVersion: 1, sendUpdates: 'all' }
     );
+    // Losing this entry only leaves the next confirm to free/busy, so it must not fail a booking that exists.
+    try {
+      rememberBooking(offered);
+    } catch (err) {
+      console.error(err);
+    }
 
     // The event already exists, so a key revoked meanwhile still gets its
     // booking, but its record must not be written back into existence.

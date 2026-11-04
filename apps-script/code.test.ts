@@ -12,6 +12,9 @@ const ADMIN = "admin-token";
 
 let props: Record<string, string>;
 let busy: { start: string; end: string }[];
+let busyOn: Record<string, { start: string; end: string }[]>;
+let freebusyQueries: string[][];
+let freebusyLags: boolean;
 let inserted: Json[];
 let post: (body: Json) => Json;
 let defaultConfig: () => Json;
@@ -25,6 +28,9 @@ let blockedOnLock: boolean;
 function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Code.js"]) {
   props = { ADMIN_TOKEN: ADMIN };
   busy = [];
+  busyOn = { primary: busy };
+  freebusyQueries = [];
+  freebusyLags = false;
   inserted = [];
   sentMail = [];
   mailFailsFor = null;
@@ -87,12 +93,17 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
         [...createHash("sha256").update(text).digest()].map(b => (b > 127 ? b - 256 : b)),
     },
     Calendar: {
-      Freebusy: { query: () => ({ calendars: { primary: { busy } } }) },
+      Freebusy: {
+        query: ({ items }: { items: { id: string }[] }) => {
+          freebusyQueries.push(items.map(item => item.id));
+          return { calendars: Object.fromEntries(items.map(({ id }) => [id, { busy: busyOn[id] ?? [] }])) };
+        },
+      },
       Events: {
-        insert: (event: Json) => {
+        insert: (event: Json, calendarId: string) => {
           interleaveAt("insert");
           inserted.push(event);
-          busy.push({ start: event.start.dateTime, end: event.end.dateTime });
+          if (!freebusyLags) (busyOn[calendarId] ??= []).push({ start: event.start.dateTime, end: event.end.dateTime });
           return { hangoutLink: "https://meet.google.com/test" };
         },
       },
@@ -337,6 +348,47 @@ describe("confirm", () => {
     const start = upcomingSlots(key)[0].start;
     expect(confirm(key, start, { email: "nope" }).error).toBe("invalid_email");
     expect(confirm(key, start, { name: " " }).error).toBe("invalid_name");
+  });
+});
+
+describe("double-booking guard", () => {
+  const BOOKING_CALENDAR = "bookings@example.com";
+
+  it("counts events on the booking calendar as busy even when busyCalendarIds omits it", () => {
+    props.BOOKING_CONFIG = JSON.stringify({ ...defaultConfig(), calendarId: BOOKING_CALENDAR, busyCalendarIds: ["primary"] });
+    const first = issue().key;
+    const slot = upcomingSlots(first)[0];
+    busyOn[BOOKING_CALENDAR] = [{ start: slot.start, end: slot.end }];
+    expect(upcomingSlots(first).map(s => s.start)).not.toContain(slot.start);
+    expect(confirm(first, slot.start).error).toBe("slot_taken");
+    expect(freebusyQueries.at(-1)).toEqual([BOOKING_CALENDAR, "primary"]);
+  });
+
+  it("queries a booking calendar that is also a busy calendar only once", () => {
+    const { key } = issue();
+    upcomingSlots(key);
+    expect(freebusyQueries.at(-1)).toEqual(["primary"]);
+  });
+
+  it("refuses a second confirm for a just-booked slot before free/busy reports it", () => {
+    freebusyLags = true;
+    const first = issue().key;
+    const second = issue().key;
+    const start = upcomingSlots(first)[0].start;
+    expect(confirm(first, start).ok).toBe(true);
+    expect(confirm(second, start).error).toBe("slot_taken");
+    expect(upcomingSlots(second).map(s => s.start)).not.toContain(start);
+    expect(inserted).toHaveLength(1);
+  });
+
+  it("remembers every booking made in quick succession", () => {
+    freebusyLags = true;
+    const keys = [issue().key, issue().key, issue().key];
+    const [a, b] = upcomingSlots(keys[0]).filter((_, i) => i % 2 === 0);
+    expect(confirm(keys[0], a.start).ok).toBe(true);
+    expect(confirm(keys[1], b.start, { email: "bob@example.com" }).ok).toBe(true);
+    expect(confirm(keys[2], a.start, { email: "cy@example.com" }).error).toBe("slot_taken");
+    expect(confirm(keys[2], b.start, { email: "cy@example.com" }).error).toBe("slot_taken");
   });
 });
 
