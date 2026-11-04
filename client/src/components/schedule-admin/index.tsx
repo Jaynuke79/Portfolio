@@ -261,7 +261,7 @@ export default function ScheduleAdmin() {
                 <h2 className="text-lg font-semibold">Meeting types</h2>
                 <p className="text-sm text-muted-foreground">What visitors can book. Each key can be limited to some of these.</p>
               </div>
-              <TypesEditor types={draft.types} onChange={changeTypes} />
+              <TypesEditor types={draft.types} defaultTypeIds={draft.keyDefaults.typeIds} onChange={changeTypes} />
             </div>
           )}
           {tab === "rules" && <RulesEditor config={draft} onChange={patchDraft} />}

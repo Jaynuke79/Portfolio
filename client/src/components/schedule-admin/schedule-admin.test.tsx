@@ -165,6 +165,7 @@ describe("ScheduleAdmin", () => {
     await signIn();
     fireEvent.click(screen.getByRole("tab", { name: "Meeting types" }));
     fireEvent.click(screen.getByRole("button", { name: "Remove 15 Minute Chat" }));
+    fireEvent.click(screen.getByRole("button", { name: "Remove type" }));
     await clickSave();
 
     const saved = vi.mocked(adminApi.saveConfig).mock.calls[0][1];
