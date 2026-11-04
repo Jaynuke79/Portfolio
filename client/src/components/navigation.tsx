@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -46,7 +46,12 @@ export default function Navigation() {
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[280px] border-border bg-background">
+          <SheetContent
+            side="right"
+            aria-describedby={undefined}
+            className="w-[280px] border-border bg-background"
+          >
+            <SheetTitle className="sr-only">Navigation</SheetTitle>
             <ul className="mt-10 flex flex-col gap-2">
               {NAV_ITEMS.map((item) => (
                 <li key={item.id}>
