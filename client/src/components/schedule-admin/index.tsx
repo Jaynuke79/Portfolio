@@ -32,6 +32,9 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
+// requireAdmin answers rate_limited instead of forbidden once wrong tokens pile up.
+const TOKEN_ERRORS = new Set(["forbidden", "rate_limited"]);
+
 function errorCode(err: unknown): string {
   return err instanceof ScheduleApiError ? err.code : "server_error";
 }
@@ -74,7 +77,11 @@ export default function ScheduleAdmin() {
         setConflict(false);
         setSaveError(null);
       } catch (err) {
-        signOut(describeAdminError(errorCode(err)));
+        const code = errorCode(err);
+        if (TOKEN_ERRORS.has(code)) return signOut(describeAdminError(code));
+        setTokenInput(candidate);
+        setGateError(describeAdminError(code));
+        setSaveError(describeAdminError(code));
       } finally {
         setChecking(false);
       }
@@ -114,13 +121,14 @@ export default function ScheduleAdmin() {
     setSaving(true);
     setSaveError(null);
     try {
+      const sent = JSON.stringify(draft);
       const result = await saveConfig(token, draft, saved.version);
       setSaved(result);
-      setDraft(result.config);
+      setDraft(current => (JSON.stringify(current) === sent ? result.config : current));
       setJustSaved(true);
     } catch (err) {
       const code = errorCode(err);
-      if (code === "forbidden") return signOut(describeAdminError(code));
+      if (TOKEN_ERRORS.has(code)) return signOut(describeAdminError(code));
       setConflict(code === "config_conflict");
       setSaveError(describeAdminError(code));
     } finally {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { type MeetingType, type Slot, ScheduleApiError } from "@/lib/schedule-api";
@@ -27,16 +27,21 @@ export default function OpenTimesPreview({ token, savedConfig, version, unsaved 
 
   const type: MeetingType = savedConfig.types.find(t => t.id === typeId) ?? savedConfig.types[0];
 
+  const latestRequest = useRef(0);
+
   const load = useCallback(async () => {
+    const request = ++latestRequest.current;
     setLoading(true);
     setError(null);
     try {
-      setSlots((await previewSlots(token, type.id)).slots);
+      const found = (await previewSlots(token, type.id)).slots;
+      if (request === latestRequest.current) setSlots(found);
     } catch (err) {
+      if (request !== latestRequest.current) return;
       setError(describeAdminError(err instanceof ScheduleApiError ? err.code : "server_error"));
       setSlots(null);
     } finally {
-      setLoading(false);
+      if (request === latestRequest.current) setLoading(false);
     }
   }, [token, type.id]);
 
