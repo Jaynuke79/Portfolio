@@ -10,9 +10,11 @@ interface Props {
   onChange: (next: KeyTermsForm) => void;
   types: MeetingType[];
   showLabel?: boolean;
+  /** When editing an existing key, offers keeping this expiry as the first choice. */
+  currentExpiry?: string;
 }
 
-export default function KeyTermsFields({ form, onChange, types, showLabel = true }: Props) {
+export default function KeyTermsFields({ form, onChange, types, showLabel = true, currentExpiry }: Props) {
   const id = useId();
   const set = (patch: Partial<KeyTermsForm>) => onChange({ ...form, ...patch });
 
@@ -50,6 +52,12 @@ export default function KeyTermsFields({ form, onChange, types, showLabel = true
 
       <fieldset className="grid gap-2">
         <legend className="mb-2 text-sm font-medium">Expires</legend>
+        {currentExpiry && (
+          <label className="flex items-center gap-2 text-sm">
+            <input type="radio" name={`${id}-expiry`} checked={form.expiryMode === "keep"} onChange={() => set({ expiryMode: "keep" })} className="accent-[hsl(var(--brand))]" />
+            Keep current ({currentExpiry})
+          </label>
+        )}
         <div className="flex flex-wrap items-center gap-4 text-sm">
           <label className="flex items-center gap-2">
             <input type="radio" name={`${id}-expiry`} checked={form.expiryMode === "days"} onChange={() => set({ expiryMode: "days" })} className="accent-[hsl(var(--brand))]" />
