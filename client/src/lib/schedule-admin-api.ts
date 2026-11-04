@@ -125,6 +125,7 @@ const ADMIN_ERRORS: Record<string, string> = {
   invalid_types: "pick at least one meeting type, or allow all.",
   unknown_type: "it refers to a meeting type that doesn't exist.",
   invalid_key_id: "that key no longer exists.",
+  ambiguous_key_id: "that key couldn't be told apart from another one. Reload the list and try again.",
   invalid_config: "the value is out of range.",
   invalid_email: "enter a valid email address, or leave it blank.",
 };

@@ -40,6 +40,20 @@ describe("describeScheduleError", () => {
   });
 });
 
+describe("describeScheduleError for booking failures", () => {
+  const GENERIC = /Something went wrong/;
+
+  it.each([
+    ["invalid_slot", /can't be booked/],
+    ["invalid_range", /dates couldn't be loaded/],
+    ["unknown_action", /reload the page/],
+  ])("has a specific message for %s", (code, expected) => {
+    const message = describeScheduleError(code);
+    expect(message).toMatch(expected);
+    expect(message).not.toMatch(GENERIC);
+  });
+});
+
 describe("KEY_ERRORS", () => {
   it("sends a visitor back to the key gate when the key unlocks no meetings", () => {
     expect(KEY_ERRORS.has("key_no_types")).toBe(true);
