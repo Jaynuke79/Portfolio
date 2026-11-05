@@ -11,7 +11,7 @@ const SKILL_GROUPS = [
     skills: [
       "Linux system administration",
       "SSH and firewall hardening",
-      "Zero Trust, PCI, and HIPAA",
+      "PCI and HIPAA compliance work",
       "HPC cluster operations",
       "PostgreSQL and web servers",
     ],

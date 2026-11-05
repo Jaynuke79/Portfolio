@@ -60,13 +60,10 @@ export default function Contact() {
   };
 
   const contactInfo = [
-    { icon: Mail, label: "Email", text: "jjalonzo-estra@mavs.coloradomesa.edu", href: "mailto:jjalonzo-estra@mavs.coloradomesa.edu" },
+    { icon: Mail, label: "Email", text: "jayden.alonzoestrada@gmail.com", href: "mailto:jayden.alonzoestrada@gmail.com" },
+    { icon: GithubIcon, label: "GitHub", text: "github.com/Jaynuke79", href: "https://github.com/Jaynuke79", external: true },
+    { icon: LinkedinIcon, label: "LinkedIn", text: "linkedin.com/in/jayae", href: "https://www.linkedin.com/in/jayae/", external: true },
     { icon: MapPin, label: "Location", text: "Grand Junction, CO" },
-  ];
-
-  const socialLinks = [
-    { icon: LinkedinIcon, label: "LinkedIn", href: "https://www.linkedin.com/in/jayae/" },
-    { icon: GithubIcon, label: "GitHub", href: "https://github.com/Jaynuke79" },
   ];
 
   return (
@@ -85,28 +82,17 @@ export default function Contact() {
                 <info.icon className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
                 <span className="sr-only">{info.label}:</span>
                 {info.href ? (
-                  <a href={info.href} className="break-all underline-offset-4 hover:text-foreground hover:underline">
+                  <a
+                    href={info.href}
+                    target={info.external ? "_blank" : undefined}
+                    rel={info.external ? "noopener noreferrer" : undefined}
+                    className="break-all underline-offset-4 hover:text-foreground hover:underline"
+                  >
                     {info.text}
                   </a>
                 ) : (
                   <span>{info.text}</span>
                 )}
-              </li>
-            ))}
-          </ul>
-
-          <ul className="mt-8 flex items-center gap-4">
-            {socialLinks.map((link) => (
-              <li key={link.label}>
-                <a
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={link.label}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
-                >
-                  <link.icon className="h-5 w-5" />
-                </a>
               </li>
             ))}
           </ul>
