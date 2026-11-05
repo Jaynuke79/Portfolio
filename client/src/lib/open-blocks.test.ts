@@ -25,15 +25,39 @@ describe("mergeOpenBlocks", () => {
     expect(blocks[0].starts).toHaveLength(3);
   });
 
-  it("merges short slots on consecutive grid steps, gaps from busy time split them", () => {
+  it("keeps the busy gap between short slots on consecutive grid steps", () => {
     const blocks = mergeOpenBlocks(
       [slot("2026-10-02T15:00:00Z", 15), slot("2026-10-02T15:30:00Z", 15), slot("2026-10-02T17:30:00Z", 15)],
       DENVER
     );
     expect(blocks.map(b => [b.startMinutes, b.endMinutes])).toEqual([
-      [540, 585],
+      [540, 555],
+      [570, 585],
       [690, 705],
     ]);
+  });
+
+  it("splits 9:00-9:15 and 9:30-9:45 into two blocks for a 15-minute type", () => {
+    const blocks = mergeOpenBlocks([slot("2026-10-06T15:00:00Z", 15), slot("2026-10-06T15:30:00Z", 15)], DENVER);
+    expect(blocks.map(b => [b.startMinutes, b.endMinutes])).toEqual([
+      [540, 555],
+      [570, 585],
+    ]);
+  });
+
+  it("merges overlapping 30-minute slots on a 15-minute step into one block", () => {
+    const blocks = mergeOpenBlocks(
+      [slot("2026-10-06T15:00:00Z", 30), slot("2026-10-06T15:15:00Z", 30), slot("2026-10-06T15:30:00Z", 30)],
+      DENVER
+    );
+    expect(blocks).toHaveLength(1);
+    expect(blocks[0]).toMatchObject({ startMinutes: 540, endMinutes: 600 });
+    expect(blocks[0].starts).toHaveLength(3);
+  });
+
+  it("merges slots that touch end to start", () => {
+    const blocks = mergeOpenBlocks([slot("2026-10-06T15:00:00Z", 30), slot("2026-10-06T15:30:00Z", 30)], DENVER);
+    expect(blocks.map(b => [b.startMinutes, b.endMinutes])).toEqual([[540, 600]]);
   });
 
   it("never merges across days", () => {
