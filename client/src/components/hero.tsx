@@ -35,10 +35,10 @@ export default function Hero() {
 
       <div className="hero-enter hero-enter-delay md:col-span-5 md:justify-self-end">
         <img
-          src="/headshot.jpg"
+          src="/headshot.webp"
           alt="Jayden Alonzo-Estrada"
-          width={480}
-          height={600}
+          width={695}
+          height={974}
           fetchPriority="high"
           decoding="async"
           className="aspect-[4/5] w-full max-w-sm rounded-lg border border-border object-cover md:max-w-[420px]"

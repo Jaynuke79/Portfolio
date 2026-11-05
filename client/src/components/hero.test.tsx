@@ -31,4 +31,12 @@ describe("Hero", () => {
     expect(img.getAttribute("loading")).not.toBe("lazy");
     expect(img.getAttribute("fetchpriority")).toBe("high");
   });
+
+  it("serves the WebP headshot with its intrinsic dimensions", () => {
+    const { getByRole } = render(<Hero />);
+
+    const img = getByRole("img") as HTMLImageElement;
+    expect(img.getAttribute("src")).toBe("/headshot.webp");
+    expect([img.getAttribute("width"), img.getAttribute("height")]).toEqual(["695", "974"]);
+  });
 });
