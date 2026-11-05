@@ -41,7 +41,7 @@ export default function Projects() {
         <Reveal>
           <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Projects and research</h2>
           <p className="mt-3 max-w-[60ch] text-lg text-muted-foreground">
-            Repository cards pull live from GitHub. The research entry links to the talk.
+            Open-source repos, client work, and research. Repository cards pull live from GitHub.
           </p>
         </Reveal>
 
@@ -81,11 +81,13 @@ export default function Projects() {
 
                 {project.pushedAt && (
                   <dl className="mt-4 flex flex-wrap gap-x-4 gap-y-1 font-mono text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <dt className="sr-only">Stars</dt>
-                      <Star className="h-3 w-3" aria-hidden="true" />
-                      <dd>{project.stars}</dd>
-                    </div>
+                    {project.stars ? (
+                      <div className="flex items-center gap-1">
+                        <dt className="sr-only">Stars</dt>
+                        <Star className="h-3 w-3" aria-hidden="true" />
+                        <dd>{project.stars}</dd>
+                      </div>
+                    ) : null}
                     {project.language && (
                       <div>
                         <dt className="sr-only">Language</dt>

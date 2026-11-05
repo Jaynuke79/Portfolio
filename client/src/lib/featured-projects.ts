@@ -26,6 +26,29 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     featured: true,
   },
   {
+    title: "Snowball Sweepstakes Rebuild",
+    description:
+      "Rebuilt the Rotary Club of Grand Junction's Snowball Sweepstakes platform from scratch in three weeks on Next.js and Neon Postgres. Scrubbed leaked credentials from git history, retired accounts whose login never checked passwords, and made tickets issue only from signature-verified, duplicate-proof payment webhooks. Every deploy is gated on 96+ tests and Playwright checks, and the nine findings from a pre-launch security audit were fixed.",
+    technologies: ["Next.js", "TypeScript", "Vercel", "Neon Postgres", "Stripe", "Authorize.net", "Square", "Playwright"],
+    linksNote: "Client work; code is private.",
+  },
+  {
+    title: "Exploring Agentic Misalignment in Commercial Level Applications",
+    description:
+      "Ongoing research, started September 2025, developing best practices for using AI in business settings, written for non-technical stakeholders.",
+    technologies: ["AI Agents", "AI Safety"],
+    linksNote: "Research in progress.",
+  },
+  {
+    title: "Key-Gated Booking System",
+    description:
+      "The scheduler behind this site. A Google Apps Script backend serves open times from Google Calendar to a React frontend. Access keys are stored only as SHA-256 hashes with per-key expiry, uses, and meeting types; each booking re-checks free/busy under a lock before confirming, key guesses and bookings are rate limited, and an admin page manages it all.",
+    technologies: ["Google Apps Script", "React", "TypeScript", "Google Calendar API"],
+    codeUrl: "https://github.com/Jaynuke79/Portfolio/tree/main/apps-script",
+    demoUrl: "https://j2a3e.com/#schedule",
+    demoLabel: "Booking page (key required)",
+  },
+  {
     repo: "file-index",
     title: "file-index",
     description:
@@ -38,13 +61,6 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     description:
       "MCP server that lets an agent post to your own LinkedIn feed through the official Posts API with OAuth. Standard library only, with no scraping or session cookies, plus guards for post length and reserved characters.",
     technologies: ["Python", "MCP", "OAuth 2.0", "LinkedIn API"],
-  },
-  {
-    repo: "PokemonDetector",
-    title: "Pokemon Detector",
-    description:
-      "ConvNeXt image classifier trained to identify all 151 Gen 1 Pokemon, packaged as a CLI, a Flask web app, and a Docker image with a live demo on Vercel.",
-    technologies: ["PyTorch", "ConvNeXt", "Flask", "Docker"],
   },
   {
     repo: "Intentionally-Vulnerable-Bad-rAG",
