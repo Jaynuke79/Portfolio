@@ -2,8 +2,6 @@ import type { Slot } from "@/lib/schedule-api";
 import type { WeeklyHours } from "@/lib/schedule-admin-api";
 import { dateKeyInZone } from "@/lib/slot-calendar";
 
-/** Matches the backend's slot grid, so consecutive starts are exactly one step apart. */
-const SLOT_STEP_MS = 30 * 60 * 1000;
 const DAY_MS = 86400000;
 
 export interface OpenBlock {
@@ -26,8 +24,8 @@ export function wallMinutes(iso: string, timeZone: string): number {
 
 /**
  * Collapses bookable starts into the continuous open stretches a calendar
- * should draw: starts one grid step apart belong to the same block, which runs
- * from the first start to the end of the last slot. Drawing raw slots instead
+ * should draw: a slot joins the current block only when it starts at or before
+ * the block's end, so any busy time between slots stays a gap. Drawing raw slots instead
  * would stack overlapping boxes whenever a meeting is longer than the step.
  */
 export function mergeOpenBlocks(slots: Slot[], timeZone: string): OpenBlock[] {
@@ -36,10 +34,9 @@ export function mergeOpenBlocks(slots: Slot[], timeZone: string): OpenBlock[] {
   for (const slot of sorted) {
     const dateKey = dateKeyInZone(slot.start, timeZone);
     const last = blocks[blocks.length - 1];
-    const lastStartMs = last ? new Date(last.starts[last.starts.length - 1]).getTime() : 0;
-    if (last && last.dateKey === dateKey && new Date(slot.start).getTime() - lastStartMs <= SLOT_STEP_MS) {
+    if (last && last.dateKey === dateKey && Date.parse(slot.start) <= Date.parse(last.end)) {
       last.starts.push(slot.start);
-      if (slot.end > last.end) last.end = slot.end;
+      if (Date.parse(slot.end) > Date.parse(last.end)) last.end = slot.end;
     } else {
       blocks.push({ dateKey, start: slot.start, end: slot.end, startMinutes: 0, endMinutes: 0, starts: [slot.start] });
     }
