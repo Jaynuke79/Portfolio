@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { Check, Copy, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,7 @@ export default function KeysManager({ token, config }: Props) {
   const [editForm, setEditForm] = useState<KeyTermsForm | null>(null);
   const [rowError, setRowError] = useState<{ keyId: string; message: string } | null>(null);
   const [confirmRevokeId, setConfirmRevokeId] = useState<string | null>(null);
+  const revokeButtons = useRef(new Map<string, HTMLButtonElement>());
 
   const refresh = useCallback(async () => {
     try {
@@ -90,6 +92,25 @@ export default function KeysManager({ token, config }: Props) {
     setEditForm(formFromKey(key, config.timeZone, config.types));
     setRowError(null);
     setConfirmRevokeId(null);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setRowError(null);
+  };
+
+  const askRevoke = (id: string) => {
+    setEditingId(null);
+    setRowError(null);
+    setConfirmRevokeId(id);
+  };
+
+  const cancelRevoke = (id: string) => {
+    flushSync(() => {
+      setConfirmRevokeId(null);
+      setRowError(null);
+    });
+    revokeButtons.current.get(id)?.focus();
   };
 
   const saveEdit = async (id: string) => {
@@ -163,15 +184,36 @@ export default function KeysManager({ token, config }: Props) {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <Button type="button" variant="outline" size="sm" onClick={() => (editingId === key.id ? setEditingId(null) : startEdit(key))}>
+                  <Button type="button" variant="outline" size="sm" onClick={() => (editingId === key.id ? cancelEdit() : startEdit(key))}>
                     {editingId === key.id ? "Cancel" : "Edit"}
                   </Button>
                   {confirmRevokeId === key.id ? (
-                    <Button type="button" variant="destructive" size="sm" onClick={() => void revoke(key.id)}>
-                      Confirm revoke
-                    </Button>
+                    <div
+                      className="flex gap-2"
+                      onKeyDown={e => {
+                        if (e.key !== "Escape") return;
+                        e.preventDefault();
+                        cancelRevoke(key.id);
+                      }}
+                    >
+                      <Button type="button" variant="destructive" size="sm" autoFocus onClick={() => void revoke(key.id)}>
+                        Confirm revoke
+                      </Button>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => cancelRevoke(key.id)}>
+                        Cancel
+                      </Button>
+                    </div>
                   ) : (
-                    <Button type="button" variant="ghost" size="sm" onClick={() => setConfirmRevokeId(key.id)}>
+                    <Button
+                      ref={el => {
+                        if (el) revokeButtons.current.set(key.id, el);
+                        else revokeButtons.current.delete(key.id);
+                      }}
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => askRevoke(key.id)}
+                    >
                       Revoke
                     </Button>
                   )}
