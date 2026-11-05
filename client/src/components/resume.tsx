@@ -226,7 +226,7 @@ export default function Resume() {
         <Reveal className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Experience</h2>
-            <p className="mt-3 text-lg text-muted-foreground">Resume and CV last updated September 2026.</p>
+            <p className="mt-3 text-lg text-muted-foreground">Resume and CV last updated November 2026.</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg" className="h-12 px-6 active:scale-[0.98]">
