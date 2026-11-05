@@ -33,13 +33,6 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     linksNote: "Client work; code is private.",
   },
   {
-    title: "Exploring Agentic Misalignment in Commercial Level Applications",
-    description:
-      "Ongoing research, started September 2025, developing best practices for using AI in business settings, written for non-technical stakeholders.",
-    technologies: ["AI Agents", "AI Safety"],
-    linksNote: "Research in progress.",
-  },
-  {
     title: "Key-Gated Booking System",
     description:
       "The scheduler behind this site. A Google Apps Script backend serves open times from Google Calendar to a React frontend. Access keys are stored only as SHA-256 hashes with per-key expiry, uses, and meeting types; each booking re-checks free/busy under a lock before confirming, key guesses and bookings are rate limited, and an admin page manages it all.",
@@ -47,6 +40,13 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     codeUrl: "https://github.com/Jaynuke79/Portfolio/tree/main/apps-script",
     demoUrl: "https://j2a3e.com/#schedule",
     demoLabel: "Booking page (key required)",
+  },
+  {
+    title: "Exploring Agentic Misalignment in Commercial Level Applications",
+    description:
+      "Ongoing research, started September 2025, developing best practices for using AI in business settings, written for non-technical stakeholders.",
+    technologies: ["AI Agents", "AI Safety"],
+    linksNote: "Research in progress.",
   },
   {
     repo: "file-index",
