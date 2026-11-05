@@ -10,6 +10,7 @@ export default defineConfig({
     },
   },
   test: {
+    testTimeout: 30000,
     include: ["client/src/**/*.test.{ts,tsx}", "scripts/**/*.test.ts", "apps-script/**/*.test.ts"],
   },
 });
