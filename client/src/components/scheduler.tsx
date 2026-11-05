@@ -133,13 +133,20 @@ export default function Scheduler() {
   const previousStep = useRef(step);
   const focusOnUnlock = useRef(false);
 
+  const dropLoadedSlots = useCallback(() => {
+    setSlots([]);
+    setSlotsView(null);
+    setSelectedDate(null);
+  }, []);
+
   const rejectKey = useCallback((code: string) => {
+    dropLoadedSlots();
     storeKey(null);
     setAccessKey("");
     setInfo(null);
     setStep("key");
     setKeyError(describeScheduleError(code));
-  }, []);
+  }, [dropLoadedSlots]);
 
   const unlock = useCallback(
     async (candidate: string, moveFocus: boolean) => {
@@ -152,6 +159,7 @@ export default function Scheduler() {
         setAccessKey(candidate);
         setInfo(booking);
         if (booking.types.length === 1) {
+          dropLoadedSlots();
           setType(booking.types[0]);
           setStep("time");
         } else {
@@ -165,7 +173,7 @@ export default function Scheduler() {
         setCheckingKey(false);
       }
     },
-    [rejectKey]
+    [rejectKey, dropLoadedSlots]
   );
 
   useEffect(() => {

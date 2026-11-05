@@ -198,6 +198,30 @@ describe("Scheduler", () => {
     expect(screen.queryByRole("button", { name: "12:00 PM" })).toBeNull();
   });
 
+  it("drops the previous key's slots when a new single-type key is entered", async () => {
+    const slot = slotTomorrowAtNoonUtc();
+    vi.mocked(api.fetchBookingInfo).mockResolvedValueOnce(INFO);
+    vi.mocked(api.fetchSlots).mockResolvedValueOnce([slot]);
+    vi.mocked(api.confirmBooking).mockRejectedValue(new api.ScheduleApiError("key_expired"));
+    render(<Scheduler />);
+    await reachDetails(slot);
+    fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Ada" } });
+    fireEvent.change(screen.getByLabelText("Email"), { target: { value: "ada@example.com" } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Confirm booking" }));
+    });
+    expect(screen.getByLabelText("Access key")).toBeTruthy();
+
+    vi.mocked(api.fetchBookingInfo).mockResolvedValueOnce({ ...INFO, types: [INFO.types[1]] });
+    vi.mocked(api.fetchSlots).mockReturnValue(new Promise(() => {}));
+    await enterKey("WXYZ-WXYZ-WXYZ-WXYZ");
+
+    expect(screen.getByRole("heading", { name: "Pick a time" })).toBeTruthy();
+    expect(screen.queryAllByRole("button", { name: /\d+ times? available/ })).toEqual([]);
+    expect(screen.queryByRole("button", { name: "12:00 PM" })).toBeNull();
+    expect(screen.getByRole("heading", { name: "Select a day" })).toBeTruthy();
+  });
+
   describe("on a fixed date", () => {
     const MID_OCTOBER = new Date("2026-10-15T18:00:00Z");
     const OCT_20_3PM_UTC: api.Slot = { start: "2026-10-20T15:00:00.000Z", end: "2026-10-20T15:30:00.000Z" };
