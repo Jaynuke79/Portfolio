@@ -3,7 +3,11 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as adminApi from "@/lib/schedule-admin-api";
 import { ScheduleApiError } from "@/lib/schedule-api";
+import App from "@/App";
 import ScheduleAdmin from "./index";
+
+vi.mock("@/pages/home", () => ({ default: () => <p>Home page</p> }));
+vi.mock("@/components/scheduler", () => ({ default: () => <p>Visitor scheduler</p> }));
 
 vi.mock("@/lib/schedule-api", async importOriginal => ({
   ...(await importOriginal<typeof import("@/lib/schedule-api")>()),
@@ -49,6 +53,26 @@ async function signIn(token = "secret") {
   });
 }
 
+async function enterToken(token = "secret") {
+  fireEvent.change(screen.getByLabelText("Admin token"), { target: { value: token } });
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+  });
+}
+
+async function openAdminRoute() {
+  history.replaceState(null, "", "/#schedule/admin");
+  render(<App />);
+  await enterToken();
+}
+
+function navigateTo(url: string) {
+  act(() => {
+    history.pushState(null, "", url);
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+  });
+}
+
 async function clickSave() {
   await act(async () => {
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
@@ -63,7 +87,10 @@ beforeEach(() => {
   vi.mocked(adminApi.listKeys).mockReset().mockResolvedValue({ keys: [] });
 });
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  history.replaceState(null, "", "/");
+});
 
 describe("ScheduleAdmin", () => {
   it("stays locked when the token is rejected", async () => {
@@ -203,5 +230,120 @@ describe("ScheduleAdmin", () => {
     fireEvent.keyDown(screen.getByRole("tab", { name: "Availability" }), { key: "ArrowLeft" });
     expect(screen.getByRole("tab", { name: "Access keys" }).getAttribute("aria-selected")).toBe("true");
     expect(document.activeElement).toBe(screen.getByRole("tab", { name: "Access keys" }));
+  });
+
+  it("clears a save error once the draft is edited again", async () => {
+    await signIn();
+    fireEvent.click(screen.getByRole("tab", { name: "Booking rules" }));
+    fireEvent.change(screen.getByLabelText("Uses"), { target: { value: "" } });
+    await clickSave();
+    expect(screen.getByRole("status").textContent).toMatch(/needs a number/);
+
+    fireEvent.change(screen.getByLabelText("Uses"), { target: { value: "3" } });
+    expect(screen.getByRole("status").textContent).toMatch(/unsaved changes/);
+  });
+
+  it("keeps the conflict message while the draft is edited", async () => {
+    vi.mocked(adminApi.saveConfig).mockRejectedValue(new ScheduleApiError("config_conflict"));
+    await signIn();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Tuesday" }));
+    await clickSave();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Wednesday" }));
+
+    expect(screen.getByRole("status").textContent).toMatch(/another tab/);
+    expect(screen.getByRole("button", { name: "Reload latest" })).toBeTruthy();
+  });
+
+  it("does not show the last session's saved note or tab after signing back in", async () => {
+    vi.mocked(adminApi.saveConfig).mockImplementation(async (_t, saved) => ({ config: saved, version: "v2" }));
+    await signIn();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Tuesday" }));
+    await clickSave();
+    expect(screen.getByRole("status").textContent).toMatch(/Saved/);
+    fireEvent.click(screen.getByRole("tab", { name: "Booking rules" }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    await enterToken();
+
+    expect(screen.queryByText(/Saved\. Visitors/)).toBeNull();
+    expect(screen.getByRole("tab", { name: "Availability" }).getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("signs out right away when nothing is unsaved", async () => {
+    await signIn();
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    expect(screen.getByLabelText("Admin token")).toBeTruthy();
+  });
+
+  it("asks before signing out with unsaved changes", async () => {
+    await signIn();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Tuesday" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+
+    expect(screen.getByText("You have unsaved changes. Sign out and discard them?")).toBeTruthy();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Discard and sign out" }));
+    fireEvent.click(screen.getByRole("button", { name: "Keep editing" }));
+    expect(screen.queryByRole("button", { name: "Discard and sign out" })).toBeNull();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Sign out" }));
+    expect((screen.getByRole("checkbox", { name: "Tuesday" }) as HTMLInputElement).checked).toBe(true);
+
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    fireEvent.keyDown(screen.getByRole("button", { name: "Discard and sign out" }), { key: "Escape" });
+    expect(screen.queryByRole("button", { name: "Discard and sign out" })).toBeNull();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Sign out" }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    fireEvent.click(screen.getByRole("button", { name: "Discard and sign out" }));
+    expect(screen.getByLabelText("Admin token")).toBeTruthy();
+    expect(sessionStorage.getItem("schedule-admin-token")).toBeNull();
+  });
+});
+
+describe("sign-out confirmation", () => {
+  it("closes once nothing is unsaved and stays closed on the next edit", async () => {
+    await signIn();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Tuesday" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    fireEvent.click(screen.getByRole("button", { name: "Discard" }));
+    expect(screen.queryByText("You have unsaved changes. Sign out and discard them?")).toBeNull();
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "Wednesday" }));
+    expect(screen.queryByText("You have unsaved changes. Sign out and discard them?")).toBeNull();
+  });
+});
+
+describe("leaving #schedule/admin", () => {
+  it("asks first and stays put when unsaved changes are kept", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    await openAdminRoute();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Tuesday" }));
+    navigateTo("/");
+
+    expect(confirm).toHaveBeenCalledWith("You have unsaved scheduling changes. Leave and discard them?");
+    expect(window.location.hash).toBe("#schedule/admin");
+    expect(screen.queryByText("Home page")).toBeNull();
+    expect((screen.getByRole("checkbox", { name: "Tuesday" }) as HTMLInputElement).checked).toBe(true);
+    confirm.mockRestore();
+  });
+
+  it("leaves when the admin agrees to discard", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true);
+    await openAdminRoute();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Tuesday" }));
+    navigateTo("/#schedule");
+
+    expect(confirm).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("Visitor scheduler")).toBeTruthy();
+    confirm.mockRestore();
+  });
+
+  it("leaves without asking when nothing is unsaved", async () => {
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    await openAdminRoute();
+    navigateTo("/");
+
+    expect(confirm).not.toHaveBeenCalled();
+    expect(screen.getByText("Home page")).toBeTruthy();
+    confirm.mockRestore();
   });
 });

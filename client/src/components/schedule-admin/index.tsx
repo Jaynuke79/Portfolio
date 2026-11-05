@@ -10,7 +10,7 @@ import RulesEditor from "@/components/schedule-admin/rules-editor";
 import TypesEditor from "@/components/schedule-admin/types-editor";
 import WeeklyHoursEditor from "@/components/schedule-admin/weekly-hours-editor";
 import { configNumberProblem } from "@/lib/booking-config";
-import { goHome } from "@/lib/hash-route";
+import { goHome, setLeaveGuard } from "@/lib/hash-route";
 import { type MeetingType, ScheduleApiError, isSchedulingConfigured } from "@/lib/schedule-api";
 import {
   type BookingConfig,
@@ -35,6 +35,8 @@ type TabId = (typeof TABS)[number]["id"];
 // requireAdmin answers rate_limited instead of forbidden once wrong tokens pile up.
 const TOKEN_ERRORS = new Set(["forbidden", "rate_limited"]);
 
+const LEAVE_PROMPT = "You have unsaved scheduling changes. Leave and discard them?";
+
 function errorCode(err: unknown): string {
   return err instanceof ScheduleApiError ? err.code : "server_error";
 }
@@ -52,6 +54,8 @@ export default function ScheduleAdmin() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [conflict, setConflict] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
+  const [confirmingSignOut, setConfirmingSignOut] = useState(false);
+  const signOutButton = useRef<HTMLButtonElement>(null);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   const dirty = Boolean(saved && draft && JSON.stringify(saved.config) !== JSON.stringify(draft));
@@ -62,7 +66,17 @@ export default function ScheduleAdmin() {
     setSaved(null);
     setDraft(null);
     setGateError(message);
+    setJustSaved(false);
+    setTab("availability");
+    setConfirmingSignOut(false);
   }, []);
+
+  const requestSignOut = () => (dirty ? setConfirmingSignOut(true) : signOut());
+
+  const keepEditing = () => {
+    setConfirmingSignOut(false);
+    signOutButton.current?.focus();
+  };
 
   const unlock = useCallback(
     async (candidate: string) => {
@@ -95,14 +109,22 @@ export default function ScheduleAdmin() {
   }, [unlock]);
 
   useEffect(() => {
-    if (!dirty) return;
+    if (!dirty) {
+      setConfirmingSignOut(false);
+      return;
+    }
     const warn = (e: BeforeUnloadEvent) => e.preventDefault();
     window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
+    const releaseLeaveGuard = setLeaveGuard(() => window.confirm(LEAVE_PROMPT));
+    return () => {
+      window.removeEventListener("beforeunload", warn);
+      releaseLeaveGuard();
+    };
   }, [dirty]);
 
   const patchDraft = (patch: Partial<BookingConfig>) => {
     setJustSaved(false);
+    if (!conflict) setSaveError(null);
     setDraft(d => (d ? { ...d, ...patch } : d));
   };
 
@@ -209,11 +231,33 @@ export default function ScheduleAdmin() {
       <header className="border-b border-border">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-5">
           <h1 className="text-xl font-semibold tracking-tight">Scheduling admin</h1>
-          <Button type="button" variant="ghost" size="sm" onClick={() => signOut()}>
+          <Button ref={signOutButton} type="button" variant="ghost" size="sm" onClick={requestSignOut}>
             <LogOut />
             Sign out
           </Button>
         </div>
+        {confirmingSignOut && (
+          <div className="mx-auto max-w-4xl px-4 pb-4">
+            <div
+              className="grid gap-3 rounded-md bg-muted p-3"
+              onKeyDown={e => {
+                if (e.key !== "Escape") return;
+                e.preventDefault();
+                keepEditing();
+              }}
+            >
+              <p id={`${baseId}-sign-out-warning`} className="text-sm">You have unsaved changes. Sign out and discard them?</p>
+              <div className="flex gap-2">
+                <Button type="button" variant="destructive" size="sm" autoFocus aria-describedby={`${baseId}-sign-out-warning`} onClick={() => signOut()}>
+                  Discard and sign out
+                </Button>
+                <Button type="button" variant="ghost" size="sm" onClick={keepEditing}>
+                  Keep editing
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="mx-auto grid max-w-4xl gap-8 px-4 py-8">
