@@ -47,7 +47,9 @@ save, the built-in defaults in `Config.js` apply.
 - **Availability** — weekly hours per day (several windows allowed), plus a live preview of
   the open times visitors will see over the next 14 days, read from your calendar.
 - **Meeting types** — add, rename, re-time or remove types. A type's id is fixed at creation
-  because keys reference it.
+  because keys reference it. A deleted type's id is retired for good (kept server-side in
+  `retiredTypeIds`): a save that reuses it is refused with `retired_type_id`, and a new type
+  whose name would produce a retired id gets a suffixed one (`team-sync` becomes `team-sync-2`).
 - **Booking rules** — page title and description, your time zone, buffer, minimum notice,
   booking window, confirmation emails (guest and/or you, and where your copy goes), and
   defaults for new keys.
@@ -86,7 +88,8 @@ npm run booking-keys -- revoke <id>
 Options left off `issue` come from the new-key defaults on the Booking rules tab
 (built-in fallback: 1 use, 14 days, all types). Options left off `update` keep the key's
 current value, so `update <id> --label "..."` touches only the label. Extending an expired
-or used-up key with `update` makes it work again.
+or used-up key with `update` makes it work again within 30 days: keys dead for more than
+30 days are removed when keys are listed (`list` or the admin Access keys tab).
 
 `issue` prints the key once — only its SHA-256 hash is stored. Send the visitor
 `https://j2a3e.com/#schedule` and the key. A visitor only sees the meeting types their key

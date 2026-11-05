@@ -45,7 +45,7 @@ This portfolio is configured for automatic deployment to GitHub Pages using GitH
 
 4. **Access Your Site**:
    - The site is served only at [https://j2a3e.com](https://j2a3e.com); the workflow writes a `CNAME` for that domain into the build output
-   - The `github.io` address is not supported: asset paths are absolute (for example `/Jayden_Alonzo-Estrada_Resume.pdf`), so images and PDFs break there
+   - j2a3e.com is the only address; `https://jaynuke79.github.io/Portfolio/` answers with a 301 redirect to it
 
 ## 📝 Customization
 
