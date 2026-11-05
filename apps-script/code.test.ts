@@ -23,7 +23,8 @@ let post: (body: Json) => Json;
 let defaultConfig: () => Json;
 let sentMail: Json[];
 let mailFailsFor: string | null;
-let interleave: { at: "insert" | "configRead"; run: () => void } | null;
+type InterleavePoint = "insert" | "configRead" | "waitLock";
+let interleave: { at: InterleavePoint; run: () => void } | null;
 let lockHeld: boolean;
 let lockWaiters: (() => void)[];
 let blockedOnLock: boolean;
@@ -46,13 +47,16 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
   lockHeld = false;
   lockWaiters = [];
   blockedOnLock = false;
-  const interleaveAt = (point: "insert" | "configRead") => {
+  const interleaveAt = (point: InterleavePoint) => {
     if (interleave?.at !== point) return;
     const { run } = interleave;
     interleave = null;
     run();
   };
   const cache = (scriptCache = new Map());
+  const checkCacheKey = (k: string) => {
+    if (k.length > 250) throw new Error("Argument too large: key");
+  };
   const context = createContext({
     console: { log() {}, error() {} },
     Intl,
@@ -81,16 +85,20 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
     CacheService: {
       getScriptCache: () => ({
         get: (k: string) => {
+          checkCacheKey(k);
           const entry = cache.get(k);
           return entry && entry.expiresAt > Date.now() ? entry.value : null;
         },
-        put: (k: string, value: string, ttlSeconds?: number) =>
-          cache.set(k, { value, expiresAt: ttlSeconds === undefined ? Infinity : Date.now() + ttlSeconds * 1000 }),
+        put: (k: string, value: string, ttlSeconds?: number) => {
+          checkCacheKey(k);
+          cache.set(k, { value, expiresAt: ttlSeconds === undefined ? Infinity : Date.now() + ttlSeconds * 1000 });
+        },
       }),
     },
     LockService: {
       getScriptLock: () => ({
         waitLock() {
+          interleaveAt("waitLock");
           if (lockHeld) {
             blockedOnLock = true;
             throw new Error("Lock wait would block");
@@ -112,8 +120,10 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
     },
     Calendar: {
       Freebusy: {
-        query: ({ items }: { items: { id: string }[] }) => {
+        query: ({ timeMin, timeMax, items }: { timeMin: string; timeMax: string; items: { id: string }[] }) => {
           freebusyQueries.push(items.map(item => item.id));
+          const inRange = (block: { start: string; end: string }) =>
+            Date.parse(block.start) < Date.parse(timeMax) && Date.parse(block.end) > Date.parse(timeMin);
           const readable = items.filter(({ id }) => unreadableCalendars[id] !== "missing");
           return {
             calendars: Object.fromEntries(
@@ -121,7 +131,7 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
                 id,
                 unreadableCalendars[id] === "errors"
                   ? { busy: [], errors: [{ domain: "global", reason: "notFound" }] }
-                  : { busy: busyOn[id] ?? [] },
+                  : { busy: (busyOn[id] ?? []).filter(inRange) },
               ])
             ),
           };
@@ -614,7 +624,7 @@ describe("booking rate limits", () => {
     expect(bookNext(key, "ada@example.com").error).toBe("rate_limited");
   });
 
-  it("ignores a count left in the cache by the old per-email counter", () => {
+  it("ignores a count left under the old unhashed per-email cache key", () => {
     const { key } = issue({ maxUses: 10 });
     scriptCache.set("rl:email:ada@example.com", { value: "3", expiresAt: Infinity });
     for (let i = 0; i < 3; i++) expect(bookNext(key, "ada@example.com").ok).toBe(true);
@@ -757,5 +767,73 @@ describe("slot range checks", () => {
     const queriesBefore = freebusyQueries.length;
     expect(slotsBetween("2026-10-01", "2026-11-15").error).toBe("invalid_range");
     expect(freebusyQueries).toHaveLength(queriesBefore);
+  });
+});
+
+describe("confirm path gaps", () => {
+  onFixedClock(MONDAY_MORNING_DENVER);
+
+  it("uses settings saved while the confirm waited for the lock", () => {
+    const { key } = issue();
+    const start = upcomingSlots(key)[0].start;
+    expect(start).toBe("2026-10-07T15:00:00.000Z");
+    const afternoons = [["13:00", "17:00"]];
+    const narrowed = { ...defaultConfig(), weeklyHours: { 1: afternoons, 2: afternoons, 3: afternoons, 4: afternoons, 5: afternoons } };
+    const saves: Json[] = [];
+    interleave = {
+      at: "waitLock",
+      run: () => saves.push(post({ action: "saveConfig", adminToken: ADMIN, config: narrowed, version: null })),
+    };
+
+    expect(confirm(key, start).error).toBe("slot_taken");
+    expect(saves).toMatchObject([{ ok: true }]);
+    expect(inserted).toHaveLength(0);
+  });
+
+  it("widens the free/busy query by the buffer so an event just before midnight blocks the 00:00 slot", () => {
+    props.BOOKING_CONFIG = JSON.stringify({
+      ...defaultConfig(),
+      bufferMinutes: 15,
+      minLeadHours: 1,
+      weeklyHours: { 2: [["00:00", "01:00"]] },
+    });
+    busy.push({ start: "2026-10-06T05:50:00.000Z", end: "2026-10-06T06:00:00.000Z" });
+    const { key } = issue();
+    const offered = post({ action: "slots", key, type: "30min", start: "2026-10-06", end: "2026-10-06" }).slots.map(
+      (s: Json) => s.start
+    );
+    expect(offered).toEqual(["2026-10-06T06:30:00.000Z"]);
+    expect(confirm(key, "2026-10-06T06:00:00.000Z").error).toBe("slot_taken");
+    expect(inserted).toHaveLength(0);
+  });
+
+  it("books and rate-limits a valid 254-character email within the cache key limit", () => {
+    const email = `${"a".repeat(254 - "@example.com".length)}@example.com`;
+    expect(email).toHaveLength(254);
+    const { key } = issue({ maxUses: 10 });
+    for (let i = 0; i < 3; i++) expect(confirm(key, upcomingSlots(key)[0].start, { email }).ok).toBe(true);
+    expect(confirm(key, upcomingSlots(key)[0].start, { email }).error).toBe("rate_limited");
+    expect(inserted).toHaveLength(3);
+    expect([...scriptCache.keys()].every(name => name.length <= 250)).toBe(true);
+  });
+
+  it("answers a honeypot submission with the same fields as a real booking, touching nothing", () => {
+    const { key } = issue();
+    const slot = upcomingSlots(key, "15min")[0];
+    const queriesBefore = freebusyQueries.length;
+    let lockRequested = false;
+    interleave = { at: "waitLock", run: () => (lockRequested = true) };
+    const decoy = confirm(key, slot.start, { type: "15min", website: "spam" });
+    expect(lockRequested).toBe(false);
+    expect(decoy).toEqual({ ok: true, start: slot.start, end: slot.end, meetLink: null, emailed: { guest: true, owner: true } });
+    expect(inserted).toHaveLength(0);
+    expect(sentMail).toHaveLength(0);
+    expect(freebusyQueries).toHaveLength(queriesBefore);
+    expect(post({ action: "listKeys", adminToken: ADMIN }).keys[0].uses).toBe(0);
+
+    interleave = null;
+    const real = confirm(key, slot.start, { type: "15min" });
+    expect(real.ok).toBe(true);
+    expect(Object.keys(decoy).sort()).toEqual(Object.keys(real).sort());
   });
 });

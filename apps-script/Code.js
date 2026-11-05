@@ -356,12 +356,14 @@ function slotsFor(config, type, startDate, endDate) {
   const { earliestMs, latestMs } = bookingWindow(config);
   const rangeStart = wallTimeToEpochMs(startDate, '00:00', config.timeZone);
   const rangeEnd = wallTimeToEpochMs(endDate, '23:59', config.timeZone) + 60 * 1000;
+  // A busy block just outside the range still blocks slots within its buffer.
+  const bufferMs = config.bufferMinutes * 60 * 1000;
   return buildSlots({
     startDate,
     endDate,
     timeZone: config.timeZone,
     weeklyHours: config.weeklyHours,
-    busy: fetchBusy(config, rangeStart, rangeEnd),
+    busy: fetchBusy(config, rangeStart - bufferMs, rangeEnd + bufferMs),
     durationMinutes: type.durationMinutes,
     bufferMinutes: config.bufferMinutes,
     earliestMs,
@@ -414,7 +416,7 @@ function readEmailBookingTimes(cache, emailKey, nowMs) {
 function readRateLimitCounts(email) {
   const cache = CacheService.getScriptCache();
   const now = Date.now();
-  const emailKey = `rl:email:${email}`;
+  const emailKey = `rl:email:${sha256Hex(email)}`;
   const hourKey = `rl:hour:${Math.floor(now / 3600000)}`;
   return {
     cache,
@@ -463,13 +465,27 @@ function logIfThrows(work) {
   }
 }
 
-function confirmBooking(body, keyHash) {
-  const config = readConfig();
-  const guest = validateGuest(body);
+/**
+ * What a bot that fills the hidden field gets back: every field of a real
+ * success with nothing behind it, so it learns nothing about why its
+ * submission went nowhere.
+ */
+function decoyConfirmation(body) {
+  const startMs = new Date(body.start).getTime();
+  const isInstant = Number.isFinite(startMs);
+  const type = readConfig().types.find(t => t.id === body.type);
+  const durationMs = (type ? type.durationMinutes : 30) * 60 * 1000;
+  return {
+    start: isInstant ? new Date(startMs).toISOString() : body.start,
+    end: isInstant ? new Date(startMs + durationMs).toISOString() : body.start,
+    meetLink: null,
+    emailed: { guest: true, owner: true },
+  };
+}
 
-  // Bots that fill the hidden field get the success shape with nothing behind
-  // it, so they learn nothing about why their submission went nowhere.
-  if (body.website) return { start: body.start, meetLink: null };
+function confirmBooking(body, keyHash) {
+  const guest = validateGuest(body);
+  if (body.website) return decoyConfirmation(body);
 
   const startMs = new Date(body.start).getTime();
   if (!Number.isFinite(startMs)) throw new BookingError('invalid_slot');
@@ -479,8 +495,10 @@ function confirmBooking(body, keyHash) {
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
-    // The key and the slot are both re-read inside the lock: two tabs sharing a
-    // single-use key, or two visitors racing for one time, cannot both pass.
+    // The settings, the key and the slot are all read inside the lock: two tabs
+    // sharing a single-use key, two visitors racing for one time, or a save made
+    // while this request waited cannot slip past the checks.
+    const config = readConfig();
     const record = readKeyRecord(keyHash);
     if (!record) throw new BookingError('invalid_key');
     const status = keyStatus(record, Date.now());
@@ -522,12 +540,12 @@ function confirmBooking(body, keyHash) {
     // The event exists, so nothing from here on may turn the booking into an error.
     logIfThrows(() => recordRateLimitedBooking(guest.email));
     logIfThrows(() => rememberBooking(offered));
-    booked = { type, offered, meetLink: event.hangoutLink || null, keyLabel: record.label || '' };
+    booked = { config, type, offered, meetLink: event.hangoutLink || null, keyLabel: record.label || '' };
   } finally {
     lock.releaseLock();
   }
 
-  const emailed = sendConfirmationEmails(config, {
+  const emailed = sendConfirmationEmails(booked.config, {
     type: booked.type,
     guest,
     start: booked.offered.start,
