@@ -52,9 +52,9 @@ export default function SchedulerCalendar({
     <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_14rem]">
       <div>
         <div className="mb-4 flex items-center justify-between">
-          <h2 id={monthLabelId} className="text-lg font-semibold tracking-tight" aria-live="polite">
+          <h3 id={monthLabelId} className="text-lg font-semibold tracking-tight" aria-live="polite">
             {formatMonthLabel(year, month)}
-          </h2>
+          </h3>
           <div className="flex gap-1">
             <Button
               variant="ghost"
@@ -138,9 +138,9 @@ export default function SchedulerCalendar({
       </div>
 
       <div>
-        <h3 className="mb-3 text-sm font-medium">
+        <h4 className="mb-3 text-sm font-medium">
           {selectedDate ? formatDateKey(selectedDate, "full") : "Select a day"}
-        </h3>
+        </h4>
         {selectedDate && (
           <ul className="grid max-h-80 gap-2 overflow-y-auto pr-1">
             {daySlots.map(slot => (

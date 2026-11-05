@@ -308,9 +308,21 @@ export default function ScheduleAdmin() {
               <TypesEditor types={draft.types} defaultTypeIds={draft.keyDefaults.typeIds} onChange={changeTypes} />
             </div>
           )}
-          {tab === "rules" && <RulesEditor config={draft} onChange={patchDraft} />}
+          {tab === "rules" && (
+            <div className="grid gap-6">
+              <div>
+                <h2 className="text-lg font-semibold">Booking rules</h2>
+                <p className="text-sm text-muted-foreground">What the booking page says and when visitors can book.</p>
+              </div>
+              <RulesEditor config={draft} onChange={patchDraft} />
+            </div>
+          )}
           {tab === "keys" && (
             <div className="grid gap-4">
+              <div>
+                <h2 className="text-lg font-semibold">Access keys</h2>
+                <p className="text-sm text-muted-foreground">Visitors need a key to book. Each key can expire, run out of uses or allow only some meeting types.</p>
+              </div>
               {dirty && (
                 <p className="rounded-md bg-muted p-3 text-sm">You have unsaved settings. Keys use the last saved meeting types.</p>
               )}

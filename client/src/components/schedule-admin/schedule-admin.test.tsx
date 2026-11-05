@@ -232,6 +232,23 @@ describe("ScheduleAdmin", () => {
     expect(document.activeElement).toBe(screen.getByRole("tab", { name: "Access keys" }));
   });
 
+  it.each([
+    ["Availability", "Weekly hours"],
+    ["Meeting types", "Meeting types"],
+    ["Booking rules", "Booking rules"],
+    ["Access keys", "Access keys"],
+  ])("opens the %s tab with an h2 and no skipped heading levels", async (tabName, heading) => {
+    await signIn();
+    await act(async () => {
+      fireEvent.click(screen.getByRole("tab", { name: tabName }));
+    });
+
+    expect(screen.getByRole("heading", { level: 1, name: "Scheduling admin" })).toBeTruthy();
+    expect(screen.getAllByRole("heading", { level: 2 }).map(h => h.textContent)).toEqual([heading]);
+    const levels = screen.getAllByRole("heading").map(h => Number(h.tagName.slice(1)));
+    levels.forEach((level, i) => expect(level).toBeLessThanOrEqual((levels[i - 1] ?? 0) + 1));
+  });
+
   it("clears a save error once the draft is edited again", async () => {
     await signIn();
     fireEvent.click(screen.getByRole("tab", { name: "Booking rules" }));

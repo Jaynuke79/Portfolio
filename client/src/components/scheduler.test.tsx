@@ -356,4 +356,22 @@ describe("Scheduler", () => {
     expect(screen.getByLabelText("Access key")).toBeTruthy();
     expect(screen.getByRole("alert").textContent).toMatch(/expired/);
   });
+
+  it("nests the month and day headings under the time step heading", async () => {
+    const slot = slotTomorrowAtNoonUtc();
+    vi.mocked(api.fetchBookingInfo).mockResolvedValue(INFO);
+    vi.mocked(api.fetchSlots).mockResolvedValue([slot]);
+    render(<Scheduler />);
+    await enterKey("ABCD-EFGH-JKMN-PQRS");
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /30 Minute Chat/ }));
+    });
+
+    expect(screen.getAllByRole("heading", { level: 2 }).map(h => h.textContent)).toEqual(["Pick a time"]);
+    const monthLabel = screen.getByRole("heading", { level: 3 });
+    expect(monthLabel.textContent).toMatch(/^\w+ \d{4}$/);
+    expect(monthLabel.getAttribute("aria-live")).toBe("polite");
+    expect(screen.getByRole("group", { name: monthLabel.textContent ?? "" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 4, name: "Select a day" })).toBeTruthy();
+  });
 });
