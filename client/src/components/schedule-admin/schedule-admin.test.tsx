@@ -299,6 +299,19 @@ describe("ScheduleAdmin", () => {
   });
 });
 
+describe("sign-out confirmation", () => {
+  it("closes once nothing is unsaved and stays closed on the next edit", async () => {
+    await signIn();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Tuesday" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    fireEvent.click(screen.getByRole("button", { name: "Discard" }));
+    expect(screen.queryByText("You have unsaved changes. Sign out and discard them?")).toBeNull();
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "Wednesday" }));
+    expect(screen.queryByText("You have unsaved changes. Sign out and discard them?")).toBeNull();
+  });
+});
+
 describe("leaving #schedule/admin", () => {
   it("asks first and stays put when unsaved changes are kept", async () => {
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);

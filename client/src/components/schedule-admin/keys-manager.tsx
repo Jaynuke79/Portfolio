@@ -100,15 +100,15 @@ export default function KeysManager({ token, config }: Props) {
   };
 
   const askRevoke = (id: string) => {
-    setEditingId(null);
-    setRowError(null);
+    if (editingId === id) setEditingId(null);
+    setRowError(error => (error?.keyId === id ? null : error));
     setConfirmRevokeId(id);
   };
 
   const cancelRevoke = (id: string) => {
     flushSync(() => {
       setConfirmRevokeId(null);
-      setRowError(null);
+      setRowError(error => (error?.keyId === id ? null : error));
     });
     revokeButtons.current.get(id)?.focus();
   };

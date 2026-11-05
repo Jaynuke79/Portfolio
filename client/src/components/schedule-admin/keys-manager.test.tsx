@@ -129,6 +129,14 @@ describe("KeysManager", () => {
     expect(within(row("Acme")).queryByRole("alert")).toBeNull();
   });
 
+  it("keeps another key's edit open when a revoke is asked", async () => {
+    await renderWith([key("k1", "Acme"), key("k2", "Globex")]);
+    await click(within(row("Globex")).getByRole("button", { name: "Edit" }));
+    await click(within(row("Acme")).getByRole("button", { name: "Revoke" }));
+
+    expect(within(row("Globex")).getByRole("button", { name: "Save key" })).toBeTruthy();
+  });
+
   it("backs out of a revoke with Cancel or Escape", async () => {
     await renderWith([key("k1", "Acme")]);
     await click(within(row("Acme")).getByRole("button", { name: "Revoke" }));

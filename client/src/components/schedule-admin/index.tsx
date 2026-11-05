@@ -109,7 +109,10 @@ export default function ScheduleAdmin() {
   }, [unlock]);
 
   useEffect(() => {
-    if (!dirty) return;
+    if (!dirty) {
+      setConfirmingSignOut(false);
+      return;
+    }
     const warn = (e: BeforeUnloadEvent) => e.preventDefault();
     window.addEventListener("beforeunload", warn);
     const releaseLeaveGuard = setLeaveGuard(() => window.confirm(LEAVE_PROMPT));
