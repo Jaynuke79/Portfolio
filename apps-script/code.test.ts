@@ -26,6 +26,7 @@ let lockHeld: boolean;
 let lockWaiters: (() => void)[];
 let blockedOnLock: boolean;
 let scriptCache: Map<string, { value: string; expiresAt: number }>;
+let eachDateKeyCalls: string[][];
 
 function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Code.js"]) {
   props = { ADMIN_TOKEN: ADMIN };
@@ -144,6 +145,13 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
   for (const file of files) {
     runInContext(readFileSync(resolve(dir, file), "utf8"), context);
   }
+  eachDateKeyCalls = [];
+  const sandbox = context as unknown as { eachDateKey(start: string, end: string): string[] };
+  const eachDateKey = sandbox.eachDateKey;
+  sandbox.eachDateKey = (start, end) => {
+    eachDateKeyCalls.push([start, end]);
+    return eachDateKey(start, end);
+  };
   const globals = context as unknown as { doPost(e: Json): Json; defaultBookingConfig(): Json };
   const doPost = globals.doPost;
   defaultConfig = globals.defaultBookingConfig;
@@ -656,6 +664,21 @@ describe("slot range checks", () => {
     expect(slotsBetween("2026-10-5", "2026-10-09").error).toBe("invalid_range");
     expect(slotsBetween("2026-10-05T00:00", "2026-10-09").error).toBe("invalid_range");
     expect(slotsBetween("2026-10-09", "2026-10-05").error).toBe("invalid_range");
+    expect(freebusyQueries).toEqual([]);
+  });
+
+  it("refuses dates that do not exist", () => {
+    expect(slotsBetween("2026-02-30", "2026-03-02").error).toBe("invalid_range");
+    expect(slotsBetween("2026-10-05", "2026-13-01").error).toBe("invalid_range");
+    expect(freebusyQueries).toEqual([]);
+  });
+
+  it("refuses an oversized range without listing its dates", () => {
+    const started = performance.now();
+    expect(slotsBetween("0000-01-01", "9999-12-31").error).toBe("invalid_range");
+    expect(slotsBetween("2026-01-01", "9999-12-31").error).toBe("invalid_range");
+    expect(performance.now() - started).toBeLessThan(1000);
+    expect(eachDateKeyCalls).toEqual([]);
     expect(freebusyQueries).toEqual([]);
   });
 

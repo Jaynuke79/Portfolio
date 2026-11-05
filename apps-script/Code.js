@@ -10,7 +10,6 @@
 
 const MAX_RANGE_DAYS = 45;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const KEY_PROPERTY_PREFIX = 'key:';
 const KEY_ID_LENGTH = 12;
 const BAD_KEY_LIMIT_PER_10_MIN = 30;
@@ -370,14 +369,19 @@ function slotsFor(config, type, startDate, endDate) {
   });
 }
 
+function dateKeyToUtcMs(dateKey) {
+  const [year, month, day] = dateKey.split('-').map(Number);
+  return Date.UTC(year, month - 1, day);
+}
+
 function listSlots(body, record) {
   const config = readConfig();
   const type = resolveType(config, body.type, record);
   const { start, end } = body;
-  if (!DATE_KEY_PATTERN.test(start || '') || !DATE_KEY_PATTERN.test(end || '') || end < start) {
+  const bothReal = [start, end].every(key => typeof key === 'string' && isCalendarDateKey(key));
+  if (!bothReal || end < start || (dateKeyToUtcMs(end) - dateKeyToUtcMs(start)) / 86400000 + 1 > MAX_RANGE_DAYS) {
     throw new BookingError('invalid_range');
   }
-  if (eachDateKey(start, end).length > MAX_RANGE_DAYS) throw new BookingError('invalid_range');
   return { slots: slotsFor(config, type, start, end) };
 }
 
