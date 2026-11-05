@@ -407,16 +407,56 @@ function readEmailBookingTimes(cache, emailKey, nowMs) {
   return Array.isArray(times) ? times.filter(t => typeof t === 'number' && t > windowStartMs) : [];
 }
 
-function enforceRateLimit(email) {
+function readRateLimitCounts(email) {
   const cache = CacheService.getScriptCache();
   const now = Date.now();
   const emailKey = `rl:email:${email}`;
   const hourKey = `rl:hour:${Math.floor(now / 3600000)}`;
-  const emailTimes = readEmailBookingTimes(cache, emailKey, now);
-  const hourCount = Number(cache.get(hourKey) || 0);
+  return {
+    cache,
+    now,
+    emailKey,
+    hourKey,
+    emailTimes: readEmailBookingTimes(cache, emailKey, now),
+    hourCount: Number(cache.get(hourKey) || 0),
+  };
+}
+
+function enforceRateLimit(email) {
+  const { emailTimes, hourCount } = readRateLimitCounts(email);
   if (emailTimes.length >= PER_EMAIL_LIMIT || hourCount >= GLOBAL_HOURLY_LIMIT) throw new BookingError('rate_limited');
+}
+
+/** Called only once the event exists, so a failed insert never counts against the guest or the hour. */
+function recordRateLimitedBooking(email) {
+  const { cache, now, emailKey, hourKey, emailTimes, hourCount } = readRateLimitCounts(email);
   cache.put(emailKey, JSON.stringify(emailTimes.concat(now)), PER_EMAIL_WINDOW_SECONDS);
   cache.put(hourKey, String(hourCount + 1), 3600);
+}
+
+/**
+ * Gives back a use reserved for an insert that failed. The record is re-read
+ * so a key deleted meanwhile stays deleted.
+ */
+function releaseKeyUse(keyHash, reservedFrom) {
+  try {
+    const latest = readKeyRecord(keyHash);
+    if (!latest) return;
+    const released = Object.assign({}, latest, { uses: Math.max(0, latest.uses - 1) });
+    if (reservedFrom.lastUsedAt === undefined) delete released.lastUsedAt;
+    else released.lastUsedAt = reservedFrom.lastUsedAt;
+    writeKeyRecord(keyHash, released);
+  } catch (err) {
+    console.error('Could not release a reserved key use', err);
+  }
+}
+
+function logIfThrows(work) {
+  try {
+    work();
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 function confirmBooking(body, keyHash) {
@@ -449,34 +489,35 @@ function confirmBooking(body, keyHash) {
 
     enforceRateLimit(guest.email);
 
-    const event = Calendar.Events.insert(
-      {
-        summary: `${type.name} with ${guest.name}`,
-        description: guest.notes,
-        extendedProperties: { private: { bookingKeyLabel: record.label || '' } },
-        start: { dateTime: offered.start },
-        end: { dateTime: offered.end },
-        attendees: [{ email: guest.email, displayName: guest.name }],
-        conferenceData: {
-          createRequest: { requestId: Utilities.getUuid(), conferenceSolutionKey: { type: 'hangoutsMeet' } },
-        },
-      },
-      config.calendarId || 'primary',
-      { conferenceDataVersion: 1, sendUpdates: 'all' }
-    );
-    // Losing this entry only leaves the next confirm to free/busy, so it must not fail a booking that exists.
+    // The use is reserved before the insert so a single-use key stays single-use
+    // even if a write after the event exists would fail.
+    writeKeyRecord(keyHash, Object.assign({}, record, { uses: record.uses + 1, lastUsedAt: new Date().toISOString() }));
+
+    let event;
     try {
-      rememberBooking(offered);
+      event = Calendar.Events.insert(
+        {
+          summary: `${type.name} with ${guest.name}`,
+          description: guest.notes,
+          extendedProperties: { private: { bookingKeyLabel: record.label || '' } },
+          start: { dateTime: offered.start },
+          end: { dateTime: offered.end },
+          attendees: [{ email: guest.email, displayName: guest.name }],
+          conferenceData: {
+            createRequest: { requestId: Utilities.getUuid(), conferenceSolutionKey: { type: 'hangoutsMeet' } },
+          },
+        },
+        config.calendarId || 'primary',
+        { conferenceDataVersion: 1, sendUpdates: 'all' }
+      );
     } catch (err) {
-      console.error(err);
+      releaseKeyUse(keyHash, record);
+      throw err;
     }
 
-    // The event already exists, so a key revoked meanwhile still gets its
-    // booking, but its record must not be written back into existence.
-    const latest = readKeyRecord(keyHash);
-    if (latest) {
-      writeKeyRecord(keyHash, Object.assign({}, latest, { uses: latest.uses + 1, lastUsedAt: new Date().toISOString() }));
-    }
+    // The event exists, so nothing from here on may turn the booking into an error.
+    logIfThrows(() => recordRateLimitedBooking(guest.email));
+    logIfThrows(() => rememberBooking(offered));
     booked = { type, offered, meetLink: event.hangoutLink || null, keyLabel: record.label || '' };
   } finally {
     lock.releaseLock();

@@ -17,6 +17,8 @@ let freebusyQueries: string[][];
 let freebusyLags: boolean;
 let unreadableCalendars: Record<string, "errors" | "missing">;
 let inserted: Json[];
+let insertFailures: number;
+let propertyWritesFail: boolean;
 let post: (body: Json) => Json;
 let defaultConfig: () => Json;
 let sentMail: Json[];
@@ -35,6 +37,8 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
   freebusyLags = false;
   unreadableCalendars = {};
   inserted = [];
+  insertFailures = 0;
+  propertyWritesFail = false;
   sentMail = [];
   mailFailsFor = null;
   interleave = null;
@@ -64,7 +68,10 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
           if (k === "BOOKING_CONFIG") interleaveAt("configRead");
           return props[k] ?? null;
         },
-        setProperty: (k: string, v: string) => (props[k] = v),
+        setProperty: (k: string, v: string) => {
+          if (propertyWritesFail) throw new Error("Properties service unavailable");
+          props[k] = v;
+        },
         setProperties: (values: Record<string, string>) => Object.assign(props, values),
         getProperties: () => ({ ...props }),
         deleteProperty: (k: string) => delete props[k],
@@ -122,6 +129,10 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
       Events: {
         insert: (event: Json, calendarId: string) => {
           interleaveAt("insert");
+          if (insertFailures > 0) {
+            insertFailures--;
+            throw new Error("Calendar service unavailable");
+          }
           inserted.push(event);
           if (!freebusyLags) (busyOn[calendarId] ??= []).push({ start: event.start.dateTime, end: event.end.dateTime });
           return { hangoutLink: "https://meet.google.com/test" };
@@ -613,6 +624,64 @@ describe("booking rate limits", () => {
 
     vi.setSystemTime(new Date("2026-10-05T17:00:01Z"));
     expect(bookNext(key, "late@example.com").ok).toBe(true);
+  });
+});
+
+describe("bookkeeping around the calendar insert", () => {
+  onFixedClock(MONDAY_MORNING_DENVER);
+
+  function keyProperty(id: string): string {
+    return Object.keys(props).find(name => name.startsWith(`key:${id}`))!;
+  }
+
+  function hourlyCounts(): string[] {
+    return [...scriptCache].filter(([name]) => name.startsWith("rl:hour:")).map(([, entry]) => entry.value);
+  }
+
+  it("counts only inserts that succeed toward the rate limits", () => {
+    const { key } = issue({ maxUses: 10 });
+    insertFailures = 3;
+    for (let i = 0; i < 3; i++) expect(confirm(key, upcomingSlots(key)[0].start).error).toBe("server_error");
+    expect(hourlyCounts()).toEqual([]);
+
+    expect(confirm(key, upcomingSlots(key)[0].start).ok).toBe(true);
+    expect(hourlyCounts()).toEqual(["1"]);
+    expect(inserted).toHaveLength(1);
+  });
+
+  it("gives the key its use back when the insert throws", () => {
+    const { key } = issue();
+    insertFailures = 1;
+    expect(confirm(key, upcomingSlots(key)[0].start).error).toBe("server_error");
+    expect(post({ action: "listKeys", adminToken: ADMIN }).keys[0].uses).toBe(0);
+    expect(confirm(key, upcomingSlots(key)[0].start).ok).toBe(true);
+    expect(post({ action: "access", key }).error).toBe("key_used_up");
+  });
+
+  it("does not bring back a key deleted while a failing insert runs", () => {
+    const { key, id } = issue({ maxUses: 3 });
+    const property = keyProperty(id);
+    insertFailures = 1;
+    interleave = { at: "insert", run: () => delete props[property] };
+    expect(confirm(key, upcomingSlots(key)[0].start).error).toBe("server_error");
+    expect(props[property]).toBeUndefined();
+  });
+
+  it("reports a booking whose property writes fail after the insert as booked, and still uses up the key", () => {
+    const { key } = issue();
+    const slots = upcomingSlots(key);
+    interleave = { at: "insert", run: () => (propertyWritesFail = true) };
+    expect(confirm(key, slots[0].start)).toMatchObject({
+      ok: true,
+      start: slots[0].start,
+      meetLink: "https://meet.google.com/test",
+      emailed: { guest: true, owner: true },
+    });
+    expect(sentMail).toHaveLength(2);
+
+    propertyWritesFail = false;
+    expect(confirm(key, slots[3].start).error).toBe("key_used_up");
+    expect(inserted).toHaveLength(1);
   });
 });
 
