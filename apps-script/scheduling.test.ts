@@ -369,6 +369,38 @@ describe("validateBookingConfig", () => {
   });
 });
 
+describe("validateBookingConfig retired type ids", () => {
+  const base = () => gs.defaultBookingConfig();
+  const chat = { id: "chat", name: "Chat", durationMinutes: 30 };
+
+  it("records the ids of types the save removes, once each", () => {
+    const current = { ...base(), types: [...base().types, chat], retiredTypeIds: ["old"] };
+    const { config } = gs.validateBookingConfig({ ...base(), retiredTypeIds: [] }, current);
+    expect(config!.retiredTypeIds).toEqual(["old", "chat"]);
+    const again = gs.validateBookingConfig({ ...base(), types: [base().types[0]] }, config!);
+    expect(again.config!.retiredTypeIds).toEqual(["old", "chat", "30min"]);
+  });
+
+  it("refuses a type that reuses a retired id", () => {
+    const current = { ...base(), retiredTypeIds: ["chat"] };
+    expect(gs.validateBookingConfig({ ...base(), types: [...base().types, chat] }, current)).toEqual({
+      error: "retired_type_id",
+      field: "types",
+    });
+  });
+
+  it("ignores retired ids sent by the client", () => {
+    const { config } = gs.validateBookingConfig({ ...base(), retiredTypeIds: ["15min", "x"] }, base());
+    expect(config!.retiredTypeIds).toEqual([]);
+  });
+
+  it("treats a current config saved before the field existed as having none", () => {
+    const legacy = base();
+    delete legacy.retiredTypeIds;
+    expect(gs.validateBookingConfig(base(), legacy).config!.retiredTypeIds).toEqual([]);
+  });
+});
+
 describe("buildConfirmationEmails", () => {
   const input = (patch: Record<string, any> = {}) => ({
     config: gs.defaultBookingConfig(),

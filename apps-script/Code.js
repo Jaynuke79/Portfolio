@@ -105,7 +105,7 @@ function route(body) {
 function readConfig() {
   const raw = PropertiesService.getScriptProperties().getProperty('BOOKING_CONFIG');
   const config = raw ? JSON.parse(raw) : defaultBookingConfig();
-  return Object.assign({}, config, { notifications: notificationSettings(config) });
+  return Object.assign({}, config, { notifications: notificationSettings(config), retiredTypeIds: retiredTypeIdsOf(config) });
 }
 
 function sha256Hex(text) {

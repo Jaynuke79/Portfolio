@@ -23,6 +23,17 @@ function askToRemove(name = "15 Minute Chat") {
 
 afterEach(cleanup);
 
+describe("TypesEditor add", () => {
+  it("gives a new type a fresh id when its name matches a deleted type", () => {
+    const onChange = vi.fn();
+    render(<TypesEditor types={TYPES} reservedTypeIds={["resume-review"]} defaultTypeIds={null} onChange={onChange} />);
+    fireEvent.change(screen.getByLabelText("New meeting type"), { target: { value: "Resume review" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add type" }));
+
+    expect(onChange).toHaveBeenCalledWith([...TYPES, { id: "resume-review-2", name: "Resume review", durationMinutes: 30 }]);
+  });
+});
+
 describe("TypesEditor removal", () => {
   it("asks for confirmation before removing a type", () => {
     const onChange = renderEditor();

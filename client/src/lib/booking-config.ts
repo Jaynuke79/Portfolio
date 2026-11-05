@@ -16,9 +16,9 @@ export const DURATION_OPTIONS = [15, 20, 30, 45, 60, 90, 120];
 /**
  * An id for a new meeting type. Ids are permanent once saved because keys
  * reference them, so they come from the name at creation and never follow
- * later renames.
+ * later renames, and a deleted type's id is never handed out again.
  */
-export function newTypeId(name: string, existingIds: string[]): string {
+export function newTypeId(name: string, existingIds: string[], retiredIds: string[] = []): string {
   const base =
     name
       .toLowerCase()
@@ -26,7 +26,8 @@ export function newTypeId(name: string, existingIds: string[]): string {
       .replace(/^-+|-+$/g, "")
       .slice(0, 32) || "meeting";
   let id = base;
-  for (let n = 2; existingIds.includes(id); n++) id = `${base}-${n}`;
+  const taken = (candidate: string) => existingIds.includes(candidate) || retiredIds.includes(candidate);
+  for (let n = 2; taken(id); n++) id = `${base}-${n}`;
   return id;
 }
 

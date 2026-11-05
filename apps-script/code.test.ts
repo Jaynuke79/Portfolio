@@ -481,6 +481,41 @@ describe("config editing", () => {
     expect(saved.config.busyCalendarIds).toEqual(["primary"]);
   });
 
+  it("retires a removed type's id so a re-added type can't reuse it", () => {
+    const withReview = defaultConfig();
+    withReview.types.push({ id: "resume-review", name: "Resume review", durationMinutes: 30 });
+    const first = save(withReview, null);
+    const { key } = issue({ typeIds: ["resume-review", "30min"] });
+
+    const removed = save({ ...first.config, types: defaultConfig().types }, first.version);
+    expect(removed.config.retiredTypeIds).toEqual(["resume-review"]);
+    expect(post({ action: "getConfig", adminToken: ADMIN }).config.retiredTypeIds).toEqual(["resume-review"]);
+
+    const readded = save({ ...removed.config, types: withReview.types }, removed.version);
+    expect(readded.error).toBe("retired_type_id:types");
+    expect(JSON.parse(props.BOOKING_CONFIG).types.map((t: Json) => t.id)).toEqual(["15min", "30min"]);
+
+    const renamed = defaultConfig().types.concat({ id: "resume-review-2", name: "Resume review", durationMinutes: 30 });
+    expect(save({ ...removed.config, types: renamed }, removed.version).ok).toBe(true);
+    expect(post({ action: "access", key }).types.map((t: Json) => t.id)).toEqual(["30min"]);
+  });
+
+  it("keeps retired ids the client tries to drop", () => {
+    props.BOOKING_CONFIG = JSON.stringify({ ...defaultConfig(), retiredTypeIds: ["old"] });
+    const saved = save({ ...defaultConfig(), retiredTypeIds: [] }, null);
+    expect(saved.config.retiredTypeIds).toEqual(["old"]);
+  });
+
+  it("loads and saves a config stored before retired ids existed", () => {
+    const legacy = defaultConfig();
+    delete legacy.retiredTypeIds;
+    props.BOOKING_CONFIG = JSON.stringify(legacy);
+    expect(post({ action: "getConfig", adminToken: ADMIN }).config.retiredTypeIds).toEqual([]);
+
+    const saved = save({ ...legacy, types: [legacy.types[1]] }, null);
+    expect(saved.config.retiredTypeIds).toEqual(["15min"]);
+  });
+
   it("previews upcoming slots from the live calendar", () => {
     const preview = post({ action: "previewSlots", adminToken: ADMIN, type: "30min" });
     expect(preview).toMatchObject({ ok: true, type: "30min", timeZone: "America/Denver" });

@@ -23,7 +23,13 @@ function defaultBookingConfig() {
       { id: '15min', name: '15 Minute Chat', durationMinutes: 15 },
       { id: '30min', name: '30 Minute Chat', durationMinutes: 30 },
     ],
+    retiredTypeIds: [],
   };
+}
+
+/** Ids of deleted meeting types, which are never reused so keys limited to them can't regain access. */
+function retiredTypeIdsOf(config) {
+  return Array.isArray(config.retiredTypeIds) ? config.retiredTypeIds : [];
 }
 
 /** Notification settings with defaults filled in for configs saved before they existed. */
@@ -57,7 +63,9 @@ function isIntInRange(value, min, max) {
 /**
  * Checks an edited config and returns { config } with only known fields, or
  * { error, field } naming the first problem. Calendar ids are not editable from
- * the web and are carried over from `current`.
+ * the web and are carried over from `current`. Retired type ids are likewise
+ * server-owned: `current`'s are kept and the ids of types this save removes are
+ * added, whatever the input says.
  */
 function validateBookingConfig(input, current) {
   const fail = (field, error) => ({ error: error || 'invalid_config', field });
@@ -73,6 +81,9 @@ function validateBookingConfig(input, current) {
   if (!isIntInRange(input.minLeadHours, 0, 720)) return fail('minLeadHours');
   if (!isIntInRange(input.horizonDays, 1, 365)) return fail('horizonDays');
 
+  const base = current || defaultBookingConfig();
+  const retired = retiredTypeIdsOf(base);
+
   if (!Array.isArray(input.types) || input.types.length === 0 || input.types.length > 20) return fail('types');
   const types = [];
   for (const type of input.types) {
@@ -80,6 +91,7 @@ function validateBookingConfig(input, current) {
     const name = type && typeof type.name === 'string' ? type.name.trim() : '';
     if (typeof id !== 'string' || !/^[a-z0-9][a-z0-9-]{0,39}$/.test(id)) return fail('types', 'invalid_type_id');
     if (types.some(t => t.id === id)) return fail('types', 'duplicate_type_id');
+    if (retired.includes(id)) return fail('types', 'retired_type_id');
     if (!name || name.length > 60) return fail('types', 'invalid_type_name');
     if (!isIntInRange(type.durationMinutes, 5, 480) || type.durationMinutes % 5 !== 0) {
       return fail('types', 'invalid_type_duration');
@@ -128,7 +140,7 @@ function validateBookingConfig(input, current) {
     ownerEmail,
   };
 
-  const base = current || defaultBookingConfig();
+  const removedIds = base.types.map(t => t.id).filter(id => !types.some(t => t.id === id) && !retired.includes(id));
   return {
     config: {
       title,
@@ -143,6 +155,7 @@ function validateBookingConfig(input, current) {
       notifications,
       weeklyHours,
       types,
+      retiredTypeIds: retired.concat(removedIds),
     },
   };
 }

@@ -22,11 +22,13 @@ function DurationSelect({ id, value, onChange, label }: { id?: string; value: nu
 
 interface Props {
   types: MeetingType[];
+  /** Ids a new type must not take: retired ones, and saved ones removed from this draft that keys may still name. */
+  reservedTypeIds?: string[];
   defaultTypeIds: string[] | null;
   onChange: (next: MeetingType[]) => void;
 }
 
-export default function TypesEditor({ types, defaultTypeIds, onChange }: Props) {
+export default function TypesEditor({ types, reservedTypeIds = [], defaultTypeIds, onChange }: Props) {
   const [newName, setNewName] = useState("");
   const [newDuration, setNewDuration] = useState(30);
   const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
@@ -57,7 +59,7 @@ export default function TypesEditor({ types, defaultTypeIds, onChange }: Props) 
     e.preventDefault();
     const name = newName.trim();
     if (!name) return;
-    onChange([...types, { id: newTypeId(name, types.map(t => t.id)), name, durationMinutes: newDuration }]);
+    onChange([...types, { id: newTypeId(name, types.map(t => t.id), reservedTypeIds), name, durationMinutes: newDuration }]);
     setNewName("");
   };
 

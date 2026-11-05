@@ -8,6 +8,11 @@ describe("newTypeId", () => {
     expect(newTypeId("Chat", ["chat", "chat-2"])).toBe("chat-3");
     expect(newTypeId("  ", [])).toBe("meeting");
   });
+
+  it("never hands out the id of a deleted type", () => {
+    expect(newTypeId("Resume review", [], ["resume-review"])).toBe("resume-review-2");
+    expect(newTypeId("Chat", ["chat-2"], ["chat", "chat-3"])).toBe("chat-4");
+  });
 });
 
 describe("termsFromForm", () => {

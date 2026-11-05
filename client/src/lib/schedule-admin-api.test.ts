@@ -13,6 +13,12 @@ describe("describeAdminError", () => {
     expect(message).not.toMatch(GENERIC);
   });
 
+  it("explains a reused id from a deleted meeting type", () => {
+    expect(describeAdminError("retired_type_id:types")).toBe(
+      "Meeting types: one uses the id of a deleted type, which can't be reused. Remove it and add it again.",
+    );
+  });
+
   it("capitalises standalone fragment messages", () => {
     expect(describeAdminError("ambiguous_key_id")).toMatch(/^That key/);
   });
