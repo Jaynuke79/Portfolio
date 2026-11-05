@@ -8,6 +8,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 type Json = Record<string, any>;
 
 const dir = dirname(fileURLToPath(import.meta.url));
+
+// CacheService limits from the Apps Script reference. The docs don't say what
+// happens past them, so the fake throws rather than clamping.
+const MAX_CACHE_KEY_CHARS = 250;
+const MAX_CACHE_VALUE_BYTES = 100 * 1024;
+const MAX_CACHE_TTL_SECONDS = 6 * 60 * 60;
 const ADMIN = "admin-token";
 
 let props: Record<string, string>;
@@ -23,6 +29,7 @@ let post: (body: Json) => Json;
 let defaultConfig: () => Json;
 let checkSetup: () => void;
 let logged: string[];
+let loggedErrors: unknown[][];
 let sentMail: Json[];
 let mailFailsFor: string | null;
 type InterleavePoint = "insert" | "configRead" | "waitLock";
@@ -31,6 +38,8 @@ let lockHeld: boolean;
 let lockWaiters: (() => void)[];
 let blockedOnLock: boolean;
 let scriptCache: Map<string, { value: string; expiresAt: number }>;
+let cachePutsFail: boolean;
+let cacheService: { getScriptCache(): { put(k: string, v: string, ttl?: number): void } };
 let eachDateKeyCalls: string[][];
 
 function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Code.js"]) {
@@ -45,6 +54,8 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
   propertyWritesFail = false;
   sentMail = [];
   logged = [];
+  loggedErrors = [];
+  cachePutsFail = false;
   mailFailsFor = null;
   interleave = null;
   lockHeld = false;
@@ -58,10 +69,16 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
   };
   const cache = (scriptCache = new Map());
   const checkCacheKey = (k: string) => {
-    if (k.length > 250) throw new Error("Argument too large: key");
+    if (k.length > MAX_CACHE_KEY_CHARS) throw new Error("Argument too large: key");
+  };
+  const checkCacheEntry = (value: string, ttlSeconds?: number) => {
+    if (Buffer.byteLength(value, "utf8") > MAX_CACHE_VALUE_BYTES) throw new Error("Argument too large: value");
+    if (ttlSeconds !== undefined && (ttlSeconds < 1 || ttlSeconds > MAX_CACHE_TTL_SECONDS)) {
+      throw new Error("Argument out of range: expirationInSeconds");
+    }
   };
   const context = createContext({
-    console: { log: (line: string) => logged.push(line), error() {} },
+    console: { log: (line: string) => logged.push(line), error: (...args: unknown[]) => loggedErrors.push(args) },
     Intl,
     Date,
     Math,
@@ -85,7 +102,7 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
         deleteProperty: (k: string) => delete props[k],
       }),
     },
-    CacheService: {
+    CacheService: (cacheService = {
       getScriptCache: () => ({
         get: (k: string) => {
           checkCacheKey(k);
@@ -94,10 +111,12 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
         },
         put: (k: string, value: string, ttlSeconds?: number) => {
           checkCacheKey(k);
+          checkCacheEntry(value, ttlSeconds);
+          if (cachePutsFail) throw new Error("Cache service unavailable");
           cache.set(k, { value, expiresAt: ttlSeconds === undefined ? Infinity : Date.now() + ttlSeconds * 1000 });
         },
       }),
-    },
+    }),
     LockService: {
       getScriptLock: () => ({
         waitLock() {
@@ -739,6 +758,63 @@ describe("bookkeeping around the calendar insert", () => {
     propertyWritesFail = false;
     expect(confirm(key, slots[3].start).error).toBe("key_used_up");
     expect(inserted).toHaveLength(1);
+  });
+
+  it("reports a booking whose cache writes fail after the insert as booked, and still emails both sides", () => {
+    const { key } = issue();
+    const slots = upcomingSlots(key);
+    interleave = { at: "insert", run: () => (cachePutsFail = true) };
+    expect(confirm(key, slots[0].start)).toMatchObject({
+      ok: true,
+      start: slots[0].start,
+      meetLink: "https://meet.google.com/test",
+      emailed: { guest: true, owner: true },
+    });
+    expect(sentMail.map(mail => mail.to)).toEqual(["ada@example.com", "owner@example.com"]);
+    expect(hourlyCounts()).toEqual([]);
+    expect(loggedErrors.length).toBeGreaterThan(0);
+
+    cachePutsFail = false;
+    expect(confirm(key, slots[3].start).error).toBe("key_used_up");
+    expect(inserted).toHaveLength(1);
+  });
+});
+
+describe("cache limits", () => {
+  onFixedClock(MONDAY_MORNING_DENVER);
+
+  it("are enforced by the fake: values over 100 KB and expirations outside 1 to 21600 seconds throw", () => {
+    const cache = cacheService.getScriptCache();
+    expect(() => cache.put("big", "x".repeat(MAX_CACHE_VALUE_BYTES + 1), 60)).toThrow("Argument too large: value");
+    expect(() => cache.put("wide", "é".repeat(MAX_CACHE_VALUE_BYTES / 2 + 1), 60)).toThrow("Argument too large: value");
+    expect(() => cache.put("long", "1", MAX_CACHE_TTL_SECONDS + 1)).toThrow("expirationInSeconds");
+    expect(() => cache.put("short", "1", 0)).toThrow("expirationInSeconds");
+    cache.put("edge", "x".repeat(MAX_CACHE_VALUE_BYTES), MAX_CACHE_TTL_SECONDS);
+    expect(scriptCache.has("edge")).toBe(true);
+  });
+
+  it("keeps recentBookings and per-email entries within the limits when the hourly cap is reached", () => {
+    for (let i = 0; i < 20; i++) {
+      const key = issue().key;
+      expect(confirm(key, upcomingSlots(key)[0].start, { email: `guest${i % 7}@example.com` }).ok).toBe(true);
+    }
+    const key = issue().key;
+    expect(confirm(key, upcomingSlots(key)[0].start, { email: "late@example.com" }).error).toBe("rate_limited");
+
+    expect(loggedErrors).toEqual([]);
+    const now = Date.now();
+    const entries = [...scriptCache].filter(([name]) => name === "recentBookings" || name.startsWith("rl:email:"));
+    for (const [name, { value, expiresAt }] of entries) {
+      expect(name.length).toBeLessThanOrEqual(MAX_CACHE_KEY_CHARS);
+      expect(Buffer.byteLength(value, "utf8")).toBeLessThanOrEqual(MAX_CACHE_VALUE_BYTES);
+      expect(expiresAt - now).toBeLessThanOrEqual(MAX_CACHE_TTL_SECONDS * 1000);
+    }
+    expect(JSON.parse(scriptCache.get("recentBookings")!.value)).toHaveLength(20);
+    const perEmailCounts = entries
+      .filter(([name]) => name.startsWith("rl:email:"))
+      .map(([, { value }]) => JSON.parse(value).length)
+      .sort();
+    expect(perEmailCounts).toEqual([2, 3, 3, 3, 3, 3, 3]);
   });
 });
 
