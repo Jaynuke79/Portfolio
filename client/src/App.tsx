@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import Home from "@/pages/home";
-import Scheduler from "@/components/scheduler";
-import ScheduleAdmin from "@/components/schedule-admin";
 import { mayLeave, routeForHash } from "@/lib/hash-route";
+
+const Scheduler = lazy(() => import("@/components/scheduler"));
+const ScheduleAdmin = lazy(() => import("@/components/schedule-admin"));
 
 function App() {
   const [route, setRoute] = useState(() => routeForHash(window.location.hash));
@@ -25,8 +26,16 @@ function App() {
 
   return (
     <>
-      {route === "schedule" && <Scheduler />}
-      {route === "schedule-admin" && <ScheduleAdmin />}
+      {route === "schedule" && (
+        <Suspense fallback={null}>
+          <Scheduler />
+        </Suspense>
+      )}
+      {route === "schedule-admin" && (
+        <Suspense fallback={null}>
+          <ScheduleAdmin />
+        </Suspense>
+      )}
       {route === "home" && <Home />}
       <Toaster />
     </>
