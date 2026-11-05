@@ -21,6 +21,8 @@ let insertFailures: number;
 let propertyWritesFail: boolean;
 let post: (body: Json) => Json;
 let defaultConfig: () => Json;
+let checkSetup: () => void;
+let logged: string[];
 let sentMail: Json[];
 let mailFailsFor: string | null;
 type InterleavePoint = "insert" | "configRead" | "waitLock";
@@ -42,6 +44,7 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
   insertFailures = 0;
   propertyWritesFail = false;
   sentMail = [];
+  logged = [];
   mailFailsFor = null;
   interleave = null;
   lockHeld = false;
@@ -58,7 +61,7 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
     if (k.length > 250) throw new Error("Argument too large: key");
   };
   const context = createContext({
-    console: { log() {}, error() {} },
+    console: { log: (line: string) => logged.push(line), error() {} },
     Intl,
     Date,
     Math,
@@ -173,9 +176,10 @@ function loadBackend(files = ["Slots.js", "Keys.js", "Config.js", "Mail.js", "Co
     eachDateKeyCalls.push([start, end]);
     return eachDateKey(start, end);
   };
-  const globals = context as unknown as { doPost(e: Json): Json; defaultBookingConfig(): Json };
+  const globals = context as unknown as { doPost(e: Json): Json; defaultBookingConfig(): Json; checkSetup(): void };
   const doPost = globals.doPost;
   defaultConfig = globals.defaultBookingConfig;
+  checkSetup = globals.checkSetup;
   post = body => doPost({ postData: { contents: JSON.stringify(body) } });
 }
 
@@ -835,5 +839,73 @@ describe("confirm path gaps", () => {
     const real = confirm(key, slot.start, { type: "15min" });
     expect(real.ok).toBe(true);
     expect(Object.keys(decoy).sort()).toEqual(Object.keys(real).sort());
+  });
+});
+
+describe("dead key cleanup", () => {
+  const DAY_MS = 86400000;
+  const now = MONDAY_MORNING_DENVER.getTime();
+  onFixedClock(MONDAY_MORNING_DENVER);
+
+  function storeKey(idPrefix: string, record: Json): string {
+    const name = `key:${idPrefix.padEnd(64, "0")}`;
+    props[name] = JSON.stringify({ label: idPrefix, typeIds: null, createdAt: new Date(now - 400 * DAY_MS).toISOString(), ...record });
+    return name;
+  }
+
+  const iso = (ms: number) => new Date(ms).toISOString();
+
+  function listedLabels(): string[] {
+    return post({ action: "listKeys", adminToken: ADMIN }).keys.map((k: Json) => k.label).sort();
+  }
+
+  it("drops keys expired more than 30 days ago and keeps ones expired more recently", () => {
+    const old = storeKey("aaa111", { uses: 0, maxUses: 1, expiresAt: iso(now - 30 * DAY_MS - 1000) });
+    storeKey("aaa222", { uses: 0, maxUses: 1, expiresAt: iso(now - 30 * DAY_MS) });
+    storeKey("aaa333", { uses: 0, maxUses: 1, expiresAt: iso(now - DAY_MS) });
+
+    expect(listedLabels()).toEqual(["aaa222", "aaa333"]);
+    expect(props[old]).toBeUndefined();
+  });
+
+  it("drops keys used up more than 30 days ago, measured from the last use or else creation", () => {
+    const future = iso(now + 300 * DAY_MS);
+    const old = storeKey("bbb111", { uses: 1, maxUses: 1, expiresAt: future, lastUsedAt: iso(now - 30 * DAY_MS - 1000) });
+    storeKey("bbb222", { uses: 1, maxUses: 1, expiresAt: future, lastUsedAt: iso(now - 30 * DAY_MS + 1000) });
+    const legacy = storeKey("bbb333", { uses: 2, maxUses: 2, expiresAt: future });
+    storeKey("bbb444", { uses: 2, maxUses: 2, expiresAt: future, createdAt: iso(now - 29 * DAY_MS) });
+
+    expect(listedLabels()).toEqual(["bbb222", "bbb444"]);
+    expect(props[old]).toBeUndefined();
+    expect(props[legacy]).toBeUndefined();
+  });
+
+  it("never drops a usable key, however old", () => {
+    storeKey("ccc111", { uses: 5, maxUses: null, expiresAt: iso(now + DAY_MS), lastUsedAt: iso(now - 300 * DAY_MS) });
+    storeKey("ccc222", { uses: 0, maxUses: 1, expiresAt: iso(now + 300 * DAY_MS) });
+    expect(listedLabels()).toEqual(["ccc111", "ccc222"]);
+  });
+
+  it("keeps a key revived by an update", () => {
+    const { id } = issue({ label: "revived" });
+    const name = Object.keys(props).find(k => k.startsWith(`key:${id}`))!;
+    props[name] = JSON.stringify({ ...JSON.parse(props[name]), expiresAt: iso(now - 60 * DAY_MS) });
+    expect(post({ action: "updateKey", adminToken: ADMIN, id, expiresInDays: 5 }).status).toBe("ok");
+    expect(listedLabels()).toEqual(["revived"]);
+  });
+
+  it("leaves the booking config and other properties alone", () => {
+    props.BOOKING_CONFIG = JSON.stringify(defaultConfig());
+    storeKey("ddd111", { uses: 0, maxUses: 1, expiresAt: iso(now - 90 * DAY_MS) });
+    listedLabels();
+    expect(Object.keys(props).sort()).toEqual(["ADMIN_TOKEN", "BOOKING_CONFIG"]);
+  });
+
+  it("reports the approximate size of the property store in checkSetup", () => {
+    props.BOOKING_CONFIG = JSON.stringify(defaultConfig());
+    storeKey("eee111", { uses: 0, maxUses: 1, expiresAt: iso(now + DAY_MS) });
+    const bytes = Object.entries(props).reduce((sum, [k, v]) => sum + k.length + v.length, 0);
+    checkSetup();
+    expect(logged).toContain(`Script properties: ${bytes} bytes of the 500 KB store`);
   });
 });
