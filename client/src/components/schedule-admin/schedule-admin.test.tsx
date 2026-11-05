@@ -54,7 +54,7 @@ async function signIn(token = "secret") {
 }
 
 async function enterToken(token = "secret") {
-  fireEvent.change(screen.getByLabelText("Admin token"), { target: { value: token } });
+  fireEvent.change(await screen.findByLabelText("Admin token"), { target: { value: token } });
   await act(async () => {
     fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
   });
@@ -383,7 +383,7 @@ describe("leaving #schedule/admin", () => {
     navigateTo("/#schedule");
 
     expect(confirm).toHaveBeenCalledTimes(1);
-    expect(screen.getByText("Visitor scheduler")).toBeTruthy();
+    expect(await screen.findByText("Visitor scheduler")).toBeTruthy();
     confirm.mockRestore();
   });
 
