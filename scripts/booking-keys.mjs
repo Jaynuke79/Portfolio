@@ -24,8 +24,10 @@ export function parseArgs(argv) {
   const positional = [];
   for (let i = 0; i < rest.length; i++) {
     if (rest[i].startsWith('--')) {
-      options[rest[i].slice(2)] = rest[i + 1];
-      i++;
+      const value = rest[i + 1];
+      const takesValue = value !== undefined && !value.startsWith('--');
+      options[rest[i].slice(2)] = takesValue ? value : undefined;
+      if (takesValue) i++;
     } else {
       positional.push(rest[i]);
     }
@@ -33,7 +35,7 @@ export function parseArgs(argv) {
   return { command, options, positional };
 }
 
-function isCalendarDateKey(value) {
+export function isCalendarDateKey(value) {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) return false;
   const [year, month, day] = match.slice(1).map(Number);

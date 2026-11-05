@@ -12,6 +12,7 @@ const MAX_RANGE_DAYS = 45;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const KEY_PROPERTY_PREFIX = 'key:';
 const KEY_ID_LENGTH = 12;
+const DEAD_KEY_RETENTION_DAYS = 30;
 const BAD_KEY_LIMIT_PER_10_MIN = 30;
 const BAD_ADMIN_LIMIT_PER_10_MIN = 10;
 const PREVIEW_DAYS = 14;
@@ -76,6 +77,13 @@ function checkSetup() {
   );
   console.log(`Key defaults: ${defaults.error ? `INVALID (${defaults.error})` : JSON.stringify(defaults.terms)}`);
   console.log(`Confirmation emails go to ${ownerAddress(config)}; ${MailApp.getRemainingDailyQuota()} sends left today`);
+  console.log(`Script properties: ${propertyStoreBytes()} bytes of the 500 KB store`);
+}
+
+/** Characters in every property name and value: exact bytes for ASCII, an undercount for other text such as key labels. */
+function propertyStoreBytes() {
+  const all = PropertiesService.getScriptProperties().getProperties();
+  return Object.keys(all).reduce((sum, name) => sum + name.length + all[name].length, 0);
 }
 
 function route(body) {
@@ -210,13 +218,40 @@ function updateKey(body) {
   }
 }
 
+/**
+ * True once a key has been unusable for DEAD_KEY_RETENTION_DAYS, counted from
+ * its expiry, or from its last use (creation for records older than
+ * lastUsedAt) when used up. A record with unreadable dates is kept.
+ */
+function isLongDead(record, nowMs) {
+  const status = keyStatus(record, nowMs);
+  if (status === 'ok') return false;
+  const deadSince = status === 'expired' ? record.expiresAt : record.lastUsedAt || record.createdAt;
+  return nowMs - new Date(deadSince).getTime() > DEAD_KEY_RETENTION_DAYS * 86400000;
+}
+
+/**
+ * Lists keys and deletes the long-dead ones, which otherwise fill the 500 KB
+ * property store BOOKING_CONFIG shares. Runs under the lock so a key revived by
+ * updateKey is never deleted from a stale read.
+ */
 function listKeys() {
-  const all = PropertiesService.getScriptProperties().getProperties();
-  const keys = Object.keys(all)
-    .filter(name => name.startsWith(KEY_PROPERTY_PREFIX))
-    .map(name => keySummary(name.slice(KEY_PROPERTY_PREFIX.length), JSON.parse(all[name])))
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  return { keys };
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const all = props.getProperties();
+    const now = Date.now();
+    const keys = [];
+    for (const name of Object.keys(all).filter(n => n.startsWith(KEY_PROPERTY_PREFIX))) {
+      const record = JSON.parse(all[name]);
+      if (isLongDead(record, now)) logIfThrows(() => props.deleteProperty(name));
+      else keys.push(keySummary(name.slice(KEY_PROPERTY_PREFIX.length), record));
+    }
+    return { keys: keys.sort((a, b) => b.createdAt.localeCompare(a.createdAt)) };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 /**
