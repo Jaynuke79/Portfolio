@@ -62,7 +62,7 @@
     --card: 0 0% 100%;
     --card-foreground: 240 6% 10%;
     --border: 240 5% 86%;
-    --input: 240 5% 80%;
+    --input: 240 5% 55%;
     --primary: 168 72% 28%;
     --primary-foreground: 0 0% 98%;
     --secondary: 240 5% 93%;
@@ -89,7 +89,7 @@
       --card: 240 6% 8%;
       --card-foreground: 0 0% 95%;
       --border: 240 5% 16%;
-      --input: 240 5% 22%;
+      --input: 240 5% 43%;
       --primary: 168 58% 56%;
       --primary-foreground: 240 6% 6%;
       --secondary: 240 5% 12%;
@@ -120,16 +120,16 @@
     text-rendering: optimizeLegibility;
   }
 
-  html {
-    scroll-behavior: smooth;
-  }
-
   ::selection {
     background-color: hsl(var(--brand) / 0.25);
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
   .reveal[data-reveal='pending'] {
     opacity: 0;
     transform: translateY(16px);
