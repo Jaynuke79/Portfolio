@@ -28,6 +28,8 @@ export interface BookingConfig {
   notifications: NotificationSettings;
   weeklyHours: WeeklyHours;
   types: MeetingType[];
+  /** Server-owned; absent from a backend deployed before ids were retired. */
+  retiredTypeIds?: string[];
 }
 
 export interface AccessKey {
@@ -118,6 +120,7 @@ const ADMIN_ERRORS: Record<string, string> = {
   overlapping_windows: "two windows on the same day overlap.",
   invalid_type_id: "a type id is invalid.",
   duplicate_type_id: "two meeting types share an id.",
+  retired_type_id: "one uses the id of a deleted type, which can't be reused. Remove it and add it again.",
   invalid_type_name: "every meeting type needs a name (60 characters max).",
   invalid_type_duration: "durations must be 5–480 minutes, in steps of 5.",
   invalid_expiry: "expiry must be between 1 and 365 days, and in the future.",

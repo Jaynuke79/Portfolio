@@ -200,6 +200,39 @@ describe("ScheduleAdmin", () => {
     expect(saved.keyDefaults.typeIds).toBeNull();
   });
 
+  it("gives a re-added type a fresh id once its old one is retired", async () => {
+    vi.mocked(adminApi.saveConfig).mockImplementation(async (_t, sent) => ({
+      config: { ...sent, retiredTypeIds: ["15min"] },
+      version: "v2",
+    }));
+    await signIn();
+    fireEvent.click(screen.getByRole("tab", { name: "Meeting types" }));
+    fireEvent.click(screen.getByRole("button", { name: "Remove 15 Minute Chat" }));
+    fireEvent.click(screen.getByRole("button", { name: "Remove type" }));
+    await clickSave();
+
+    fireEvent.change(screen.getByLabelText("New meeting type"), { target: { value: "15min" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add type" }));
+    await clickSave();
+
+    const resent = vi.mocked(adminApi.saveConfig).mock.calls[1][1];
+    expect(resent.types.map(t => t.id)).toEqual(["30min", "15min-2"]);
+  });
+
+  it("gives a type removed and re-added in one draft a fresh id", async () => {
+    vi.mocked(adminApi.saveConfig).mockImplementation(async (_t, sent) => ({ config: sent, version: "v2" }));
+    await signIn();
+    fireEvent.click(screen.getByRole("tab", { name: "Meeting types" }));
+    fireEvent.click(screen.getByRole("button", { name: "Remove 15 Minute Chat" }));
+    fireEvent.click(screen.getByRole("button", { name: "Remove type" }));
+    fireEvent.change(screen.getByLabelText("New meeting type"), { target: { value: "15min" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add type" }));
+    await clickSave();
+
+    const sent = vi.mocked(adminApi.saveConfig).mock.calls[0][1];
+    expect(sent.types.map(t => t.id)).toEqual(["30min", "15min-2"]);
+  });
+
   it("refuses to save an emptied number field", async () => {
     await signIn();
     fireEvent.click(screen.getByRole("tab", { name: "Booking rules" }));
