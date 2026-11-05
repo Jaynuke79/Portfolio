@@ -25,9 +25,10 @@ const GROUPS: Group[] = [
         location: "Grand Junction, CO",
         period: "Sep 2026 to present",
         bullets: [
-          "Promoted from intern after a year of connector delivery. Own customer communications, project coordination in Productive and HubSpot, and VM provisioning for customer deployments.",
-          "Built the team's multi-agent engineering environment: agent roles, hooks, an SSH rulebook, and an issue-burndown skill packaged as one verified plugin.",
-          "Hold the company seat on the OpenAI Partner Portal.",
+          "Own customer delivery for data connectors to DealCloud, Ajera, Panzura, and QuickBooks Online: requirements, field mapping, test timelines, and VM provisioning, coordinated in Productive and HubSpot. Brought DealCloud to customer-testing readiness and moved Ajera into customer testing.",
+          "Standardized one-command Docker deploy bundles across every connector repo, running parallel engineer agents with a dedicated reviewer across five repos, then tested the bundles end to end on client VMs and fixed container UID and PII-redaction gaps.",
+          "Shipped EggNest Portal features to staging, including Gremlin Tracker for recurring operational issues, a Budget Watch notifier, admin impersonation, and timecard accuracy fixes; recovered staging after a breaking argon2 upgrade.",
+          "Built the team's multi-agent engineering environment (agent roles, hooks, SSH rulebook, issue-burndown skill) and packaged it as one verified plugin. Hold the company seat on the OpenAI Partner Portal.",
         ],
       },
       {
@@ -36,9 +37,10 @@ const GROUPS: Group[] = [
         location: "Grand Junction, CO",
         period: "Oct 2025 to Sep 2026",
         bullets: [
-          "Grew the HubSpot connector into a deep CRM integration across 11 object types with write actions and UAT agents, and took a customer Zoho Desk connector from foundation to production.",
-          "Ran audit-to-burndown pipelines with agent teams: verified every CodeQL finding, filed 12 issues and 2 epics, merged 10 PRs closing all 9 targets, and shipped a connector with 225 passing tests. 158 commits and 25,900+ lines across 562 files in 21 working days.",
-          "Standardized connector development with shared ConnectorLib skills, administered the Linux servers, Lambdas, and databases behind the EggNest Portal, and drafted the company's HIPAA and PII compliance roadmap.",
+          "Grew the HubSpot connector into a deep CRM integration across 11 object types with write actions and UAT agents, so Glean can both inspect and act on records, and took a customer's Zoho Desk connector from foundation to production.",
+          "Built and hardened connectors for Deltek Vantagepoint, DealCloud, and Paylocity, researching each vendor API and shipping a credential validator before scaffolding code; one connector shipped with 225 passing tests.",
+          "Ran audit-to-burndown pipelines with agent teams in defined roles: verified every CodeQL finding against the codebase, filed 12 issues and 2 epics, and merged 10 PRs closing all 9 targets.",
+          "Administered the Linux servers, Lambdas, and databases behind the EggNest Portal, standardized connector development with shared ConnectorLib skills, and drafted the company's HIPAA and PII compliance roadmap.",
         ],
       },
       {
@@ -47,19 +49,19 @@ const GROUPS: Group[] = [
         location: "Grand Junction, CO",
         period: "Nov 2024 to present",
         bullets: [
-          "Rebuilt the club's sweepstakes platform from scratch in three weeks on Next.js, TypeScript, Vercel, and Neon Postgres, replacing a 2020 build on unpatched Node.js 10 and migrating 38 charities, 5 sponsors, and historical ticket records intact.",
-          "Scrubbed live credentials from git history, retired 689 password-less buyer accounts in favor of throttled admin auth, and made tickets issue only from signature-verified payment webhooks across Stripe, Authorize.net, and Square.",
-          "Gated deployment on 96+ automated tests and Playwright checks, fixed nine pre-launch security-audit findings, and shipped training mode, member roles, and Excel export under a maintenance contract.",
+          "Maintained the club's existing sweepstakes site, then rebuilt it from scratch in three weeks (July 2026) on Next.js, TypeScript, Vercel, and Neon Postgres, replacing a 2020 build on unpatched Node.js 10 and migrating 38 charities, 5 sponsors, and all historical ticket records intact.",
+          "Closed the old site's security failures: scrubbed live credentials from git history, retired 689 password-less buyer accounts in favor of throttled admin auth, and made tickets issue only from signature-verified webhooks across Stripe, Authorize.net, and Square.",
+          "Gated every deploy on 96+ automated tests and Playwright checks, fixed nine pre-launch security-audit findings, and shipped training mode, member roles, and Excel export under a maintenance contract.",
         ],
       },
       {
         title: "Field Technician",
         org: "Greenflare Technologies",
-        location: "Denver, CO",
+        location: "Denver, CO (remote, with on-site visits)",
         period: "Oct 2024 to Sep 2026",
         bullets: [
           "Repaired and maintained high-throughput Linux compute systems in production, restoring failed nodes and improving hardware uptime.",
-          "Diagnosed Ethernet bottlenecks with packet captures and targeted load tests, boosting network throughput by about 20% in high-traffic areas.",
+          "Diagnosed Ethernet bottlenecks with packet captures and targeted load tests, raising throughput about 20% in high-traffic areas.",
         ],
       },
       {
@@ -68,7 +70,7 @@ const GROUPS: Group[] = [
         location: "Grand Junction, CO",
         period: "Jun 2025 to Aug 2025",
         bullets: [
-          "Shipped and operated an internal RAG service on Linux with FastAPI, LangChain, Supabase PostgreSQL, and React, cutting document lookup by about 3 hours a week.",
+          "Shipped and operated an internal RAG service on Linux (FastAPI, LangChain, Supabase PostgreSQL, React) that cut document lookup by about 3 hours a week for staff.",
           "Added retrieval evaluation and logging for top-k accuracy and latency across 2-week sprints in an 8-week delivery window.",
         ],
       },
@@ -78,7 +80,7 @@ const GROUPS: Group[] = [
         location: "Albuquerque, NM",
         period: "Jun 2024 to Aug 2024",
         bullets: [
-          "Delivered an RF-to-optical testing protocol and pipeline in two weeks with MPLAB and low-level C, automating signal sweeps and data capture for mission-critical equipment validation.",
+          "Delivered an RF-to-optical test protocol and pipeline in two weeks in low-level C with MPLAB, automating signal sweeps and data capture for validation of mission-critical equipment.",
         ],
       },
       {
@@ -87,8 +89,7 @@ const GROUPS: Group[] = [
         location: "Grand Junction, CO",
         period: "Dec 2023 to present",
         bullets: [
-          "Lead a 6-person team building ML pipelines for IoMT intrusion detection and small cybersecurity language models.",
-          "Manage repos, sprints, code review, and experiment tracking for reproducibility.",
+          "Lead a 6-person team building ML pipelines for IoMT intrusion detection and small cybersecurity language models; manage repos, sprints, code review, and experiment tracking for reproducibility.",
         ],
       },
     ],
@@ -184,7 +185,7 @@ const GROUPS: Group[] = [
         period: "Aug 2023 to May 2027 (expected)",
         bullets: [
           "GPA 3.63 / 4.0. Focus on AI application.",
-          "Captained coding and cybersecurity teams to national competitions, placing 4th regionally in the first year.",
+          "Captained coding and cybersecurity teams to national competitions, placing 4th at the ICPC regional in the first year.",
           "Coursework: Probability and Statistics, OOP and Design Patterns, Databases, Algorithms, Python Machine Learning.",
         ],
       },
@@ -249,7 +250,7 @@ export default function Resume() {
             <ol className="relative mt-6 border-l border-border">
               {group.entries.map((entry) => (
                 <li
-                  key={entry.title}
+                  key={`${entry.title}|${entry.org ?? ""}`}
                   className="relative grid gap-2 pb-10 pl-8 last:pb-0 md:grid-cols-[200px_1fr] md:gap-8"
                 >
                   <span

@@ -110,3 +110,31 @@ describe("Contact form send failure", () => {
     expect(toast).toHaveBeenLastCalledWith(expect.objectContaining({ title: "Message Sent!" }));
   });
 });
+
+describe("Contact details", () => {
+  it("shows the Gmail address as a mailto link", () => {
+    const { getByRole } = render(<Contact />);
+
+    const email = getByRole("link", { name: "jayden.alonzoestrada@gmail.com" });
+    expect(email.getAttribute("href")).toBe("mailto:jayden.alonzoestrada@gmail.com");
+  });
+
+  it("shows GitHub and LinkedIn as visible external text links", () => {
+    const { getByRole } = render(<Contact />);
+
+    const github = getByRole("link", { name: "github.com/Jaynuke79" });
+    const linkedin = getByRole("link", { name: "linkedin.com/in/jayae" });
+    expect(github.getAttribute("href")).toBe("https://github.com/Jaynuke79");
+    expect(linkedin.getAttribute("href")).toBe("https://www.linkedin.com/in/jayae/");
+    for (const link of [github, linkedin]) {
+      expect(link.getAttribute("target")).toBe("_blank");
+      expect(link.getAttribute("rel")).toBe("noopener noreferrer");
+    }
+  });
+
+  it("no longer lists the school address", () => {
+    const { container } = render(<Contact />);
+
+    expect(container.textContent).not.toContain("mavs.coloradomesa.edu");
+  });
+});
