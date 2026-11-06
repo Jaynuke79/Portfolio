@@ -30,6 +30,8 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     description:
       "Rebuilt the Rotary Club of Grand Junction's Snowball Sweepstakes platform from scratch in three weeks on Next.js and Neon Postgres. Scrubbed leaked credentials from git history, retired accounts whose login never checked passwords, and made tickets issue only from signature-verified, duplicate-proof payment webhooks. Every deploy is gated on 96+ tests and Playwright checks, and the nine findings from a pre-launch security audit were fixed.",
     technologies: ["Next.js", "TypeScript", "Vercel", "Neon Postgres", "Stripe", "Authorize.net", "Square", "Playwright"],
+    demoUrl: "https://gjsnowball.vercel.app/",
+    demoLabel: "Live site",
     linksNote: "Client work; code is private.",
   },
   {

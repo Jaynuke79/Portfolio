@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
 import { ExternalLink, Star } from "lucide-react";
 import { GithubIcon } from "@/components/icons";
 import Reveal from "@/components/reveal";
@@ -16,6 +17,23 @@ function formatPushedAt(iso: string): string {
 
 const linkClass =
   "inline-flex items-center gap-1.5 text-sm font-medium text-brand underline-offset-4 hover:underline focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-sm";
+
+function CardImage({ src, alt }: { src: string; alt: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  return (
+    <img
+      src={src}
+      alt={alt}
+      width={1200}
+      height={600}
+      loading="lazy"
+      decoding="async"
+      onError={() => setFailed(true)}
+      className="aspect-[2/1] w-full border-b border-border object-cover"
+    />
+  );
+}
 
 export default function Projects() {
   const repos = useGithubRepos();
@@ -55,17 +73,7 @@ export default function Projects() {
                 project.featured && "bg-brand-soft md:col-span-2"
               )}
             >
-              {project.image && (
-                <img
-                  src={project.image}
-                  alt={project.alt}
-                  width={1200}
-                  height={600}
-                  loading="lazy"
-                  decoding="async"
-                  className="aspect-[2/1] w-full border-b border-border object-cover"
-                />
-              )}
+              {project.image && <CardImage key={project.image} src={project.image} alt={project.alt} />}
               <div className={cn("flex flex-1 flex-col p-6", project.featured && "md:p-8")}>
                 <h3 className={cn("font-semibold tracking-tight", project.featured ? "text-2xl" : "text-lg")}>
                   {project.title}
