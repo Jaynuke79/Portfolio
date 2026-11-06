@@ -8,6 +8,8 @@ export interface FeaturedProject {
   codeUrl?: string;
   demoUrl?: string;
   demoLabel?: string;
+  paperUrl?: string;
+  paperLabel?: string;
   linksNote?: string;
   featured?: boolean;
 }
@@ -20,9 +22,13 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     image: "/mobisec-2025.webp",
     alt: "Jayden Alonzo-Estrada beside the MobiSec 2025 conference banner in Sapporo, Japan",
     technologies: ["Jupyter Notebook", "Sk-learn", "Pandas", "Numpy"],
+    codeUrl:
+      "https://github.com/Colorado-Mesa-University-Cybersecurity/The-Effect-of-Increased-Dimensionality-on-Detecting-Malicious-IoMT-Network-Traffic",
     demoUrl: "https://easychair.org/smart-slide/slide/2N9Q",
     demoLabel: "Talk slides",
-    linksNote: "Published by Springer (MobiSec 2025). Full text available on request.",
+    paperUrl: "/Alonzo-Estrada_IoMT_Dimensionality_Manuscript.pdf",
+    paperLabel: "Full text (author manuscript)",
+    linksNote: "Published by Springer (MobiSec 2025).",
     featured: true,
   },
   {

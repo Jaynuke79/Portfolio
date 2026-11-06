@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
-import { ExternalLink, Star } from "lucide-react";
+import { ExternalLink, FileText, Star } from "lucide-react";
 import { GithubIcon } from "@/components/icons";
 import Reveal from "@/components/reveal";
 import { FEATURED_PROJECTS } from "@/lib/featured-projects";
@@ -130,6 +130,12 @@ export default function Projects() {
                     <a href={project.demoUrl} target="_blank" rel="noopener noreferrer" className={linkClass}>
                       <ExternalLink className="h-4 w-4" />
                       {project.demoLabel ?? "Demo"}
+                    </a>
+                  )}
+                  {project.paperUrl && (
+                    <a href={project.paperUrl} target="_blank" rel="noopener noreferrer" className={linkClass}>
+                      <FileText className="h-4 w-4" />
+                      {project.paperLabel ?? "Paper"}
                     </a>
                   )}
                   {project.linksNote && (
