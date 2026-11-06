@@ -63,6 +63,24 @@ describe("Projects", () => {
     );
   });
 
+  it("links the research card to its slides, code, and hosted manuscript", () => {
+    render(<Projects />);
+    const research = within(card("Machine Learning Research Lead"));
+    const manuscript = research.getByRole("link", { name: /full text \(author manuscript\)/i });
+
+    expect(research.getByRole("link", { name: /talk slides/i }).getAttribute("href")).toBe(
+      "https://easychair.org/smart-slide/slide/2N9Q"
+    );
+    expect(research.getByRole("link", { name: /code/i }).getAttribute("href")).toBe(
+      "https://github.com/Colorado-Mesa-University-Cybersecurity/The-Effect-of-Increased-Dimensionality-on-Detecting-Malicious-IoMT-Network-Traffic"
+    );
+    expect(manuscript.getAttribute("href")).toBe("/Alonzo-Estrada_IoMT_Dimensionality_Manuscript.pdf");
+    expect(manuscript.getAttribute("target")).toBe("_blank");
+    expect(manuscript.getAttribute("rel")).toBe("noopener noreferrer");
+    expect(research.getByText("Published by Springer (MobiSec 2025).")).toBeTruthy();
+    expect(research.queryByText(/on request/i)).toBeNull();
+  });
+
   it("links the client rebuild to its live site in a new tab", () => {
     render(<Projects />);
     const snowball = within(card("Snowball Sweepstakes Rebuild"));
