@@ -95,6 +95,25 @@ describe("Projects", () => {
   });
 
   it.each([
+    ["Snowball Sweepstakes Rebuild", "/snowball-sweepstakes.webp", "Snowball Sweepstakes home page"],
+    [
+      "Key-Gated Booking System",
+      "/booking-system.webp",
+      "Booking page showing a month calendar and open times (sample data)",
+    ],
+    [
+      "Exploring Agentic Misalignment in Commercial Level Applications",
+      "/agentic-misalignment.webp",
+      "Illustration of an AI agent's actual path drifting from its intended path until a checkpoint steers it back to the goal",
+    ],
+  ])("shows the %s card image", (title, src, alt) => {
+    render(<Projects />);
+
+    const image = within(card(title)).getByRole("img", { name: alt });
+    expect(image.getAttribute("src")).toBe(src);
+  });
+
+  it.each([
     ["Intentionally Vulnerable Bad RAG", "Intentionally Vulnerable Bad RAG repository card"],
     ["Machine Learning Research Lead", null],
   ])("removes the %s card image when it fails to load", (title, expectedAlt) => {
