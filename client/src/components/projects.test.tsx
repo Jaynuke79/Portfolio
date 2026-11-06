@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GithubRepo } from "@/lib/github";
 import Projects from "./projects";
@@ -63,10 +63,33 @@ describe("Projects", () => {
     );
   });
 
-  it("gives the client rebuild no links", () => {
+  it("links the client rebuild to its live site in a new tab", () => {
     render(<Projects />);
+    const snowball = within(card("Snowball Sweepstakes Rebuild"));
+    const links = snowball.getAllByRole("link");
+    const live = snowball.getByRole("link", { name: /live site/i });
 
-    expect(within(card("Snowball Sweepstakes Rebuild")).queryAllByRole("link")).toHaveLength(0);
+    expect(links).toHaveLength(1);
+    expect(live.getAttribute("href")).toBe("https://gjsnowball.vercel.app/");
+    expect(live.getAttribute("target")).toBe("_blank");
+    expect(live.getAttribute("rel")).toBe("noopener noreferrer");
+    expect(snowball.getByText("Client work; code is private.")).toBeTruthy();
+  });
+
+  it.each([
+    ["Intentionally Vulnerable Bad RAG", "Intentionally Vulnerable Bad RAG repository card"],
+    ["Machine Learning Research Lead", null],
+  ])("removes the %s card image when it fails to load", (title, expectedAlt) => {
+    render(<Projects />);
+    const image = card(title).querySelector("img");
+    expect(image).not.toBeNull();
+    const alt = image!.getAttribute("alt")!;
+    if (expectedAlt) expect(alt).toBe(expectedAlt);
+
+    fireEvent.error(image!);
+
+    expect(card(title).querySelector("img")).toBeNull();
+    expect(within(document.body).queryByAltText(alt)).toBeNull();
   });
 
   it("hides the star count on a repo with no stars", () => {
