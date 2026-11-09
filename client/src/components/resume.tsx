@@ -28,7 +28,7 @@ const GROUPS: Group[] = [
           "Own customer delivery for data connectors to DealCloud, Ajera, Panzura, and QuickBooks Online: requirements, field mapping, test timelines, and VM provisioning, coordinated in Productive and HubSpot. Brought DealCloud to customer-testing readiness and moved Ajera into customer testing.",
           "Standardized one-command Docker deploy bundles across every connector repo, running parallel engineer agents with a dedicated reviewer across five repos, then tested the bundles end to end on client VMs and fixed container UID and PII-redaction gaps.",
           "Shipped EggNest Portal features to staging, including Gremlin Tracker for recurring operational issues, a Budget Watch notifier, admin impersonation, and timecard accuracy fixes; recovered staging after a breaking argon2 upgrade.",
-          "Built the team's multi-agent engineering environment (agent roles, hooks, SSH rulebook, issue-burndown skill) and packaged it as one verified plugin. Hold the company seat on the OpenAI Partner Portal.",
+          "Built the team's multi-agent engineering environment (agent roles, hooks, SSH rulebook, issue-burndown skill) and packaged it as one verified plugin. Hold a company seat on the OpenAI Partner Portal.",
         ],
       },
       {
